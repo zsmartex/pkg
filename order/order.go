@@ -3,6 +3,7 @@ package order
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 )
 
@@ -21,6 +22,7 @@ var (
 
 type Order struct {
 	ID             uint64          `json:"id"`
+	UUID           uuid.UUID       `json:"uuid"`
 	MemberID       uint64          `json:"member_id"`
 	Symbol         string          `json:"symbol"`
 	Side           OrderSide       `json:"side"`
@@ -36,6 +38,7 @@ type Order struct {
 
 type OrderKey struct {
 	ID        uint64
+	UUID      uuid.UUID
 	Symbol    string
 	Side      OrderSide
 	Price     decimal.Decimal
