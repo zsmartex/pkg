@@ -32,7 +32,7 @@ type Order struct {
 	Quantity       decimal.Decimal `json:"quantity"`
 	FilledQuantity decimal.Decimal `json:"filled_quantity"`
 	Cancelled      bool            `json:"canceled"`
-	Fake           bool            `json:"is_fake"`
+	Fake           bool            `json:"fake"`
 	CreatedAt      time.Time       `json:"created_at"`
 }
 
@@ -43,16 +43,19 @@ type OrderKey struct {
 	Side      OrderSide
 	Price     decimal.Decimal
 	StopPrice decimal.Decimal
+	Fake      bool
 	CreatedAt time.Time
 }
 
 func (o *Order) Key() *OrderKey {
 	return &OrderKey{
 		ID:        o.ID,
+		UUID:      o.UUID,
 		Symbol:    o.Symbol,
 		Side:      o.Side,
 		Price:     o.Price,
 		StopPrice: o.StopPrice,
+		Fake:      o.Fake,
 		CreatedAt: o.CreatedAt,
 	}
 }
@@ -71,6 +74,9 @@ func (o *Order) IsFake() bool {
 
 func (o *Order) Fill(quantity decimal.Decimal) {
 	o.FilledQuantity = o.FilledQuantity.Add(quantity)
+	if o.Filled() {
+		o.Cancel()
+	}
 }
 
 func (o *Order) Filled() bool {

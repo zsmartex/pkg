@@ -1,6 +1,11 @@
 package pkg
 
-import "github.com/zsmartex/pkg/order"
+import (
+	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+
+	"github.com/zsmartex/pkg/order"
+)
 
 type PayloadAction = string
 
@@ -16,4 +21,20 @@ type MatchingPayloadMessage struct {
 	Order  *order.Order    `json:"order"`
 	Key    *order.OrderKey `json:"key"`
 	Market string          `json:"market"`
+}
+
+type GetDepthPayload struct {
+	Market string `json:"market"`
+	Limit  int    `json:"limit"`
+}
+
+type GetFakeOrderPayload struct {
+	Market string    `json:"market"`
+	UUID   uuid.UUID `json:"uuid"`
+}
+
+type DepthJSON struct {
+	Asks     [][]decimal.Decimal `json:"asks"`
+	Bids     [][]decimal.Decimal `json:"bids"`
+	Sequence uint64              `json:"sequence"`
 }
