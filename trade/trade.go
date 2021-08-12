@@ -13,11 +13,11 @@ type Trade struct {
 	Price      decimal.Decimal `json:"price"`
 	Quantity   decimal.Decimal `json:"quantity"`
 	Total      decimal.Decimal `json:"total"`
-	MakerOrder *order.Order    `json:"maker"`
-	TakerOrder *order.Order    `json:"taker"`
+	MakerOrder order.Order     `json:"maker"`
+	TakerOrder order.Order     `json:"taker"`
 }
 
-func (t *Trade) BuyOrder() *order.Order {
+func (t *Trade) BuyOrder() order.Order {
 	if t.MakerOrder.Side == order.SideBuy {
 		return t.MakerOrder
 	} else {
@@ -25,7 +25,7 @@ func (t *Trade) BuyOrder() *order.Order {
 	}
 }
 
-func (t *Trade) SellOrder() *order.Order {
+func (t *Trade) SellOrder() order.Order {
 	if t.MakerOrder.Side == order.SideSell {
 		return t.MakerOrder
 	} else {
