@@ -37,14 +37,14 @@ type Order struct {
 }
 
 type OrderKey struct {
-	ID        uint64
-	UUID      uuid.UUID
-	Symbol    string
-	Side      OrderSide
-	Price     decimal.Decimal
-	StopPrice decimal.Decimal
-	Fake      bool
-	CreatedAt time.Time
+	ID        uint64          `json:"id"`
+	UUID      uuid.UUID       `json:"uuid"`
+	Symbol    string          `json:"symbol"`
+	Side      OrderSide       `json:"side"`
+	Price     decimal.Decimal `json:"price"`
+	StopPrice decimal.Decimal `json:"stop_price"`
+	Fake      bool            `json:"fake"`
+	CreatedAt time.Time       `json:"created_at"`
 }
 
 func (o *Order) Key() *OrderKey {
