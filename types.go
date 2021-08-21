@@ -9,12 +9,11 @@ import (
 type PayloadAction = string
 
 var (
-	ActionSubmit         PayloadAction = "submit"
-	ActionCancel         PayloadAction = "cancel"
-	ActionCancelWithKey  PayloadAction = "cancel_with_key" // this method will not notify to the user
-	ActionReload         PayloadAction = "reload"
-	ActionNew            PayloadAction = "new"
-	ActionGetMarketPrice PayloadAction = "get_market_price"
+	ActionSubmit        PayloadAction = "submit"
+	ActionCancel        PayloadAction = "cancel"
+	ActionCancelWithKey PayloadAction = "cancel_with_key" // this method will not notify to the user
+	ActionReload        PayloadAction = "reload"
+	ActionNew           PayloadAction = "new"
 )
 
 type MatchingPayloadMessage struct {
