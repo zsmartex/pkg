@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 
 	"github.com/zsmartex/pkg/order"
@@ -10,10 +9,12 @@ import (
 type PayloadAction = string
 
 var (
-	ActionSubmit        PayloadAction = "submit"
-	ActionCancel        PayloadAction = "cancel"
-	ActionCancelWithKey PayloadAction = "cancel_with_key" // this method will not notify to the user
-	ActionReload        PayloadAction = "reload"
+	ActionSubmit         PayloadAction = "submit"
+	ActionCancel         PayloadAction = "cancel"
+	ActionCancelWithKey  PayloadAction = "cancel_with_key" // this method will not notify to the user
+	ActionReload         PayloadAction = "reload"
+	ActionNew            PayloadAction = "new"
+	ActionGetMarketPrice PayloadAction = "get_market_price"
 )
 
 type MatchingPayloadMessage struct {
@@ -26,11 +27,6 @@ type MatchingPayloadMessage struct {
 type GetDepthPayload struct {
 	Market string `json:"market"`
 	Limit  int    `json:"limit"`
-}
-
-type GetFakeOrderPayload struct {
-	Market string    `json:"market"`
-	UUID   uuid.UUID `json:"uuid"`
 }
 
 type DepthJSON struct {
