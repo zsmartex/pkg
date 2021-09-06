@@ -25,7 +25,7 @@ type MatchingPayloadMessage struct {
 
 type GetDepthPayload struct {
 	Market string `json:"market"`
-	Limit  int    `json:"limit"`
+	Limit  int64    `json:"limit"`
 }
 
 type DepthJSON struct {
