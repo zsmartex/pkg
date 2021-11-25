@@ -21,9 +21,9 @@ var (
 )
 
 type Order struct {
-	ID             uint64          `json:"id"`
+	ID             int64           `json:"id"`
 	UUID           uuid.UUID       `json:"uuid"`
-	MemberID       uint64          `json:"member_id"`
+	MemberID       int64           `json:"member_id"`
 	Symbol         string          `json:"symbol"`
 	Side           OrderSide       `json:"side"`
 	Type           OrderType       `json:"type"`
@@ -37,7 +37,7 @@ type Order struct {
 }
 
 type OrderKey struct {
-	ID        uint64          `json:"id"`
+	ID        int64           `json:"id"`
 	UUID      uuid.UUID       `json:"uuid"`
 	Symbol    string          `json:"symbol"`
 	Side      OrderSide       `json:"side"`
