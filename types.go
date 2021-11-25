@@ -31,5 +31,5 @@ type GetDepthPayload struct {
 type DepthJSON struct {
 	Asks     [][]decimal.Decimal `json:"asks"`
 	Bids     [][]decimal.Decimal `json:"bids"`
-	Sequence uint64              `json:"sequence"`
+	Sequence int64               `json:"sequence"`
 }
