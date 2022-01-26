@@ -1,7 +1,7 @@
 syntax = "proto3";
 package service;
 
-option go_package = "proto/Grpc/engine;engineGrpc";
+option go_package = "proto/Grpc/engine;GrpcEngine";
 
 message Decimal {
   int64 Val = 1;
