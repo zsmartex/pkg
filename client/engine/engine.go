@@ -39,6 +39,10 @@ func (c *GrpcMatchingClient) FetchOrderBook(in *GrpcEngine.FetchOrderBookRequest
 	return c.client.FetchOrderBook(context.Background(), in, opts...)
 }
 
+func (c *GrpcMatchingClient) FetchOrder(in *GrpcEngine.FetchOrderRequest, opts ...grpc.CallOption) (*GrpcEngine.FetchOrderResponse, error) {
+	return c.client.FetchOrder(context.Background(), in, opts...)
+}
+
 func (c *GrpcMatchingClient) Close() error {
 	return c.connect.Close()
 }
