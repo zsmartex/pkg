@@ -1,0 +1,51 @@
+syntax = "proto3";
+package service;
+
+option go_package = "proto/Grpc/engine;engineGrpc";
+
+message Decimal {
+  int64 Val = 1;
+  int32 Exp = 2;
+}
+
+message BookOrder {
+  repeated Decimal price_quantity = 1;
+}
+
+message FetchOrderBookRequest {
+  string market = 1;
+  int64 limit = 2;
+}
+
+message FetchOrderBookResponse {
+  string market = 1;
+  repeated BookOrder Bids = 2;
+  repeated BookOrder Asks = 3;
+  int64 sequence = 4;
+}
+
+message CalcMarketOrderRequest {
+  string market = 1;
+  string side = 2;
+  Decimal quantity = 3;
+  Decimal volume = 4;
+}
+
+message CalcMarketOrderResponse {
+  Decimal quantity = 1;
+  Decimal locked = 2;
+}
+
+message FetchMarketPriceRequest {
+  string market = 1;
+}
+
+message FetchMarketPriceResponse {
+  Decimal price = 1;
+}
+
+service MatchingEngineService {
+  rpc FetchOrderBook(FetchOrderBookRequest) returns (FetchOrderBookResponse) {}
+  rpc CalcMarketOrder(CalcMarketOrderRequest) returns (CalcMarketOrderResponse) {}
+  rpc FetchMarketPrice(FetchMarketPriceRequest) returns (FetchMarketPriceResponse) {}
+}
