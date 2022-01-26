@@ -1,5 +1,5 @@
 syntax = "proto3";
-package service;
+package GrpcEngine;
 
 option go_package = "proto/Grpc/engine;GrpcEngine";
 
