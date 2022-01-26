@@ -1,6 +1,8 @@
 package GrpcEngine
 
-import "github.com/shopspring/decimal"
+import (
+	"github.com/shopspring/decimal"
+)
 
 func (d *Decimal) ToDecimal() decimal.Decimal {
 	return decimal.New(d.Val, d.Exp)

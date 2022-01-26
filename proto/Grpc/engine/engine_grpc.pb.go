@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MatchingEngineServiceClient interface {
+	FetchOrder(ctx context.Context, in *FetchOrderRequest, opts ...grpc.CallOption) (*FetchOrderResponse, error)
 	FetchOrderBook(ctx context.Context, in *FetchOrderBookRequest, opts ...grpc.CallOption) (*FetchOrderBookResponse, error)
 	CalcMarketOrder(ctx context.Context, in *CalcMarketOrderRequest, opts ...grpc.CallOption) (*CalcMarketOrderResponse, error)
 	FetchMarketPrice(ctx context.Context, in *FetchMarketPriceRequest, opts ...grpc.CallOption) (*FetchMarketPriceResponse, error)
@@ -35,9 +36,18 @@ func NewMatchingEngineServiceClient(cc grpc.ClientConnInterface) MatchingEngineS
 	return &matchingEngineServiceClient{cc}
 }
 
+func (c *matchingEngineServiceClient) FetchOrder(ctx context.Context, in *FetchOrderRequest, opts ...grpc.CallOption) (*FetchOrderResponse, error) {
+	out := new(FetchOrderResponse)
+	err := c.cc.Invoke(ctx, "/GrpcEngine.MatchingEngineService/FetchOrder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *matchingEngineServiceClient) FetchOrderBook(ctx context.Context, in *FetchOrderBookRequest, opts ...grpc.CallOption) (*FetchOrderBookResponse, error) {
 	out := new(FetchOrderBookResponse)
-	err := c.cc.Invoke(ctx, "/service.MatchingEngineService/FetchOrderBook", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/GrpcEngine.MatchingEngineService/FetchOrderBook", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +56,7 @@ func (c *matchingEngineServiceClient) FetchOrderBook(ctx context.Context, in *Fe
 
 func (c *matchingEngineServiceClient) CalcMarketOrder(ctx context.Context, in *CalcMarketOrderRequest, opts ...grpc.CallOption) (*CalcMarketOrderResponse, error) {
 	out := new(CalcMarketOrderResponse)
-	err := c.cc.Invoke(ctx, "/service.MatchingEngineService/CalcMarketOrder", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/GrpcEngine.MatchingEngineService/CalcMarketOrder", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +65,7 @@ func (c *matchingEngineServiceClient) CalcMarketOrder(ctx context.Context, in *C
 
 func (c *matchingEngineServiceClient) FetchMarketPrice(ctx context.Context, in *FetchMarketPriceRequest, opts ...grpc.CallOption) (*FetchMarketPriceResponse, error) {
 	out := new(FetchMarketPriceResponse)
-	err := c.cc.Invoke(ctx, "/service.MatchingEngineService/FetchMarketPrice", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/GrpcEngine.MatchingEngineService/FetchMarketPrice", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,6 +76,7 @@ func (c *matchingEngineServiceClient) FetchMarketPrice(ctx context.Context, in *
 // All implementations should embed UnimplementedMatchingEngineServiceServer
 // for forward compatibility
 type MatchingEngineServiceServer interface {
+	FetchOrder(context.Context, *FetchOrderRequest) (*FetchOrderResponse, error)
 	FetchOrderBook(context.Context, *FetchOrderBookRequest) (*FetchOrderBookResponse, error)
 	CalcMarketOrder(context.Context, *CalcMarketOrderRequest) (*CalcMarketOrderResponse, error)
 	FetchMarketPrice(context.Context, *FetchMarketPriceRequest) (*FetchMarketPriceResponse, error)
@@ -75,6 +86,9 @@ type MatchingEngineServiceServer interface {
 type UnimplementedMatchingEngineServiceServer struct {
 }
 
+func (UnimplementedMatchingEngineServiceServer) FetchOrder(context.Context, *FetchOrderRequest) (*FetchOrderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FetchOrder not implemented")
+}
 func (UnimplementedMatchingEngineServiceServer) FetchOrderBook(context.Context, *FetchOrderBookRequest) (*FetchOrderBookResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FetchOrderBook not implemented")
 }
@@ -96,6 +110,24 @@ func RegisterMatchingEngineServiceServer(s grpc.ServiceRegistrar, srv MatchingEn
 	s.RegisterService(&MatchingEngineService_ServiceDesc, srv)
 }
 
+func _MatchingEngineService_FetchOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FetchOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MatchingEngineServiceServer).FetchOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/GrpcEngine.MatchingEngineService/FetchOrder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MatchingEngineServiceServer).FetchOrder(ctx, req.(*FetchOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MatchingEngineService_FetchOrderBook_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FetchOrderBookRequest)
 	if err := dec(in); err != nil {
@@ -106,7 +138,7 @@ func _MatchingEngineService_FetchOrderBook_Handler(srv interface{}, ctx context.
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/service.MatchingEngineService/FetchOrderBook",
+		FullMethod: "/GrpcEngine.MatchingEngineService/FetchOrderBook",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MatchingEngineServiceServer).FetchOrderBook(ctx, req.(*FetchOrderBookRequest))
@@ -124,7 +156,7 @@ func _MatchingEngineService_CalcMarketOrder_Handler(srv interface{}, ctx context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/service.MatchingEngineService/CalcMarketOrder",
+		FullMethod: "/GrpcEngine.MatchingEngineService/CalcMarketOrder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MatchingEngineServiceServer).CalcMarketOrder(ctx, req.(*CalcMarketOrderRequest))
@@ -142,7 +174,7 @@ func _MatchingEngineService_FetchMarketPrice_Handler(srv interface{}, ctx contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/service.MatchingEngineService/FetchMarketPrice",
+		FullMethod: "/GrpcEngine.MatchingEngineService/FetchMarketPrice",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MatchingEngineServiceServer).FetchMarketPrice(ctx, req.(*FetchMarketPriceRequest))
@@ -154,9 +186,13 @@ func _MatchingEngineService_FetchMarketPrice_Handler(srv interface{}, ctx contex
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var MatchingEngineService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "service.MatchingEngineService",
+	ServiceName: "GrpcEngine.MatchingEngineService",
 	HandlerType: (*MatchingEngineServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "FetchOrder",
+			Handler:    _MatchingEngineService_FetchOrder_Handler,
+		},
 		{
 			MethodName: "FetchOrderBook",
 			Handler:    _MatchingEngineService_FetchOrderBook_Handler,

@@ -3,9 +3,31 @@ package GrpcEngine;
 
 option go_package = "proto/Grpc/engine;GrpcEngine";
 
+import "google/protobuf/timestamp.proto";
+
 message Decimal {
   int64 Val = 1;
   int32 Exp = 2;
+}
+
+message FetchOrderRequest {
+  string market = 1;
+  string side = 2;
+  bytes uuid = 3;
+  Decimal price = 4;
+}
+
+message FetchOrderResponse {
+  bytes uuid = 1;
+  int64 member_id = 2;
+  string symbol = 3;
+  string side = 4;
+  string type = 5;
+  Decimal price = 6;
+  Decimal stop_price = 7;
+  Decimal filled_quantity = 8;
+  bool cancelled = 9;
+  google.protobuf.Timestamp created_at = 10;
 }
 
 message BookOrder {
@@ -45,6 +67,7 @@ message FetchMarketPriceResponse {
 }
 
 service MatchingEngineService {
+  rpc FetchOrder(FetchOrderRequest) returns (FetchOrderResponse) {}
   rpc FetchOrderBook(FetchOrderBookRequest) returns (FetchOrderBookResponse) {}
   rpc CalcMarketOrder(CalcMarketOrderRequest) returns (CalcMarketOrderResponse) {}
   rpc FetchMarketPrice(FetchMarketPriceRequest) returns (FetchMarketPriceResponse) {}
