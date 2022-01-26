@@ -11,23 +11,35 @@ message Decimal {
 }
 
 message FetchOrderRequest {
-  string market = 1;
-  string side = 2;
-  bytes uuid = 3;
-  Decimal price = 4;
+  int64 id = 1;
+  string symbol = 2;
+  string side = 3;
+  bytes uuid = 4;
+  Decimal price = 5;
+  Decimal stop_price = 6;
+  bool fake = 7;
+  google.protobuf.Timestamp created_at = 8;
 }
 
 message FetchOrderResponse {
-  bytes uuid = 1;
-  int64 member_id = 2;
-  string symbol = 3;
-  string side = 4;
-  string type = 5;
-  Decimal price = 6;
-  Decimal stop_price = 7;
-  Decimal filled_quantity = 8;
-  bool cancelled = 9;
-  google.protobuf.Timestamp created_at = 10;
+  int64 id = 1;
+  bytes uuid = 2;
+  int64 member_id = 3;
+  string symbol = 4;
+  string side = 5;
+  string type = 6;
+  Decimal price = 7;
+  Decimal stop_price = 8;
+  Decimal quantity = 9;
+  Decimal filled_quantity = 10;
+  bool fake = 11;
+  bool cancelled = 12;
+  google.protobuf.Timestamp created_at = 13;
+}
+
+message FetchOpenOrdersRequest {
+  string symbol = 1;
+  string side = 2;
 }
 
 message BookOrder {
@@ -35,19 +47,19 @@ message BookOrder {
 }
 
 message FetchOrderBookRequest {
-  string market = 1;
+  string symbol = 1;
   int64 limit = 2;
 }
 
 message FetchOrderBookResponse {
-  string market = 1;
+  string symbol = 1;
   repeated BookOrder Bids = 2;
   repeated BookOrder Asks = 3;
   int64 sequence = 4;
 }
 
 message CalcMarketOrderRequest {
-  string market = 1;
+  string symbol = 1;
   string side = 2;
   Decimal quantity = 3;
   Decimal volume = 4;
@@ -59,7 +71,7 @@ message CalcMarketOrderResponse {
 }
 
 message FetchMarketPriceRequest {
-  string market = 1;
+  string symbol = 1;
 }
 
 message FetchMarketPriceResponse {
