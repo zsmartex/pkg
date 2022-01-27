@@ -4,7 +4,7 @@
 // - protoc             v3.6.1
 // source: proto/engine.proto
 
-package engine
+package GrpcEngine
 
 import (
 	context "context"
