@@ -1,7 +1,7 @@
 syntax = "proto3";
 package GrpcEngine;
 
-option go_package = "github.com/zsmartex/pkg/Grpc/engine";
+option go_package = "github.com/zsmartex/pkg/Grpc/engine;GrpcEngine";
 
 import "proto/utils.proto";
 import "proto/order.proto";
