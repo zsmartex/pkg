@@ -1,22 +1,18 @@
 syntax = "proto3";
 package GrpcEngine;
 
-option go_package = "proto/Grpc/engine;GrpcEngine";
+option go_package = "github.com/zsmartex/pkg/proto";
 
 import "google/protobuf/timestamp.proto";
-
-message Decimal {
-  int64 Val = 1;
-  int32 Exp = 2;
-}
+import "utils.proto";
 
 message FetchOrderRequest {
   int64 id = 1;
   string symbol = 2;
   string side = 3;
   bytes uuid = 4;
-  Decimal price = 5;
-  Decimal stop_price = 6;
+  GrpcUtils.Decimal price = 5;
+  GrpcUtils.Decimal stop_price = 6;
   bool fake = 7;
   google.protobuf.Timestamp created_at = 8;
 }
@@ -28,10 +24,10 @@ message FetchOrderResponse {
   string symbol = 4;
   string side = 5;
   string type = 6;
-  Decimal price = 7;
-  Decimal stop_price = 8;
-  Decimal quantity = 9;
-  Decimal filled_quantity = 10;
+  GrpcUtils.Decimal price = 7;
+  GrpcUtils.Decimal stop_price = 8;
+  GrpcUtils.Decimal quantity = 9;
+  GrpcUtils.Decimal filled_quantity = 10;
   bool fake = 11;
   bool cancelled = 12;
   google.protobuf.Timestamp created_at = 13;
@@ -43,7 +39,7 @@ message FetchOpenOrdersRequest {
 }
 
 message BookOrder {
-  repeated Decimal price_quantity = 1;
+  repeated GrpcUtils.Decimal price_quantity = 1;
 }
 
 message FetchOrderBookRequest {
@@ -61,13 +57,13 @@ message FetchOrderBookResponse {
 message CalcMarketOrderRequest {
   string symbol = 1;
   string side = 2;
-  Decimal quantity = 3;
-  Decimal volume = 4;
+  GrpcUtils.Decimal quantity = 3;
+  GrpcUtils.Decimal volume = 4;
 }
 
 message CalcMarketOrderResponse {
-  Decimal quantity = 1;
-  Decimal locked = 2;
+  GrpcUtils.Decimal quantity = 1;
+  GrpcUtils.Decimal locked = 2;
 }
 
 message FetchMarketPriceRequest {
@@ -75,7 +71,7 @@ message FetchMarketPriceRequest {
 }
 
 message FetchMarketPriceResponse {
-  Decimal price = 1;
+  GrpcUtils.Decimal price = 1;
 }
 
 service MatchingEngineService {

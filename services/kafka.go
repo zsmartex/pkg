@@ -23,7 +23,7 @@ func NewKafka() *KafkaClient {
 	}
 }
 
-func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e kafka.Event) error) {
+func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e kafka.Event) error) error {
 	if k.consumer == nil {
 		consumer, err := kafka.NewConsumer(k.config)
 		if err != nil {
@@ -33,7 +33,9 @@ func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e
 		k.consumer = consumer
 	}
 
-	k.consumer.Subscribe(topic, func(c *kafka.Consumer, e kafka.Event) error {
+	k.consumer.Poll(100)
+
+	return k.consumer.Subscribe(topic, func(c *kafka.Consumer, e kafka.Event) error {
 		err := callback(c, e)
 
 		if err != nil {
@@ -63,7 +65,7 @@ func (k *KafkaClient) Publish(topic string, body []byte) error {
 		return err
 	}
 
-	k.producer.Flush(0)
+	k.producer.Flush(100)
 
 	return nil
 }
