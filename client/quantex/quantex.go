@@ -31,3 +31,7 @@ func NewQuantexClient() *GrpcQuantexClient {
 func (c *GrpcQuantexClient) UpdateOrder(in *GrpcQuantex.UpdateOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	return c.client.UpdateOrder(context.Background(), in, opts...)
 }
+
+func (c *GrpcQuantexClient) ReloadStrategy(in *GrpcQuantex.ReloadStrategyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	return c.client.ReloadStrategy(context.Background(), in, opts...)
+}
