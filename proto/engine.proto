@@ -7,7 +7,7 @@ import "proto/utils.proto";
 import "proto/order.proto";
 
 message FetchOrderRequest {
-  GrpcOrder.Order order_key = 1;
+  GrpcOrder.OrderKey order_key = 1;
 }
 
 message FetchOrderResponse {
