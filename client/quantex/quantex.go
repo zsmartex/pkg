@@ -35,3 +35,7 @@ func (c *GrpcQuantexClient) UpdateOrder(in *GrpcQuantex.UpdateOrderRequest, opts
 func (c *GrpcQuantexClient) ReloadStrategy(in *GrpcQuantex.ReloadStrategyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	return c.client.ReloadStrategy(context.Background(), in, opts...)
 }
+
+func (c *GrpcQuantexClient) Close() error {
+	return c.connect.Close()
+}
