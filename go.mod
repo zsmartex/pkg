@@ -9,6 +9,7 @@ require (
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.4.2
 	google.golang.org/grpc v1.44.0
+	google.golang.org/protobuf v1.27.1 // indirect
 	gorm.io/driver/postgres v1.2.3
 	gorm.io/gorm v1.22.5
 )

@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	GrpcEngine "github.com/zsmartex/pkg/proto/Grpc/engine"
+	GrpcEngine "github.com/zsmartex/pkg/Grpc/engine"
 	"google.golang.org/grpc"
 )
 

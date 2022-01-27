@@ -1,20 +1,11 @@
-package GrpcEngine
+package GrpcOrder
 
 import (
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 	"github.com/zsmartex/pkg/order"
 )
 
-func (d *Decimal) ToDecimal() decimal.Decimal {
-	return decimal.New(d.Val, d.Exp)
-}
-
-func (d *Decimal) ToNullDecimal() decimal.NullDecimal {
-	return decimal.NewNullDecimal(d.ToDecimal())
-}
-
-func (r *FetchOrderRequest) ToOrderKey() *order.OrderKey {
+func (r *OrderKey) ToOrderKey() *order.OrderKey {
 	uuid, _ := uuid.FromBytes(r.Uuid)
 
 	return &order.OrderKey{
@@ -29,7 +20,7 @@ func (r *FetchOrderRequest) ToOrderKey() *order.OrderKey {
 	}
 }
 
-func (r *FetchOrderResponse) ToOrder() *order.Order {
+func (r *Order) ToOrder() *order.Order {
 	uuid, _ := uuid.FromBytes(r.Uuid)
 
 	return &order.Order{

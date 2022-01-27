@@ -1,7 +1,7 @@
 syntax = "proto3";
 package GrpcOrder;
 
-option go_package = "./;GrpcOrder";
+option go_package = "github.com/zsmartex/pkg/Grpc/order;GrpcOrder";
 
 import "google/protobuf/timestamp.proto";
 import "proto/utils.proto";
