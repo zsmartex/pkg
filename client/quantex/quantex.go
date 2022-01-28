@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	GrpcQuantex "github.com/zsmartex/pkg/Grpc/quantex"
 	"google.golang.org/grpc"
@@ -17,7 +18,7 @@ type GrpcQuantexClient struct {
 
 func NewQuantexClient() *GrpcQuantexClient {
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(os.Getenv("QUANTEX_ENGINE_URL"), grpc.WithInsecure())
+	conn, err := grpc.Dial(os.Getenv("QUANTEX_ENGINE_URL"), grpc.WithInsecure(), grpc.WithBlock(), grpc.WithBackoffMaxDelay(5*time.Second))
 	if err != nil {
 		log.Fatalf("did not connect: %s", err)
 	}
