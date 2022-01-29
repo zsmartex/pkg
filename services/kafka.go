@@ -7,26 +7,21 @@ import (
 )
 
 type KafkaClient struct {
-	config   *kafka.ConfigMap
 	consumer *kafka.Consumer
 	producer *kafka.Producer
 }
 
 func NewKafka() *KafkaClient {
-	config := &kafka.ConfigMap{
-		"bootstrap.servers":  os.Getenv("KAFKA_URL"),
-		"enable.auto.commit": false,
-		"group.id":           os.Getenv("KAFKA_GROUP_ID"),
-	}
-
-	return &KafkaClient{
-		config: config,
-	}
+	return &KafkaClient{}
 }
 
 func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e kafka.Event) error) error {
 	if k.consumer == nil {
-		consumer, err := kafka.NewConsumer(k.config)
+		consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
+			"bootstrap.servers":  os.Getenv("KAFKA_URL"),
+			"enable.auto.commit": false,
+			"group.id":           os.Getenv("KAFKA_GROUP_ID"),
+		})
 		if err != nil {
 			panic("Can't create consumer due to error: " + err.Error())
 		}
@@ -47,7 +42,9 @@ func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e
 
 func (k *KafkaClient) Publish(topic string, body []byte) error {
 	if k.producer == nil {
-		producer, err := kafka.NewProducer(k.config)
+		producer, err := kafka.NewProducer(&kafka.ConfigMap{
+			"bootstrap.servers": os.Getenv("KAFKA_URL"),
+		})
 		if err != nil {
 			panic("Can't create producer due to error: " + err.Error())
 		}
