@@ -1,10 +1,13 @@
 package services
 
 import (
+	"log"
 	"os"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func NewDatabase() (*gorm.DB, error) {
@@ -19,8 +22,19 @@ func NewDatabase() (*gorm.DB, error) {
 
 	dialector = postgres.Open(dsn)
 
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second,   // Slow SQL threshold
+			LogLevel:                  logger.Silent, // Log level
+			IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
+			Colorful:                  false,         // Disable color
+		},
+	)
+
 	db, err := gorm.Open(dialector, &gorm.Config{
 		SkipDefaultTransaction: true,
+		Logger:                 newLogger,
 	})
 
 	if err != nil {
