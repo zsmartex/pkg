@@ -20,12 +20,11 @@ type MatchingPayloadMessage struct {
 	Action PayloadAction   `json:"action"`
 	Order  *order.Order    `json:"order"`
 	Key    *order.OrderKey `json:"key"`
-	Market string          `json:"market"`
 }
 
 type GetDepthPayload struct {
 	Market string `json:"market"`
-	Limit  int64    `json:"limit"`
+	Limit  int64  `json:"limit"`
 }
 
 type DepthJSON struct {
