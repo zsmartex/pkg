@@ -15,7 +15,7 @@ type KafkaClient struct {
 func NewKafka() *KafkaClient {
 	config := &kafka.ConfigMap{
 		"bootstrap.servers":  os.Getenv("KAFKA_URL"),
-		"auto.commit.offset": false,
+		"enable.auto.commit": false,
 		"group.id":           os.Getenv("KAFKA_GROUP_ID"),
 	}
 
@@ -33,8 +33,6 @@ func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e
 
 		k.consumer = consumer
 	}
-
-	k.consumer.Poll(100)
 
 	return k.consumer.Subscribe(topic, func(c *kafka.Consumer, e kafka.Event) error {
 		err := callback(c, e)
