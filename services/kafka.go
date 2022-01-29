@@ -15,7 +15,7 @@ func NewKafka() *KafkaClient {
 	return &KafkaClient{}
 }
 
-func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e kafka.Event) error) error {
+func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e kafka.Event) error) {
 	if k.consumer == nil {
 		consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 			"bootstrap.servers":  os.Getenv("KAFKA_URL"),
@@ -29,15 +29,15 @@ func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e
 		k.consumer = consumer
 	}
 
-	return k.consumer.Subscribe(topic, func(c *kafka.Consumer, e kafka.Event) error {
-		err := callback(c, e)
+	for {
+		e := k.consumer.Poll(100)
+
+		err := callback(k.consumer, e)
 
 		if err != nil {
-			c.Commit()
+			k.consumer.Commit()
 		}
-
-		return err
-	})
+	}
 }
 
 func (k *KafkaClient) Publish(topic string, body []byte) error {
