@@ -1,6 +1,7 @@
 package services
 
 import (
+	"log"
 	"os"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -15,7 +16,7 @@ func NewKafka() *KafkaClient {
 	return &KafkaClient{}
 }
 
-func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e kafka.Event) error) {
+func (k *KafkaClient) Subscribe(topic string, callback func([]byte) error) {
 	if k.consumer == nil {
 		consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 			"bootstrap.servers":  os.Getenv("KAFKA_URL"),
@@ -29,16 +30,15 @@ func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e
 		k.consumer = consumer
 	}
 
-	for {
-		e := k.consumer.Poll(100)
+	k.consumer.SubscribeTopics([]string{topic}, nil)
 
-		if e == nil {
-			continue
+	for {
+		msg, err := k.consumer.ReadMessage(-1)
+		if err != nil {
+			log.Printf("Consumer error: %v (%v)\n", err, msg)
 		}
 
-		err := callback(k.consumer, e)
-
-		if err != nil {
+		if err := callback(msg.Value); err == nil {
 			k.consumer.Commit()
 		}
 	}
