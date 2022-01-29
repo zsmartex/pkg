@@ -16,6 +16,7 @@ func NewKafka() *KafkaClient {
 	config := &kafka.ConfigMap{
 		"bootstrap.servers":  os.Getenv("KAFKA_URL"),
 		"auto.commit.offset": false,
+		"group.id":           os.Getenv("KAFKA_GROUP_ID"),
 	}
 
 	return &KafkaClient{
