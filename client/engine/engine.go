@@ -17,7 +17,7 @@ type GrpcMatchingClient struct {
 
 func NewMatchingClient() *GrpcMatchingClient {
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(os.Getenv("MATCHING_ENGINE_URL"), grpc.WithInsecure(), grpc.WithBlock(), grpc.WithBackoffMaxDelay(5*time.Second))
+	conn, err := grpc.Dial(os.Getenv("MATCHING_ENGINE_URL"), grpc.WithInsecure(), grpc.WithBackoffMaxDelay(5*time.Second))
 	if err != nil {
 		log.Fatalf("did not connect: %s", err)
 	}
