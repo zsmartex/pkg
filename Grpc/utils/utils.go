@@ -5,6 +5,13 @@ import (
 )
 
 func (d *Decimal) ToDecimal() decimal.Decimal {
+	if d == nil {
+		d = &Decimal{
+			Val: 0,
+			Exp: 0,
+		}
+	}
+
 	return decimal.New(d.Val, d.Exp)
 }
 
