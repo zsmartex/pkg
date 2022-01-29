@@ -32,6 +32,10 @@ func (k *KafkaClient) Subscribe(topic string, callback func(c *kafka.Consumer, e
 	for {
 		e := k.consumer.Poll(100)
 
+		if e == nil {
+			continue
+		}
+
 		err := callback(k.consumer, e)
 
 		if err != nil {
