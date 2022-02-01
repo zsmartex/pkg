@@ -4,14 +4,16 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/zsmartex/pkg"
 )
 
 type KafkaClient struct {
-	Consumer *kafka.Consumer
-	Producer *kafka.Producer
+	Consumer     *kafka.Consumer
+	Producer     *kafka.Producer
+	publishMutex sync.Mutex
 }
 
 func NewKafka() *KafkaClient {
@@ -64,6 +66,9 @@ func (k *KafkaClient) SubscribeTopics(topics []string, rebalanceCb kafka.Rebalan
 }
 
 func (k *KafkaClient) publish(topic string, key []byte, body []byte) error {
+	k.publishMutex.Lock()
+	defer k.publishMutex.Unlock()
+
 	if k.Producer == nil {
 		producer, err := kafka.NewProducer(&kafka.ConfigMap{
 			"bootstrap.servers": os.Getenv("KAFKA_URL"),
