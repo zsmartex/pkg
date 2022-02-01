@@ -19,6 +19,7 @@ var (
 type MatchingPayloadMessage struct {
 	Action PayloadAction   `json:"action"`
 	Order  *order.Order    `json:"order"`
+	Market string          `json:"market"`
 	Key    *order.OrderKey `json:"key"`
 }
 
