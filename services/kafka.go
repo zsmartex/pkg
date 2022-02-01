@@ -3,8 +3,10 @@ package services
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/zsmartex/pkg"
 )
 
 type KafkaClient struct {
@@ -24,7 +26,7 @@ func (k *KafkaClient) CreateConsumer() (*kafka.Consumer, error) {
 	})
 }
 
-func (k *KafkaClient) Subscribe(topic string, callback func([]byte) error) {
+func (k *KafkaClient) Subscribe(topic string, callback func(msg *kafka.Message) error) {
 	if k.Consumer == nil {
 		consumer, err := k.CreateConsumer()
 		if err != nil {
@@ -42,7 +44,7 @@ func (k *KafkaClient) Subscribe(topic string, callback func([]byte) error) {
 			log.Printf("Consumer error: %v (%v)\n", err, msg)
 		}
 
-		if err := callback(msg.Value); err == nil {
+		if err := callback(msg); err == nil {
 			k.Consumer.CommitMessage(msg)
 		}
 	}
@@ -61,7 +63,7 @@ func (k *KafkaClient) SubscribeTopics(topics []string, rebalanceCb kafka.Rebalan
 	return k.Consumer.SubscribeTopics(topics, rebalanceCb)
 }
 
-func (k *KafkaClient) Publish(topic string, body []byte) error {
+func (k *KafkaClient) publish(topic string, key []byte, body []byte) error {
 	if k.Producer == nil {
 		producer, err := kafka.NewProducer(&kafka.ConfigMap{
 			"bootstrap.servers": os.Getenv("KAFKA_URL"),
@@ -77,6 +79,7 @@ func (k *KafkaClient) Publish(topic string, body []byte) error {
 
 	err := k.Producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		Key:            key,
 		Value:          body,
 	}, nil)
 
@@ -87,4 +90,14 @@ func (k *KafkaClient) Publish(topic string, body []byte) error {
 	k.Producer.Flush(100)
 
 	return nil
+}
+
+func (k *KafkaClient) Publish(topic string, body []byte) error {
+	return k.publish(topic, nil, body)
+}
+
+func (k *KafkaClient) EnqueueEvent(kind pkg.EnqueueEventKind, id, event string, payload []byte) error {
+	key := strings.Join([]string{string(kind), id, event}, ".")
+
+	return k.publish("rango:events", []byte(key), payload)
 }

@@ -32,3 +32,10 @@ type DepthJSON struct {
 	Bids     [][]decimal.Decimal `json:"bids"`
 	Sequence int64               `json:"sequence"`
 }
+
+type EnqueueEventKind string
+
+var (
+	EnqueueEventKindPublic  EnqueueEventKind = "public"
+	EnqueueEventKindPrivate EnqueueEventKind = "private"
+)
