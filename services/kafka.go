@@ -47,7 +47,7 @@ func (k *KafkaClient) Subscribe(topics []string, callback func(msg kafka.Message
 	}
 
 	for {
-		messages, err := k.Consumer.ReadMessage(context.Background())
+		messages, err := k.Consumer.Consume(context.Background())
 		if err != nil {
 			log.Printf("Consumer error: %v (%v)\n", err, messages)
 		}
