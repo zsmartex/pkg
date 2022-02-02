@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/mywrap/log"
+	log "github.com/sirupsen/logrus"
 )
 
 // ConsumerConfig should be created by NewConsumerConfig (for default values)
@@ -24,6 +24,8 @@ type ConsumerConfig struct {
 	GroupId string
 	// Offset will be used ONLY if consumer group does not have a valid offset committed
 	Offset Offset
+
+	Logger *log.Entry
 }
 
 // Message represents a message consumed from kafka
@@ -51,14 +53,14 @@ type Consumer struct {
 	mutex   *sync.Mutex // protect handler
 
 	groupId string // just for debugging
-	IsLog   bool   // whether to log when receiving a message
+	Logger  *log.Entry
 }
 
 // NewConsumer init an auto reconnect Consumer (but return an error if the first
 // connecting fail)
 func NewConsumer(conf ConsumerConfig) (*Consumer, error) {
-	csm := &Consumer{mutex: &sync.Mutex{}, groupId: conf.GroupId, IsLog: true}
-	log.Printf("creating a consumer with %#v", conf)
+	csm := &Consumer{mutex: &sync.Mutex{}, groupId: conf.GroupId}
+	conf.Logger.Printf("creating a consumer with %#v", conf)
 	csm.stopCtx, csm.stopCxl = context.WithCancel(context.Background())
 	samConf := sarama.NewConfig()
 	samConf.Consumer.Offsets.Initial = int64(conf.Offset)
@@ -76,7 +78,7 @@ func NewConsumer(conf ConsumerConfig) (*Consumer, error) {
 
 	go func() {
 		for warn := range client.Errors() {
-			log.Printf("error in consumer life cycle: %v", warn)
+			conf.Logger.Printf("error in consumer life cycle: %v", warn)
 		}
 	}()
 
@@ -97,9 +99,9 @@ func NewConsumer(conf ConsumerConfig) (*Consumer, error) {
 		}
 
 		go func() { // running session goroutine
-			log.Condf(csm.IsLog, "begin Consume session")
+			conf.Logger.Debug("begin Consume session")
 			err := client.Consume(csm.stopCtx, topics, handler) // blocking
-			log.Condf(csm.IsLog, "end Consume session: %v", err)
+			conf.Logger.Debugf("end Consume session: %v", err)
 			if err != nil {
 				handler.ssnEndedErr = fmt.Errorf("session ended: %v", err)
 				close(handler.ssnEndedChan) // sarama Consume stop (or stopCxl)
@@ -144,7 +146,7 @@ func NewConsumer(conf ConsumerConfig) (*Consumer, error) {
 	}()
 	// wait for ConsumeClaim start, TODO: better logic here
 	time.Sleep(200 * time.Millisecond)
-	log.Condf(csm.IsLog, "connected to kafka cluster %v", conf.BootstrapServers)
+	conf.Logger.Debugf("connected to kafka cluster %v", conf.BootstrapServers)
 	return csm, nil
 }
 
@@ -234,7 +236,7 @@ func (c Consumer) consume(ctx context.Context) ([]Message, error) {
 func (c *Consumer) Stop() {
 	c.stopCxl()
 	closeErr := c.client.Close()
-	log.Printf("client Close: %v", closeErr)
+	c.Logger.Printf("client Close: %v", closeErr)
 }
 
 type handlerImpl struct {
@@ -252,7 +254,7 @@ type handlerImpl struct {
 }
 
 func (h *handlerImpl) Setup(s sarama.ConsumerGroupSession) error {
-	log.Condf(h.consumer.IsLog, "joined consumer group, assigned partitions %#v", s.Claims())
+	h.consumer.Logger.Debugf("joined consumer group, assigned partitions %#v", s.Claims())
 	h.mu.Lock()
 	h.readMsgChans = make(map[string](chan *partRequest))
 	h.mu.Unlock()
@@ -265,8 +267,8 @@ func (h *handlerImpl) Cleanup(sarama.ConsumerGroupSession) error { return nil }
 // each assigned partition will run this func in a goroutine
 func (h *handlerImpl) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	partition := fmt.Sprintf("%v:%v", claim.Topic(), claim.Partition())
-	log.Condf(h.consumer.IsLog, "begin ConsumeClaim partition %v", partition)
-	defer log.Condf(h.consumer.IsLog, "end partition ConsumeClaim %v", partition)
+	h.consumer.Logger.Debugf("begin ConsumeClaim partition %v", partition)
+	defer h.consumer.Logger.Debugf("end partition ConsumeClaim %v", partition)
 	h.mu.Lock()
 	readMsgChan, ok := h.readMsgChans[partition]
 	if !ok {
@@ -282,7 +284,7 @@ func (h *handlerImpl) ConsumeClaim(session sarama.ConsumerGroupSession, claim sa
 			select {
 			case samMsg, opening := <-claim.Messages():
 				if !opening { // cluster needs to be rebalanced
-					log.Debugf("end ConsumeClaim due to rebalance")
+					h.consumer.Logger.Debugf("end ConsumeClaim due to rebalance")
 					partReq.responseChan <- nil
 					return nil
 				}
@@ -294,14 +296,14 @@ func (h *handlerImpl) ConsumeClaim(session sarama.ConsumerGroupSession, claim sa
 				msg := &Message{Value: string(samMsg.Value), Offset: samMsg.Offset,
 					Topic: samMsg.Topic, Partition: samMsg.Partition,
 					Key: string(samMsg.Key), Timestamp: samMsg.Timestamp, Session: session, SamMsg: samMsg}
-				log.Condf(h.consumer.IsLog, "received from topic %v:%v:%v: %v",
+				h.consumer.Logger.Debugf("received from topic %v:%v:%v: %v",
 					msg.Topic, msg.Partition, msg.Offset, msg.Value)
 				partReq.responseChan <- msg // take care of blocking
 			case <-partReq.ctx.Done(): //
 				partReq.responseChan <- nil
 			}
 		case <-h.ssnEndedChan:
-			log.Debugf("end ConsumeClaim due to ssnEndedChan")
+			h.consumer.Logger.Debug("end ConsumeClaim due to ssnEndedChan")
 			return nil
 		}
 	}
