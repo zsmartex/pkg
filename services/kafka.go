@@ -80,7 +80,7 @@ func (k *KafkaClient) publish(topic string, key []byte, body []byte) error {
 			"auto.leader.rebalance.enable": true,
 			"min.insync.replicas":          2,
 			"default.replication.factor":   3,
-			"num.partitions":               3,
+			"default.topic.config":         kafka.ConfigMap{"acks": "all"},
 		})
 		if err != nil {
 			panic("Can't create producer due to error: " + err.Error())
