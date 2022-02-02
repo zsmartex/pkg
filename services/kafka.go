@@ -128,5 +128,5 @@ func (k *KafkaClient) PublishJSONWithKey(topic, key string, payload interface{})
 func (k *KafkaClient) EnqueueEvent(kind pkg.EnqueueEventKind, id, event string, payload interface{}) error {
 	key := strings.Join([]string{string(kind), id, event}, ".")
 
-	return k.publishJSON("rango:events", key, payload)
+	return k.publishJSON("rango.events", key, payload)
 }
