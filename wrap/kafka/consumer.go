@@ -31,7 +31,7 @@ type ConsumerConfig struct {
 
 // Message represents a message consumed from kafka
 type Message struct {
-	Value     string
+	Value     []byte
 	Offset    int64
 	Topic     string
 	Partition int32
@@ -294,7 +294,7 @@ func (h *handlerImpl) ConsumeClaim(session sarama.ConsumerGroupSession, claim sa
 					continue
 				}
 				// session.MarkMessage(samMsg, "") // commit offset
-				msg := &Message{Value: string(samMsg.Value), Offset: samMsg.Offset,
+				msg := &Message{Value: samMsg.Value, Offset: samMsg.Offset,
 					Topic: samMsg.Topic, Partition: samMsg.Partition,
 					Key: string(samMsg.Key), Timestamp: samMsg.Timestamp, Session: session, SamMsg: samMsg}
 				h.consumer.Logger.Debugf("received from topic %v:%v:%v: %v",
