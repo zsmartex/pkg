@@ -75,12 +75,9 @@ func (k *KafkaClient) publish(topic string, key []byte, body []byte) error {
 
 	if k.Producer == nil {
 		producer, err := kafka.NewProducer(&kafka.ConfigMap{
-			"bootstrap.servers":            os.Getenv("KAFKA_URL"),
-			"auto.create.topics.enable":    false,
-			"auto.leader.rebalance.enable": true,
-			"min.insync.replicas":          2,
-			"default.replication.factor":   3,
-			"default.topic.config":         kafka.ConfigMap{"acks": "all"},
+			"bootstrap.servers":         os.Getenv("KAFKA_URL"),
+			"auto.create.topics.enable": false,
+			"default.topic.config":      kafka.ConfigMap{"acks": "all"},
 		})
 		if err != nil {
 			panic("Can't create producer due to error: " + err.Error())
