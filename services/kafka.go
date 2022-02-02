@@ -22,13 +22,9 @@ func NewKafka() *KafkaClient {
 
 func (k *KafkaClient) CreateConsumer() (*kafka.Consumer, error) {
 	return kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers":          os.Getenv("KAFKA_URL"),
-		"enable.auto.commit":         false,
-		"group.id":                   os.Getenv("KAFKA_GROUP_ID"),
-		"auto.create.topics.enable":  false,
-		"min.insync.replicas":        2,
-		"default.replication.factor": 3,
-		"num.partitions":             3,
+		"bootstrap.servers":  os.Getenv("KAFKA_URL"),
+		"enable.auto.commit": false,
+		"group.id":           os.Getenv("KAFKA_GROUP_ID"),
 	})
 }
 
@@ -75,9 +71,7 @@ func (k *KafkaClient) publish(topic string, key []byte, body []byte) error {
 
 	if k.Producer == nil {
 		producer, err := kafka.NewProducer(&kafka.ConfigMap{
-			"bootstrap.servers":         os.Getenv("KAFKA_URL"),
-			"auto.create.topics.enable": false,
-			"default.topic.config":      kafka.ConfigMap{"acks": "all"},
+			"bootstrap.servers": os.Getenv("KAFKA_URL"),
 		})
 		if err != nil {
 			panic("Can't create producer due to error: " + err.Error())
