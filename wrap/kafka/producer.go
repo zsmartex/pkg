@@ -106,7 +106,7 @@ func truncateStr(s string, limit int) string {
 // SendExplicitMessage _
 // Deprecated: use ProduceWithKey instead
 func (p Producer) SendExplicitMessage(topic string, value []byte, key string) error {
-	msgMeta := MsgMetadata{UniqueId: uuid.New(), SentAt: time.Now()}
+	msgMeta := MsgMetadata{UniqueId: uuid.New().String(), SentAt: time.Now()}
 	samMsg := &sarama.ProducerMessage{
 		Value:     sarama.ByteEncoder(value),
 		Topic:     topic,
@@ -195,7 +195,7 @@ const (
 )
 
 type MsgMetadata struct {
-	UniqueId uuid.UUID
+	UniqueId string
 	SentAt   time.Time
 }
 

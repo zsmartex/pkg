@@ -30,7 +30,7 @@ func (k *KafkaClient) CreateConsumer(topics []string) (*kafka.Consumer, error) {
 		BootstrapServers: os.Getenv("KAFKA_URL"),
 		Offset:           kafka.OffsetEarliest,
 		GroupId:          "zsmartex",
-		Topics:           strings.Join(topics, ","),
+		Topics:           strings.Join(topics, ", "),
 		Logger:           k.logger,
 	})
 }
