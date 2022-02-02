@@ -9,7 +9,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/zsmartex/pkg"
-	"github.com/zsmartex/pkg/internal/kafka"
+	"github.com/zsmartex/pkg/wrap/kafka"
 )
 
 type KafkaClient struct {
