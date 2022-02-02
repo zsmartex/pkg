@@ -62,7 +62,7 @@ func (k *KafkaClient) Subscribe(topics []string, callback func(msg kafka.Message
 func (k *KafkaClient) CreateProducer() (*kafka.Producer, error) {
 	return kafka.NewProducer(kafka.ProducerConfig{
 		BrokersList:  os.Getenv("KAFKA_URL"),
-		RequiredAcks: kafka.WaitForAll,
+		RequiredAcks: kafka.WaitForLocal,
 		IsCompressed: true,
 		Logger:       k.logger,
 	})

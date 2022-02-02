@@ -65,8 +65,7 @@ func NewConsumer(conf ConsumerConfig) (*Consumer, error) {
 	csm.stopCtx, csm.stopCxl = context.WithCancel(context.Background())
 	samConf := sarama.NewConfig()
 	samConf.Consumer.Offsets.Initial = int64(conf.Offset)
-	kafkaVersion, _ := sarama.ParseKafkaVersion("1.1.1")
-	samConf.Version = kafkaVersion
+	samConf.Version = sarama.V3_1_0_0
 	brokers := strings.Split(conf.BootstrapServers, ",")
 	topics := strings.Split(conf.Topics, ",")
 	samConf.Consumer.Return.Errors = true
