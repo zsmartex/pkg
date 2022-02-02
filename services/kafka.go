@@ -59,17 +59,21 @@ func (k *KafkaClient) Subscribe(topics []string, callback func(msg kafka.Message
 	}
 }
 
-func (k *KafkaClient) publish(topic string, key string, body []byte) error {
+func (k *KafkaClient) CreateProducer() (*kafka.Producer, error) {
+	return kafka.NewProducer(kafka.ProducerConfig{
+		BrokersList:  os.Getenv("KAFKA_URL"),
+		RequiredAcks: kafka.WaitForAll,
+		IsCompressed: true,
+		Logger:       k.logger,
+	})
+}
+
+func (k *KafkaClient) publishJSON(topic, key string, payload interface{}) error {
 	k.publishMutex.Lock()
 	defer k.publishMutex.Unlock()
 
 	if k.Producer == nil {
-		producer, err := kafka.NewProducer(kafka.ProducerConfig{
-			BrokersList:  os.Getenv("KAFKA_URL"),
-			RequiredAcks: kafka.WaitForAll,
-			IsCompressed: true,
-			Logger:       k.logger,
-		})
+		producer, err := k.CreateProducer()
 		if err != nil {
 			panic("Can't create producer due to error: " + err.Error())
 		}
@@ -78,18 +82,50 @@ func (k *KafkaClient) publish(topic string, key string, body []byte) error {
 	}
 
 	if len(key) > 0 {
-		return k.Producer.Produce(topic, body)
+		return k.Producer.ProduceJSON(topic, payload)
 	} else {
-		return k.Producer.ProduceWithKey(topic, body, key)
+		return k.Producer.ProduceJSONWithKey(topic, payload, key)
 	}
 }
 
-func (k *KafkaClient) Publish(topic string, body []byte) error {
-	return k.publish(topic, "", body)
+func (k *KafkaClient) publish(topic string, key string, payload []byte) error {
+	k.publishMutex.Lock()
+	defer k.publishMutex.Unlock()
+
+	if k.Producer == nil {
+		producer, err := k.CreateProducer()
+		if err != nil {
+			panic("Can't create producer due to error: " + err.Error())
+		}
+
+		k.Producer = producer
+	}
+
+	if len(key) > 0 {
+		return k.Producer.Produce(topic, payload)
+	} else {
+		return k.Producer.ProduceWithKey(topic, payload, key)
+	}
 }
 
-func (k *KafkaClient) EnqueueEvent(kind pkg.EnqueueEventKind, id, event string, payload []byte) error {
+func (k *KafkaClient) Publish(topic string, payload []byte) error {
+	return k.publish(topic, "", payload)
+}
+
+func (k *KafkaClient) PublishWithKey(topic, key string, payload []byte) error {
+	return k.publish(topic, "", payload)
+}
+
+func (k *KafkaClient) PublishJSON(topic string, payload interface{}) error {
+	return k.publishJSON(topic, "", payload)
+}
+
+func (k *KafkaClient) PublishJSONWithKey(topic, key string, payload interface{}) error {
+	return k.publishJSON(topic, key, payload)
+}
+
+func (k *KafkaClient) EnqueueEvent(kind pkg.EnqueueEventKind, id, event string, payload interface{}) error {
 	key := strings.Join([]string{string(kind), id, event}, ".")
 
-	return k.publish("rango:events", key, payload)
+	return k.publishJSON("rango:events", key, payload)
 }
