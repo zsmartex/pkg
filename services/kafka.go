@@ -83,9 +83,9 @@ func (k *KafkaClient) publishJSON(topic, key string, payload interface{}) error 
 	}
 
 	if len(key) > 0 {
-		return k.Producer.ProduceJSON(topic, payload)
-	} else {
 		return k.Producer.ProduceJSONWithKey(topic, payload, key)
+	} else {
+		return k.Producer.ProduceJSON(topic, payload)
 	}
 }
 
@@ -103,9 +103,9 @@ func (k *KafkaClient) publish(topic string, key string, payload []byte) error {
 	}
 
 	if len(key) > 0 {
-		return k.Producer.Produce(topic, payload)
-	} else {
 		return k.Producer.ProduceWithKey(topic, payload, key)
+	} else {
+		return k.Producer.Produce(topic, payload)
 	}
 }
 
