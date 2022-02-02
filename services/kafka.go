@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/zsmartex/pkg"
 	"github.com/zsmartex/pkg/wrap/kafka"
@@ -29,7 +30,7 @@ func (k *KafkaClient) CreateConsumer(topics []string) (*kafka.Consumer, error) {
 	return kafka.NewConsumer(kafka.ConsumerConfig{
 		BootstrapServers: os.Getenv("KAFKA_URL"),
 		Offset:           kafka.OffsetEarliest,
-		GroupId:          "zsmartex",
+		GroupId:          "zsmartex-" + uuid.NewString(),
 		Topics:           strings.Join(topics, ", "),
 		Logger:           k.logger,
 	})
