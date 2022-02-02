@@ -60,8 +60,8 @@ type Consumer struct {
 // NewConsumer init an auto reconnect Consumer (but return an error if the first
 // connecting fail)
 func NewConsumer(conf ConsumerConfig) (*Consumer, error) {
-	csm := &Consumer{mutex: &sync.Mutex{}, groupId: conf.GroupId}
-	conf.Logger.Printf("creating a consumer with %#v", conf)
+	csm := &Consumer{mutex: &sync.Mutex{}, groupId: conf.GroupId, Logger: conf.Logger}
+	csm.Logger.Printf("creating a consumer with %#v", conf)
 	csm.stopCtx, csm.stopCxl = context.WithCancel(context.Background())
 	samConf := sarama.NewConfig()
 	samConf.Consumer.Offsets.Initial = int64(conf.Offset)
@@ -78,7 +78,7 @@ func NewConsumer(conf ConsumerConfig) (*Consumer, error) {
 
 	go func() {
 		for warn := range client.Errors() {
-			conf.Logger.Printf("error in consumer life cycle: %v", warn)
+			csm.Logger.Printf("error in consumer life cycle: %v", warn)
 		}
 	}()
 
@@ -99,9 +99,9 @@ func NewConsumer(conf ConsumerConfig) (*Consumer, error) {
 		}
 
 		go func() { // running session goroutine
-			conf.Logger.Debug("begin Consume session")
+			csm.Logger.Debug("begin Consume session")
 			err := client.Consume(csm.stopCtx, topics, handler) // blocking
-			conf.Logger.Debugf("end Consume session: %v", err)
+			csm.Logger.Debugf("end Consume session: %v", err)
 			if err != nil {
 				handler.ssnEndedErr = fmt.Errorf("session ended: %v", err)
 				close(handler.ssnEndedChan) // sarama Consume stop (or stopCxl)
@@ -146,7 +146,7 @@ func NewConsumer(conf ConsumerConfig) (*Consumer, error) {
 	}()
 	// wait for ConsumeClaim start, TODO: better logic here
 	time.Sleep(200 * time.Millisecond)
-	conf.Logger.Debugf("connected to kafka cluster %v", conf.BootstrapServers)
+	csm.Logger.Debugf("connected to kafka cluster %v", conf.BootstrapServers)
 	return csm, nil
 }
 
