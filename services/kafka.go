@@ -92,7 +92,7 @@ func (k *KafkaClient) publish(topic string, key []byte, body []byte) error {
 		return err
 	}
 
-	k.Producer.Flush(0)
+	k.Producer.Flush(5)
 
 	return nil
 }
