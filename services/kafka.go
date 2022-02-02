@@ -1,13 +1,14 @@
 package services
 
 import (
+	"context"
 	"log"
 	"os"
 	"strings"
 	"sync"
 
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/zsmartex/pkg"
+	"github.com/zsmartex/pkg/internal/kafka"
 )
 
 type KafkaClient struct {
@@ -20,89 +21,69 @@ func NewKafka() *KafkaClient {
 	return &KafkaClient{}
 }
 
-func (k *KafkaClient) CreateConsumer() (*kafka.Consumer, error) {
-	return kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers":  os.Getenv("KAFKA_URL"),
-		"enable.auto.commit": false,
-		"group.id":           os.Getenv("KAFKA_GROUP_ID"),
+func (k *KafkaClient) CreateConsumer(topics []string) (*kafka.Consumer, error) {
+	return kafka.NewConsumer(kafka.ConsumerConfig{
+		BootstrapServers: os.Getenv("KAFKA_URL"),
+		Offset:           kafka.OffsetEarliest,
+		GroupId:          "zsmartex",
+		Topics:           strings.Join(topics, ","),
 	})
 }
 
-func (k *KafkaClient) Subscribe(topic string, callback func(msg *kafka.Message) error) {
+func (k *KafkaClient) Subscribe(topics []string, callback func(msg kafka.Message) error) {
 	if k.Consumer == nil {
-		consumer, err := k.CreateConsumer()
+		consumer, err := k.CreateConsumer(topics)
 		if err != nil {
 			panic("Can't create consumer due to error: " + err.Error())
 		}
 
 		k.Consumer = consumer
 	}
-
-	k.SubscribeTopics([]string{topic}, nil)
 
 	for {
-		msg, err := k.Consumer.ReadMessage(-1)
+		messages, err := k.Consumer.ReadMessage(context.Background())
 		if err != nil {
-			log.Printf("Consumer error: %v (%v)\n", err, msg)
+			log.Printf("Consumer error: %v (%v)\n", err, messages)
 		}
 
-		if err := callback(msg); err == nil {
-			k.Consumer.CommitMessage(msg)
+		for _, msg := range messages {
+			if err := callback(msg); err == nil {
+				msg.Session.MarkMessage(msg.SamMsg, "")
+			}
 		}
 	}
 }
 
-func (k *KafkaClient) SubscribeTopics(topics []string, rebalanceCb kafka.RebalanceCb) error {
-	if k.Consumer == nil {
-		consumer, err := k.CreateConsumer()
-		if err != nil {
-			panic("Can't create consumer due to error: " + err.Error())
-		}
-
-		k.Consumer = consumer
-	}
-
-	return k.Consumer.SubscribeTopics(topics, rebalanceCb)
-}
-
-func (k *KafkaClient) publish(topic string, key []byte, body []byte) error {
+func (k *KafkaClient) publish(topic string, key string, body []byte) error {
 	k.publishMutex.Lock()
 	defer k.publishMutex.Unlock()
 
 	if k.Producer == nil {
-		producer, err := kafka.NewProducer(&kafka.ConfigMap{
-			"bootstrap.servers": os.Getenv("KAFKA_URL"),
+		producer, err := kafka.NewProducer(kafka.ProducerConfig{
+			BrokersList:  os.Getenv("KAFKA_URL"),
+			RequiredAcks: kafka.WaitForAll,
+			IsCompressed: true,
 		})
 		if err != nil {
 			panic("Can't create producer due to error: " + err.Error())
 		}
 
 		k.Producer = producer
-
-		k.Producer.GetFatalError()
 	}
 
-	err := k.Producer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-		Key:            key,
-		Value:          body,
-	}, nil)
-
-	if err != nil {
-		return err
+	if len(key) > 0 {
+		return k.Producer.Produce(topic, body)
+	} else {
+		return k.Producer.ProduceWithKey(topic, body, key)
 	}
-
-	k.Producer.Flush(5)
-
-	return nil
 }
 
 func (k *KafkaClient) Publish(topic string, body []byte) error {
-	return k.publish(topic, nil, body)
+	return k.publish(topic, "", body)
 }
 
 func (k *KafkaClient) EnqueueEvent(kind pkg.EnqueueEventKind, id, event string, payload []byte) error {
 	key := strings.Join([]string{string(kind), id, event}, ".")
 
-	return k.publish("rango:events", []byte(key), payload)
+	return k.publish("rango:events", key, payload)
 }
