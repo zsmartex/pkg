@@ -49,6 +49,7 @@ func NewProducer(conf ProducerConfig) (*Producer, error) {
 	samConf.Version = kafkaVersion
 	samConf.Producer.RequiredAcks = sarama.RequiredAcks(conf.RequiredAcks)
 	samConf.Producer.Retry.Max = 5
+	samConf.Producer.Flush.Frequency = 10 * time.Millisecond
 	samConf.Producer.Retry.BackoffFunc = func(retries, maxRetries int) time.Duration {
 		ret := 100 * time.Millisecond
 		for retries > 0 {
