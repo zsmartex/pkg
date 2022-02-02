@@ -20,7 +20,9 @@ type KafkaClient struct {
 }
 
 func NewKafka(logger *logrus.Entry) *KafkaClient {
-	return &KafkaClient{}
+	return &KafkaClient{
+		logger: logger,
+	}
 }
 
 func (k *KafkaClient) CreateConsumer(topics []string) (*kafka.Consumer, error) {
