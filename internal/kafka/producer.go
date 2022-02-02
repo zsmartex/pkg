@@ -10,7 +10,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/google/uuid"
-	"github.com/mywrap/log"
+	log "github.com/sirupsen/logrus"
 )
 
 // ProducerConfig _
@@ -28,8 +28,10 @@ type ProducerConfig struct {
 	// size before compress, default 1000000,
 	// should <= broker's message.max.bytes after compressed
 	MaxMsgBytes   int
-	DisableLog    bool // default enable log on produced and delivered a message
-	LogMaxLineLen int  // default no limit (can log a very large message)
+	LogMaxLineLen int // default no limit (can log a very large message)
+
+	// Logger from application
+	Logger *log.Entry
 }
 
 // Producer _
@@ -40,7 +42,7 @@ type Producer struct {
 
 // NewProducer returns a connected Producer
 func NewProducer(conf ProducerConfig) (*Producer, error) {
-	log.Infof("creating a producer with %#v", conf)
+	conf.Logger.Infof("creating a producer with %#v", conf)
 	// construct sarama config
 	samConf := sarama.NewConfig()
 	kafkaVersion, _ := sarama.ParseKafkaVersion("1.1.1")
@@ -72,20 +74,20 @@ func NewProducer(conf ProducerConfig) (*Producer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error create producer: %v", err)
 	}
-	log.Infof("connected to kafka cluster %v", conf.BrokersList)
+	conf.Logger.Infof("connected to kafka cluster %v", conf.BrokersList)
 	go func() {
 		for err := range p.samProducer.Errors() {
 			errMsg := err.Err.Error()
 			if errMsg == "circuit breaker is open" {
 				errMsg = "probably you did not input a topic"
 			}
-			log.Infof("failed to produce msgId %v to topic %v: %v",
+			conf.Logger.Infof("failed to produce msgId %v to topic %v: %v",
 				err.Msg.Metadata, err.Msg.Topic, errMsg)
 		}
 	}()
 	go func() {
 		for sent := range p.samProducer.Successes() {
-			log.Condf(!p.conf.DisableLog,
+			conf.Logger.Debugf(
 				"delivered msgId %v to topic %v:%v:%v",
 				sent.Metadata, sent.Topic, sent.Partition, sent.Offset)
 		}
@@ -117,12 +119,12 @@ func (p Producer) SendExplicitMessage(topic string, value []byte, key string) er
 	select {
 	case p.samProducer.Input() <- samMsg:
 		if p.conf.LogMaxLineLen > 0 {
-			log.Condf(!p.conf.DisableLog,
+			p.conf.Logger.Debugf(
 				"producing msgId %v to %v:%v: len %v, msg: %v",
 				msgMeta.UniqueId, samMsg.Topic, key,
 				len(string(value)), truncateStr(string(value), p.conf.LogMaxLineLen))
 		} else {
-			log.Condf(!p.conf.DisableLog,
+			p.conf.Logger.Debugf(
 				"producing msgId %v to %v:%v: msg: %v",
 				msgMeta.UniqueId, samMsg.Topic, key, string(value))
 		}

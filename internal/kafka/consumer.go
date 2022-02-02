@@ -25,6 +25,7 @@ type ConsumerConfig struct {
 	// Offset will be used ONLY if consumer group does not have a valid offset committed
 	Offset Offset
 
+	// Logger from application
 	Logger *log.Entry
 }
 

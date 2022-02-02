@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/sirupsen/logrus"
 	"github.com/zsmartex/pkg"
 	"github.com/zsmartex/pkg/internal/kafka"
 )
@@ -15,9 +16,10 @@ type KafkaClient struct {
 	Consumer     *kafka.Consumer
 	Producer     *kafka.Producer
 	publishMutex sync.Mutex
+	logger       *logrus.Entry
 }
 
-func NewKafka() *KafkaClient {
+func NewKafka(logger *logrus.Entry) *KafkaClient {
 	return &KafkaClient{}
 }
 
@@ -27,6 +29,7 @@ func (k *KafkaClient) CreateConsumer(topics []string) (*kafka.Consumer, error) {
 		Offset:           kafka.OffsetEarliest,
 		GroupId:          "zsmartex",
 		Topics:           strings.Join(topics, ","),
+		Logger:           k.logger,
 	})
 }
 
@@ -63,6 +66,7 @@ func (k *KafkaClient) publish(topic string, key string, body []byte) error {
 			BrokersList:  os.Getenv("KAFKA_URL"),
 			RequiredAcks: kafka.WaitForAll,
 			IsCompressed: true,
+			Logger:       k.logger,
 		})
 		if err != nil {
 			panic("Can't create producer due to error: " + err.Error())
