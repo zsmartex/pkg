@@ -95,40 +95,38 @@ func NewKafkaProducer() (*KafkaProducer, error) {
 	}, nil
 }
 
-func (k *KafkaProducer) Produce(topic string, payload interface{}) error {
+func (k *KafkaProducer) Produce(topic string, payload interface{}) {
 	data, err := json.Marshal(payload)
 	if err != nil {
-		return err
+		return
 	}
 
-	return k.produce(topic, "", data)
+	k.produce(topic, "", data)
 }
 
-func (k *KafkaProducer) ProduceWithKey(topic, key string, payload interface{}) error {
+func (k *KafkaProducer) ProduceWithKey(topic, key string, payload interface{}) {
 	data, err := json.Marshal(payload)
 	if err != nil {
-		return err
+		return
 	}
 
-	return k.produce(topic, key, data)
+	k.produce(topic, key, data)
 }
 
 func getBrokers() []string {
 	return strings.Split(os.Getenv("KAFKA_URL"), ",")
 }
 
-func (p *KafkaProducer) produce(topic, key string, payload []byte) error {
+func (p *KafkaProducer) produce(topic, key string, payload []byte) {
 	var bkey []byte
 
 	if len(key) > 0 {
 		bkey = []byte(key)
 	}
 
-	r := p.Client.ProduceSync(context.Background(), &kgo.Record{
+	p.Client.Produce(context.Background(), &kgo.Record{
 		Topic: topic,
 		Key:   bkey,
 		Value: payload,
-	})
-
-	return r.FirstErr()
+	}, nil)
 }

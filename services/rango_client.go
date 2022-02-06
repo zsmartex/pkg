@@ -19,8 +19,8 @@ func NewRangoClient() (*RangoClient, error) {
 	return &RangoClient{producer: producer}, nil
 }
 
-func (k *RangoClient) EnqueueEvent(kind pkg.EnqueueEventKind, id, event string, payload interface{}) error {
+func (k *RangoClient) EnqueueEvent(kind pkg.EnqueueEventKind, id, event string, payload interface{}) {
 	key := strings.Join([]string{string(kind), id, event}, ".")
 
-	return k.producer.ProduceWithKey("rango.events", key, payload)
+	k.producer.ProduceWithKey("rango.events", key, payload)
 }
