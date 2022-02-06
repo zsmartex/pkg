@@ -2,131 +2,108 @@ package services
 
 import (
 	"context"
-	"log"
+	"encoding/json"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
-	"github.com/zsmartex/pkg"
-	"github.com/zsmartex/pkg/wrap/kafka"
+	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 type KafkaClient struct {
-	Consumer     *kafka.Consumer
-	Producer     *kafka.Producer
-	publishMutex sync.Mutex
-	logger       *logrus.Entry
+	Client *kgo.Client
 }
 
-func NewKafka(logger *logrus.Entry) *KafkaClient {
+func NewKafka() (*KafkaClient, error) {
+	client, err := kgo.NewClient()
+	if err != nil {
+		return nil, err
+	}
 	return &KafkaClient{
-		logger: logger,
-	}
+		Client: client,
+	}, nil
 }
 
-func (k *KafkaClient) CreateConsumer(topics []string) (*kafka.Consumer, error) {
-	return kafka.NewConsumer(kafka.ConsumerConfig{
-		BootstrapServers: os.Getenv("KAFKA_URL"),
-		Offset:           kafka.OffsetEarliest,
-		GroupId:          "zsmartex-" + uuid.NewString(),
-		Topics:           strings.Join(topics, ", "),
-		Logger:           k.logger,
+type KafkaConsumer struct {
+	Client *kgo.Client
+}
+
+func NewKafkaConsumer(topics ...string) (*KafkaConsumer, error) {
+	brokers := getBrokers()
+
+	client, err := kgo.NewClient(
+		kgo.SeedBrokers(brokers...),
+		kgo.ConsumerGroup("zsmartex-"+uuid.NewString()),
+		kgo.ConsumeTopics(topics...),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &KafkaConsumer{
+		Client: client,
+	}, nil
+}
+
+func (c *KafkaConsumer) Poll() []*kgo.Record {
+	records := make([]*kgo.Record, 0)
+
+	fetches := c.Client.PollRecords(context.Background(), -1)
+
+	fetches.EachRecord(func(r *kgo.Record) {
+		records = append(records, r)
 	})
+
+	return records
 }
 
-func (k *KafkaClient) Subscribe(topics []string, callback func(msg kafka.Message) error) {
-	if k.Consumer == nil {
-		consumer, err := k.CreateConsumer(topics)
-		if err != nil {
-			panic("Can't create consumer due to error: " + err.Error())
-		}
+func (c *KafkaConsumer) CommitRecords(records ...*kgo.Record) error {
+	return c.Client.CommitRecords(context.Background(), records...)
+}
 
-		k.Consumer = consumer
+type KafkaProducer struct {
+	Client *kgo.Client
+}
+
+func NewKafkaProducer() (*KafkaProducer, error) {
+	brokers := getBrokers()
+
+	client, err := kgo.NewClient(
+		kgo.SeedBrokers(brokers...),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &KafkaProducer{
+		Client: client,
+	}, nil
+}
+
+func (k *KafkaProducer) Produce(topic string, payload interface{}) error {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return err
 	}
 
-	for {
-		messages, err := k.Consumer.Consume(context.Background())
-		if err != nil {
-			log.Printf("Consumer error: %v (%v)\n", err, messages)
-		}
-
-		for _, msg := range messages {
-			if err := callback(msg); err == nil {
-				msg.Session.MarkMessage(msg.SamMsg, "")
-			}
-		}
-	}
+	return k.produce(topic, "", data)
 }
 
-func (k *KafkaClient) CreateProducer() (*kafka.Producer, error) {
-	return kafka.NewProducer(kafka.ProducerConfig{
-		BrokersList:  os.Getenv("KAFKA_URL"),
-		RequiredAcks: kafka.WaitForLocal,
-		IsCompressed: true,
-		Logger:       k.logger,
-	})
-}
-
-func (k *KafkaClient) publishJSON(topic, key string, payload interface{}) error {
-	k.publishMutex.Lock()
-	defer k.publishMutex.Unlock()
-
-	if k.Producer == nil {
-		producer, err := k.CreateProducer()
-		if err != nil {
-			panic("Can't create producer due to error: " + err.Error())
-		}
-
-		k.Producer = producer
+func (k *KafkaProducer) ProduceWithKey(topic, key string, payload interface{}) error {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return err
 	}
 
-	if len(key) > 0 {
-		return k.Producer.ProduceJSONWithKey(topic, payload, key)
-	} else {
-		return k.Producer.ProduceJSON(topic, payload)
-	}
+	return k.produce(topic, "", data)
 }
 
-func (k *KafkaClient) publish(topic string, key string, payload []byte) error {
-	k.publishMutex.Lock()
-	defer k.publishMutex.Unlock()
-
-	if k.Producer == nil {
-		producer, err := k.CreateProducer()
-		if err != nil {
-			panic("Can't create producer due to error: " + err.Error())
-		}
-
-		k.Producer = producer
-	}
-
-	if len(key) > 0 {
-		return k.Producer.ProduceWithKey(topic, payload, key)
-	} else {
-		return k.Producer.Produce(topic, payload)
-	}
+func getBrokers() []string {
+	return strings.Split(os.Getenv("KAFKA_URL"), ",")
 }
 
-func (k *KafkaClient) Publish(topic string, payload []byte) error {
-	return k.publish(topic, "", payload)
-}
+func (p *KafkaProducer) produce(topic, key string, payload []byte) error {
+	r := p.Client.ProduceSync(context.Background(), &kgo.Record{
+		Topic: topic,
+	}, nil)
 
-func (k *KafkaClient) PublishWithKey(topic, key string, payload []byte) error {
-	return k.publish(topic, "", payload)
-}
-
-func (k *KafkaClient) PublishJSON(topic string, payload interface{}) error {
-	return k.publishJSON(topic, "", payload)
-}
-
-func (k *KafkaClient) PublishJSONWithKey(topic, key string, payload interface{}) error {
-	return k.publishJSON(topic, key, payload)
-}
-
-func (k *KafkaClient) EnqueueEvent(kind pkg.EnqueueEventKind, id, event string, payload interface{}) error {
-	key := strings.Join([]string{string(kind), id, event}, ".")
-
-	return k.publishJSON("rango.events", key, payload)
+	return r.FirstErr()
 }
