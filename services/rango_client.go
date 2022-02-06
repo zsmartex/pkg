@@ -1,7 +1,6 @@
 package services
 
 import (
-	"log"
 	"strings"
 
 	"github.com/zsmartex/pkg"
@@ -21,8 +20,6 @@ func NewRangoClient() (*RangoClient, error) {
 }
 
 func (k *RangoClient) EnqueueEvent(kind pkg.EnqueueEventKind, id, event string, payload interface{}) error {
-	log.Println(k.producer)
-	log.Println(k.producer.Client)
 	key := strings.Join([]string{string(kind), id, event}, ".")
 
 	return k.producer.ProduceWithKey("rango.events", key, payload)

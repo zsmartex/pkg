@@ -127,6 +127,7 @@ func (p *KafkaProducer) produce(topic, key string, payload []byte) error {
 	r := p.Client.ProduceSync(context.Background(), &kgo.Record{
 		Topic: topic,
 		Key:   bkey,
+		Value: payload,
 	}, nil)
 
 	return r.FirstErr()
