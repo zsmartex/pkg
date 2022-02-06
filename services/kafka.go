@@ -6,27 +6,44 @@ import (
 	"os"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 type KafkaConsumer struct {
-	Client *kgo.Client
+	CommitClient *kadm.Client
+	Client       *kgo.Client
+	Topics       []string
+	Group        string
 }
 
-func NewKafkaConsumer(topics ...string) (*KafkaConsumer, error) {
+func NewKafkaConsumer(group string, topics []string) (*KafkaConsumer, error) {
 	brokers := getBrokers()
+	seeds := kgo.SeedBrokers(brokers...)
 
-	client, err := kgo.NewClient(
-		kgo.SeedBrokers(brokers...),
-		kgo.ConsumerGroup("zsmartex-"+uuid.NewString()),
-		kgo.ConsumeTopics(topics...),
+	cl, err := kgo.NewClient(
+		seeds,
 	)
 	if err != nil {
 		return nil, err
 	}
+
+	adm := kadm.NewClient(cl)
+	os, err := adm.FetchOffsetsForTopics(context.Background(), group, topics...)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := kgo.NewClient(seeds, kgo.ConsumePartitions(os.Into().Into()))
+	if err != nil {
+		return nil, err
+	}
+
 	return &KafkaConsumer{
-		Client: client,
+		CommitClient: adm,
+		Client:       client,
+		Topics:       topics,
+		Group:        group,
 	}, nil
 }
 
@@ -51,8 +68,13 @@ func (c *KafkaConsumer) Poll() ([]*kgo.Record, error) {
 	return records, nil
 }
 
-func (c *KafkaConsumer) CommitRecords(records ...*kgo.Record) error {
-	return c.Client.CommitRecords(context.Background(), records...)
+func (c *KafkaConsumer) CommitRecords(records []kgo.Record) error {
+	return c.CommitClient.CommitAllOffsets(context.Background(), c.Group, kadm.OffsetsFromRecords(records...))
+}
+
+func (c *KafkaConsumer) Close() {
+	c.Client.Close()
+	c.CommitClient.Close()
 }
 
 type KafkaProducer struct {

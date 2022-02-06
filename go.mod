@@ -10,6 +10,7 @@ require (
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/twmb/franz-go v1.3.1
+	github.com/twmb/franz-go/pkg/kadm v0.0.0-20220128010747-0a23cca3f4ee
 	golang.org/x/crypto v0.0.0-20220128200615-198e4374d7ed // indirect
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
 	google.golang.org/grpc v1.44.0
