@@ -110,7 +110,7 @@ func (k *KafkaProducer) ProduceWithKey(topic, key string, payload interface{}) e
 		return err
 	}
 
-	return k.produce(topic, "", data)
+	return k.produce(topic, key, data)
 }
 
 func getBrokers() []string {
@@ -118,8 +118,15 @@ func getBrokers() []string {
 }
 
 func (p *KafkaProducer) produce(topic, key string, payload []byte) error {
+	var bkey []byte
+
+	if len(key) > 0 {
+		bkey = []byte(key)
+	}
+
 	r := p.Client.ProduceSync(context.Background(), &kgo.Record{
 		Topic: topic,
+		Key:   bkey,
 	}, nil)
 
 	return r.FirstErr()
