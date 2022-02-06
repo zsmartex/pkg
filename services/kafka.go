@@ -68,7 +68,7 @@ func (c *KafkaConsumer) Poll() ([]*kgo.Record, error) {
 	return records, nil
 }
 
-func (c *KafkaConsumer) CommitRecords(records []kgo.Record) error {
+func (c *KafkaConsumer) CommitRecords(records ...kgo.Record) error {
 	return c.CommitClient.CommitAllOffsets(context.Background(), c.Group, kadm.OffsetsFromRecords(records...))
 }
 
