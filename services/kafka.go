@@ -128,7 +128,7 @@ func (p *KafkaProducer) produce(topic, key string, payload []byte) error {
 		Topic: topic,
 		Key:   bkey,
 		Value: payload,
-	}, nil)
+	})
 
 	return r.FirstErr()
 }
