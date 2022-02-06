@@ -10,20 +10,6 @@ import (
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
-type KafkaClient struct {
-	Client *kgo.Client
-}
-
-func NewKafka() (*KafkaClient, error) {
-	client, err := kgo.NewClient()
-	if err != nil {
-		return nil, err
-	}
-	return &KafkaClient{
-		Client: client,
-	}, nil
-}
-
 type KafkaConsumer struct {
 	Client *kgo.Client
 }
@@ -44,16 +30,25 @@ func NewKafkaConsumer(topics ...string) (*KafkaConsumer, error) {
 	}, nil
 }
 
-func (c *KafkaConsumer) Poll() []*kgo.Record {
+func (c *KafkaConsumer) Poll() ([]*kgo.Record, error) {
 	records := make([]*kgo.Record, 0)
+	errors := make([]error, 0)
 
 	fetches := c.Client.PollRecords(context.Background(), -1)
+
+	fetches.EachError(func(s string, i int32, e error) {
+		errors = append(errors, e)
+	})
+
+	if len(errors) > 0 {
+		return records, errors[0]
+	}
 
 	fetches.EachRecord(func(r *kgo.Record) {
 		records = append(records, r)
 	})
 
-	return records
+	return records, nil
 }
 
 func (c *KafkaConsumer) CommitRecords(records ...*kgo.Record) error {
