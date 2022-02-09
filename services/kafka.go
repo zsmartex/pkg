@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
@@ -79,9 +80,10 @@ func (c *KafkaConsumer) Close() {
 
 type KafkaProducer struct {
 	Client *kgo.Client
+	logger *logrus.Entry
 }
 
-func NewKafkaProducer() (*KafkaProducer, error) {
+func NewKafkaProducer(logger *logrus.Entry) (*KafkaProducer, error) {
 	brokers := getBrokers()
 
 	client, err := kgo.NewClient(
@@ -92,6 +94,7 @@ func NewKafkaProducer() (*KafkaProducer, error) {
 	}
 	return &KafkaProducer{
 		Client: client,
+		logger: logger,
 	}, nil
 }
 
@@ -118,6 +121,7 @@ func getBrokers() []string {
 }
 
 func (p *KafkaProducer) produce(topic, key string, payload []byte) {
+	p.logger.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
 	var bkey []byte
 
 	if len(key) > 0 {

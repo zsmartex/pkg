@@ -10,12 +10,7 @@ type RangoClient struct {
 	producer *KafkaProducer
 }
 
-func NewRangoClient() (*RangoClient, error) {
-	producer, err := NewKafkaProducer()
-	if err != nil {
-		return nil, err
-	}
-
+func NewRangoClient(producer *KafkaProducer) (*RangoClient, error) {
 	return &RangoClient{producer: producer}, nil
 }
 
