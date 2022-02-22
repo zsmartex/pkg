@@ -1,4 +1,4 @@
-package order
+package pkg
 
 import (
 	"time"
@@ -24,7 +24,7 @@ type Order struct {
 	ID             int64           `json:"id"`
 	UUID           uuid.UUID       `json:"uuid"`
 	MemberID       int64           `json:"member_id"`
-	Symbol         string          `json:"symbol"`
+	Symbol         Symbol          `json:"symbol"`
 	Side           OrderSide       `json:"side"`
 	Type           OrderType       `json:"type"`
 	Price          decimal.Decimal `json:"price"`
@@ -39,7 +39,7 @@ type Order struct {
 type OrderKey struct {
 	ID        int64           `json:"id"`
 	UUID      uuid.UUID       `json:"uuid"`
-	Symbol    string          `json:"symbol"`
+	Symbol    Symbol          `json:"symbol"`
 	Side      OrderSide       `json:"side"`
 	Price     decimal.Decimal `json:"price"`
 	StopPrice decimal.Decimal `json:"stop_price"`

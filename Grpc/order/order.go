@@ -2,17 +2,17 @@ package GrpcOrder
 
 import (
 	"github.com/google/uuid"
-	"github.com/zsmartex/pkg/order"
+	"github.com/zsmartex/pkg"
 )
 
-func (r *OrderKey) ToOrderKey() *order.OrderKey {
+func (r *OrderKey) ToOrderKey() *pkg.OrderKey {
 	uuid, _ := uuid.FromBytes(r.Uuid)
 
-	return &order.OrderKey{
+	return &pkg.OrderKey{
 		ID:        r.Id,
 		UUID:      uuid,
-		Symbol:    r.Symbol,
-		Side:      order.OrderSide(r.Side),
+		Symbol:    r.Symbol.ToSymbol(),
+		Side:      pkg.OrderSide(r.Side),
 		Price:     r.Price.ToDecimal(),
 		StopPrice: r.StopPrice.ToDecimal(),
 		Fake:      r.Fake,
@@ -20,16 +20,16 @@ func (r *OrderKey) ToOrderKey() *order.OrderKey {
 	}
 }
 
-func (r *Order) ToOrder() *order.Order {
+func (r *Order) ToOrder() *pkg.Order {
 	uuid, _ := uuid.FromBytes(r.Uuid)
 
-	return &order.Order{
+	return &pkg.Order{
 		ID:             r.Id,
 		UUID:           uuid,
-		Symbol:         r.Symbol,
+		Symbol:         r.Symbol.ToSymbol(),
 		MemberID:       r.MemberId,
-		Side:           order.OrderSide(r.Side),
-		Type:           order.OrderType(r.Type),
+		Side:           pkg.OrderSide(r.Side),
+		Type:           pkg.OrderType(r.Type),
 		Price:          r.Price.ToDecimal(),
 		StopPrice:      r.StopPrice.ToDecimal(),
 		Quantity:       r.Quantity.ToDecimal(),

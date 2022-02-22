@@ -2,8 +2,6 @@ package pkg
 
 import (
 	"github.com/shopspring/decimal"
-
-	"github.com/zsmartex/pkg/order"
 )
 
 type PayloadAction = string
@@ -17,14 +15,14 @@ var (
 )
 
 type MatchingPayloadMessage struct {
-	Action PayloadAction   `json:"action"`
-	Order  *order.Order    `json:"order"`
-	Market string          `json:"market"`
-	Key    *order.OrderKey `json:"key"`
+	Action PayloadAction `json:"action"`
+	Order  *Order        `json:"order"`
+	Symbol Symbol        `json:"symbol"`
+	Key    *OrderKey     `json:"key"`
 }
 
 type GetDepthPayload struct {
-	Market string `json:"market"`
+	Symbol Symbol `json:"symbol"`
 	Limit  int64  `json:"limit"`
 }
 

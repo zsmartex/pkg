@@ -5,10 +5,11 @@ option go_package = "github.com/zsmartex/pkg/Grpc/order;GrpcOrder";
 
 import "google/protobuf/timestamp.proto";
 import "proto/utils.proto";
+import "proto/symbol.proto";
 
 message OrderKey {
   int64 id = 1;
-  string symbol = 2;
+  GrpcSymbol.Symbol symbol = 2;
   string side = 3;
   bytes uuid = 4;
   GrpcUtils.Decimal price = 5;
@@ -21,7 +22,7 @@ message Order {
   int64 id = 1;
   bytes uuid = 2;
   int64 member_id = 3;
-  string symbol = 4;
+  GrpcSymbol.Symbol symbol = 4;
   string side = 5;
   string type = 6;
   GrpcUtils.Decimal price = 7;

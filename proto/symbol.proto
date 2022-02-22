@@ -1,0 +1,9 @@
+syntax = "proto3";
+package GrpcSymbol;
+
+option go_package = "github.com/zsmartex/pkg/Grpc/symbol;GrpcSymbol";
+
+message Symbol {
+  string base_currency = 1;
+  string quote_currency = 2;
+}
