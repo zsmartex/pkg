@@ -5,6 +5,7 @@ option go_package = "github.com/zsmartex/pkg/Grpc/engine;GrpcEngine";
 
 import "proto/utils.proto";
 import "proto/order.proto";
+import "proto/symbol.proto";
 
 message FetchOrderRequest {
   GrpcOrder.OrderKey order_key = 1;
@@ -15,7 +16,7 @@ message FetchOrderResponse {
 }
 
 message FetchOpenOrdersRequest {
-  string symbol = 1;
+  GrpcSymbol.Symbol symbol = 1;
   string side = 2;
 }
 
@@ -24,19 +25,19 @@ message BookOrder {
 }
 
 message FetchOrderBookRequest {
-  string symbol = 1;
+  GrpcSymbol.Symbol symbol = 1;
   int64 limit = 2;
 }
 
 message FetchOrderBookResponse {
-  string symbol = 1;
+  GrpcSymbol.Symbol symbol = 1;
   repeated BookOrder Bids = 2;
   repeated BookOrder Asks = 3;
   int64 sequence = 4;
 }
 
 message CalcMarketOrderRequest {
-  string symbol = 1;
+  GrpcSymbol.Symbol symbol = 1;
   string side = 2;
   GrpcUtils.Decimal quantity = 3;
   GrpcUtils.Decimal volume = 4;
@@ -48,7 +49,7 @@ message CalcMarketOrderResponse {
 }
 
 message FetchMarketPriceRequest {
-  string symbol = 1;
+  GrpcSymbol.Symbol symbol = 1;
 }
 
 message FetchMarketPriceResponse {
