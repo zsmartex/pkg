@@ -53,19 +53,22 @@ func appendClaims(defaultClaims, customClaims jwt.MapClaims) jwt.MapClaims {
 // ForgeToken creates a valid JWT signed by the given private key
 func ForgeToken(uid, email, role string, referral_uid datatypes.NullString, level int, key *rsa.PrivateKey, customClaims jwt.MapClaims) (string, error) {
 	claims := appendClaims(jwt.MapClaims{
-		"iat":          time.Now().Unix(),
-		"jti":          strconv.FormatInt(time.Now().Unix(), 10),
-		"exp":          time.Now().UTC().Add(time.Hour).Unix(),
-		"sub":          "session",
-		"iss":          "barong",
-		"aud":          [3]string{"peatio", "barong", "finex"},
-		"uid":          uid,
-		"email":        email,
-		"role":         role,
-		"level":        level,
-		"state":        "active",
-		"referral_uid": referral_uid,
+		"iat":   time.Now().Unix(),
+		"jti":   strconv.FormatInt(time.Now().Unix(), 10),
+		"exp":   time.Now().UTC().Add(time.Hour).Unix(),
+		"sub":   "session",
+		"iss":   "barong",
+		"aud":   [3]string{"peatio", "barong", "finex"},
+		"uid":   uid,
+		"email": email,
+		"role":  role,
+		"level": level,
+		"state": "active",
 	}, customClaims)
+
+	if referral_uid.Valid {
+		claims["referral_uid"] = referral_uid.String
+	}
 
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
