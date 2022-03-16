@@ -51,7 +51,7 @@ func appendClaims(defaultClaims, customClaims jwt.MapClaims) jwt.MapClaims {
 }
 
 // ForgeToken creates a valid JWT signed by the given private key
-func ForgeToken(uid, email, role string, referral_uid datatypes.NullString, level int, key *rsa.PrivateKey, customClaims jwt.MapClaims) (string, error) {
+func ForgeToken(uid, email, role string, referral_uid datatypes.NullString, level int64, key *rsa.PrivateKey, customClaims jwt.MapClaims) (string, error) {
 	claims := appendClaims(jwt.MapClaims{
 		"iat":   time.Now().Unix(),
 		"jti":   strconv.FormatInt(time.Now().Unix(), 10),
