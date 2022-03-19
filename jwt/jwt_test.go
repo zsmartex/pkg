@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/zsmartex/pkg/datatypes"
 )
 
 func TestAuth_appendClaims(t *testing.T) {
@@ -62,11 +61,9 @@ func TestAuth_JWT(t *testing.T) {
 	}
 
 	t.Run("should validate jwt", func(t *testing.T) {
-		token, err := ForgeToken("uid", "email", "role", datatypes.NullString{
-			NullString: sql.NullString{
-				Valid:  true,
-				String: "UID123165658",
-			},
+		token, err := ForgeToken("uid", "email", "role", sql.NullString{
+			Valid:  true,
+			String: "UID123165658",
 		}, 3, ks.PrivateKey, nil)
 		if err != nil {
 			t.Fatal(err)

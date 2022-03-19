@@ -2,11 +2,11 @@ package jwt
 
 import (
 	"crypto/rsa"
+	"database/sql"
 	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/zsmartex/pkg/datatypes"
 )
 
 // Auth struct represents parsed jwt information.
@@ -51,7 +51,7 @@ func appendClaims(defaultClaims, customClaims jwt.MapClaims) jwt.MapClaims {
 }
 
 // ForgeToken creates a valid JWT signed by the given private key
-func ForgeToken(uid, email, role string, referral_uid datatypes.NullString, level int64, key *rsa.PrivateKey, customClaims jwt.MapClaims) (string, error) {
+func ForgeToken(uid, email, role string, referral_uid sql.NullString, level int64, key *rsa.PrivateKey, customClaims jwt.MapClaims) (string, error) {
 	claims := appendClaims(jwt.MapClaims{
 		"iat":   time.Now().Unix(),
 		"jti":   strconv.FormatInt(time.Now().Unix(), 10),
