@@ -19,5 +19,5 @@ require (
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gorm.io/driver/postgres v1.2.3
-	gorm.io/gorm v1.22.5
+	gorm.io/gorm v1.23.3
 )
