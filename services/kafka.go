@@ -99,38 +99,37 @@ func NewKafkaProducer(logger *logrus.Entry) (*KafkaProducer, error) {
 }
 
 func (k *KafkaProducer) Produce(topic string, payload interface{}) {
-	data, err := json.Marshal(payload)
-	if err != nil {
-		return
-	}
-
-	k.produce(topic, "", data)
+	k.produce(topic, "", payload)
 }
 
 func (k *KafkaProducer) ProduceWithKey(topic, key string, payload interface{}) {
-	data, err := json.Marshal(payload)
-	if err != nil {
-		return
-	}
-
-	k.produce(topic, key, data)
+	k.produce(topic, key, payload)
 }
 
 func getBrokers() []string {
 	return strings.Split(os.Getenv("KAFKA_URL"), ",")
 }
 
-func (p *KafkaProducer) produce(topic, key string, payload []byte) {
-	p.logger.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
-	var bkey []byte
+func (p *KafkaProducer) produce(topic, key string, payload interface{}) {
+	switch data := payload.(type) {
+	case string:
+		p.produce(topic, key, []byte(data))
+		return
+	case []byte:
+		p.logger.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
 
-	if len(key) > 0 {
-		bkey = []byte(key)
+		p.Client.Produce(context.Background(), &kgo.Record{
+			Topic: topic,
+			Key:   []byte(key),
+			Value: data,
+		}, nil)
+		return
+	default:
+		jdata, err := json.Marshal(payload)
+		if err != nil {
+			return
+		}
+
+		p.produce(topic, key, jdata)
 	}
-
-	p.Client.Produce(context.Background(), &kgo.Record{
-		Topic: topic,
-		Key:   bkey,
-		Value: payload,
-	}, nil)
 }
