@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -10,15 +11,10 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func NewDatabase() (*gorm.DB, error) {
+func NewDatabase(host string, port int, user, password, dbname string) (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
-	dsn := "host=" + os.Getenv("DATABASE_HOST") +
-		" port=" + os.Getenv("DATABASE_PORT") +
-		" user=" + os.Getenv("DATABASE_USER") +
-		" password=" + os.Getenv("DATABASE_PASS") +
-		" dbname=" + os.Getenv("DATABASE_NAME") +
-		" sslmode=disable"
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
 	dialector = postgres.Open(dsn)
 

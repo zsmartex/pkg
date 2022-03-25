@@ -3,7 +3,6 @@ package services
 import (
 	"encoding/base64"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -21,12 +20,13 @@ type EventAPIPayload struct {
 	Record interface{} `json:"record"`
 }
 
-func NewEventAPI(application_name string) (*EventAPI, error) {
-	producer, err := NewKafkaProducer(NewLoggerService("EVENT_API"))
+func NewEventAPI(brokers []string, application_name string, jwt_private_key string) (*EventAPI, error) {
+	logger := NewLoggerService("EVENT_API")
+	producer, err := NewKafkaProducer(brokers, logger)
 	if err != nil {
 		return nil, err
 	}
-	secret, err := base64.StdEncoding.DecodeString(os.Getenv("EVENT_API_JWT_PRIVATE_KEY"))
+	secret, err := base64.StdEncoding.DecodeString(jwt_private_key)
 	if err != nil {
 		return nil, err
 	}

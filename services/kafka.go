@@ -3,8 +3,6 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"os"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/twmb/franz-go/pkg/kadm"
@@ -18,8 +16,7 @@ type KafkaConsumer struct {
 	Group        string
 }
 
-func NewKafkaConsumer(group string, topics []string) (*KafkaConsumer, error) {
-	brokers := getBrokers()
+func NewKafkaConsumer(brokers []string, group string, topics []string) (*KafkaConsumer, error) {
 	seeds := kgo.SeedBrokers(brokers...)
 
 	cl, err := kgo.NewClient(
@@ -83,9 +80,7 @@ type KafkaProducer struct {
 	logger *logrus.Entry
 }
 
-func NewKafkaProducer(logger *logrus.Entry) (*KafkaProducer, error) {
-	brokers := getBrokers()
-
+func NewKafkaProducer(brokers []string, logger *logrus.Entry) (*KafkaProducer, error) {
 	client, err := kgo.NewClient(
 		kgo.SeedBrokers(brokers...),
 	)
@@ -104,10 +99,6 @@ func (k *KafkaProducer) Produce(topic string, payload interface{}) {
 
 func (k *KafkaProducer) ProduceWithKey(topic, key string, payload interface{}) {
 	k.produce(topic, key, payload)
-}
-
-func getBrokers() []string {
-	return strings.Split(os.Getenv("KAFKA_URL"), ",")
 }
 
 func (p *KafkaProducer) produce(topic, key string, payload interface{}) {
