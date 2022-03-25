@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"os"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -12,8 +11,8 @@ type RedisClient struct {
 	client *redis.Client
 }
 
-func NewRedisClient() (*RedisClient, error) {
-	opts, err := redis.ParseURL(os.Getenv("REDIS_URL"))
+func NewRedisClient(addr string) (*RedisClient, error) {
+	opts, err := redis.ParseURL(addr)
 	if err != nil {
 		return nil, err
 	}
