@@ -1,7 +1,6 @@
 package services
 
 import (
-	"context"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -10,9 +9,7 @@ import (
 
 func NewLoggerService(service string) *log.Entry {
 	// Log as JSON instead of the default ASCII formatter.
-	log.SetFormatter(&logger.Formatter{
-		CustomCaption: service,
-	})
+	log.SetFormatter(&logger.Formatter{})
 
 	// Output to stdout instead of the default stderr
 	// Can be any io.Writer, see below for File example
@@ -34,5 +31,7 @@ func NewLoggerService(service string) *log.Entry {
 		log.SetLevel(log.PanicLevel)
 	}
 
-	return log.WithContext(context.Background())
+	return log.WithFields(log.Fields{
+		service: service,
+	})
 }

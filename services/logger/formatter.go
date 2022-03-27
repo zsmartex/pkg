@@ -17,10 +17,7 @@ type RootFields struct {
 }
 
 type Formatter struct {
-	CustomCaptionPrettyPrint bool
-	// custom caption can be struct, string, whatever
-	CustomCaption interface{}
-	PrettyPrint   bool
+	PrettyPrint bool
 }
 
 func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
@@ -46,31 +43,14 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// 	b.WriteString(prettierCaller(file, fc))
 	// }
 
-	if f.CustomCaption != nil {
-
-		b.WriteString("[")
-		captionStr := ""
-		if f.CustomCaptionPrettyPrint {
-			captionStr = marshalIndent(f.CustomCaption)
-		} else {
-			captionStr = marshal(f.CustomCaption)
-		}
-		b.WriteString(captionStr)
-		b.WriteString("]")
-	}
-
+	service := entry.Data["service"].(string)
+	b.WriteString(fmt.Sprintf("[%s]", service))
 	b.WriteString(fmt.Sprintf("%16s", " - "))
 
 	// _, _ = fmt.Fprintf(b, "\x1b[%dm", levelColor)
 
 	var data string
-	if f.PrettyPrint {
-		data = marshalIndent(root.Fields)
-		//data = root.marshalIndent()
-	} else {
-		data = marshal(root.Fields)
-		//data = root.marshal()
-	}
+	marshal(root.Fields)
 
 	b.WriteString(data)
 	b.WriteString("\x1b[0m")
