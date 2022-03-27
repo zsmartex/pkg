@@ -1,14 +1,18 @@
 package services
 
 import (
+	"context"
 	"os"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/zsmartex/pkg/services/logger"
 )
 
 func NewLoggerService(service string) *log.Entry {
 	// Log as JSON instead of the default ASCII formatter.
-	log.SetFormatter(&log.JSONFormatter{})
+	log.SetFormatter(&logger.Formatter{
+		CustomCaption: service,
+	})
 
 	// Output to stdout instead of the default stderr
 	// Can be any io.Writer, see below for File example
@@ -30,7 +34,5 @@ func NewLoggerService(service string) *log.Entry {
 		log.SetLevel(log.PanicLevel)
 	}
 
-	return log.WithFields(log.Fields{
-		"Service": service,
-	})
+	return log.WithContext(context.Background())
 }
