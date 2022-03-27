@@ -17,7 +17,8 @@ type RootFields struct {
 }
 
 type Formatter struct {
-	PrettyPrint bool
+	PrettyPrint   bool
+	CustomCaption string
 }
 
 func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
@@ -43,14 +44,13 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// 	b.WriteString(prettierCaller(file, fc))
 	// }
 
-	service := entry.Data["service"].(string)
-	b.WriteString(fmt.Sprintf("[%s]", service))
+	b.WriteString(fmt.Sprintf("[%s]", f.CustomCaption))
 	b.WriteString(fmt.Sprintf("%16s", " - "))
 
 	// _, _ = fmt.Fprintf(b, "\x1b[%dm", levelColor)
 
 	var data string
-	marshal(root.Fields)
+	data = marshal(root.Fields)
 
 	b.WriteString(data)
 	b.WriteString("\x1b[0m")

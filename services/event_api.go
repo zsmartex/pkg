@@ -20,12 +20,7 @@ type EventAPIPayload struct {
 	Record interface{} `json:"record"`
 }
 
-func NewEventAPI(brokers []string, application_name string, jwt_private_key string) (*EventAPI, error) {
-	logger := NewLoggerService("EVENT_API")
-	producer, err := NewKafkaProducer(brokers, logger)
-	if err != nil {
-		return nil, err
-	}
+func NewEventAPI(producer *KafkaProducer, application_name string, jwt_private_key string) (*EventAPI, error) {
 	secret, err := base64.StdEncoding.DecodeString(jwt_private_key)
 	if err != nil {
 		return nil, err
