@@ -32,6 +32,8 @@ func NewLoggerService(service string) *log.Entry {
 		log.SetLevel(log.FatalLevel)
 	case "PANIC":
 		log.SetLevel(log.PanicLevel)
+	case "TRACE":
+		log.SetLevel(log.TraceLevel)
 	}
 
 	return log.WithContext(context.Background())
