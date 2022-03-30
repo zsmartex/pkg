@@ -1,13 +1,13 @@
 package jwt
 
 import (
-	"database/sql"
 	"reflect"
 	"strconv"
 	"testing"
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/volatiletech/null/v9"
 )
 
 func TestAuth_appendClaims(t *testing.T) {
@@ -61,10 +61,7 @@ func TestAuth_JWT(t *testing.T) {
 	}
 
 	t.Run("should validate jwt", func(t *testing.T) {
-		token, err := ForgeToken("uid", "email", "role", sql.NullString{
-			Valid:  true,
-			String: "UID123165658",
-		}, 3, ks.PrivateKey, nil)
+		token, err := ForgeToken("uid", "email", "role", null.StringFrom("UID123165658"), 3, ks.PrivateKey, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
