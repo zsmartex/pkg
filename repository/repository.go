@@ -30,6 +30,10 @@ func (r Repository) First(ctx context.Context, model interface{}, filters []Filt
 	return ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).First(model).Error
 }
 
+func (r Repository) FirstOrCreate(ctx context.Context, model interface{}, opts []TransactionOption) error {
+	return MakeTransaction(FirstOrCreate, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
+}
+
 func (r Repository) Take(ctx context.Context, model interface{}, filters []Filter) error {
 	return ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).Take(model).Error
 }

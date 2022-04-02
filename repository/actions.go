@@ -3,6 +3,10 @@ package repository
 import "gorm.io/gorm"
 
 var (
+	FirstOrCreate Action = func(tx *gorm.DB, models interface{}) *gorm.DB {
+		return tx.FirstOrCreate(models)
+	}
+
 	Create Action = func(tx *gorm.DB, models interface{}) *gorm.DB {
 		return tx.Create(models)
 	}
