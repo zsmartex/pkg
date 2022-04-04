@@ -35,7 +35,9 @@ func NewKafkaConsumer(brokers []string, group string, topics []string) (*KafkaCo
 		client, err = kgo.NewClient(
 			seeds,
 			kgo.AllowAutoTopicCreation(),
+			kgo.ConsumerGroup(group),
 			kgo.ConsumePartitions(os.Into().Into()),
+			kgo.DisableAutoCommit(),
 		)
 		if err != nil {
 			return nil, err
@@ -46,6 +48,7 @@ func NewKafkaConsumer(brokers []string, group string, topics []string) (*KafkaCo
 			kgo.AllowAutoTopicCreation(),
 			kgo.ConsumerGroup(group),
 			kgo.ConsumeTopics(topics...),
+			kgo.DisableAutoCommit(),
 		)
 		if err != nil {
 			return nil, err
