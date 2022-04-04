@@ -61,7 +61,7 @@ func (e *EventAPI) Notify(event_name string, event_payload EventAPIPayload) erro
 		return err
 	}
 
-	e.producer.ProduceWithKey(topic, strings.Replace(event_name, eventType, "", 1), jwt_token)
+	e.producer.ProduceWithKey(topic, strings.Replace(event_name, fmt.Sprintf("%s.", eventType), "", 1), jwt_token)
 
 	return nil
 }
