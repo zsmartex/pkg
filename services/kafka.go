@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"log"
 
 	"github.com/sirupsen/logrus"
 	"github.com/twmb/franz-go/pkg/kadm"
@@ -27,15 +26,12 @@ func NewKafkaConsumer(brokers []string, group string, topics []string) (*KafkaCo
 		return nil, err
 	}
 
+	var client *kgo.Client
+
 	adm := kadm.NewClient(cl)
 	os, err := adm.FetchOffsetsForTopics(context.Background(), group, topics...)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
 
-	var client *kgo.Client
-	if os.Ok() {
+	if os.Ok() && err == nil {
 		client, err = kgo.NewClient(seeds, kgo.ConsumePartitions(os.Into().Into()))
 		if err != nil {
 			return nil, err
