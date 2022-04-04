@@ -89,10 +89,12 @@ type KafkaProducer struct {
 func NewKafkaProducer(brokers []string, logger *logrus.Entry) (*KafkaProducer, error) {
 	client, err := kgo.NewClient(
 		kgo.SeedBrokers(brokers...),
+		kgo.AllowAutoTopicCreation(),
 	)
 	if err != nil {
 		return nil, err
 	}
+
 	return &KafkaProducer{
 		Client: client,
 		logger: logger,
