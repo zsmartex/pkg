@@ -1,9 +1,9 @@
 package services
 
 import (
+	"crypto/rsa"
 	"encoding/base64"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -14,7 +14,7 @@ import (
 type EventAPI struct {
 	application_name string
 	producer         *KafkaProducer
-	jwt_private_key  []byte
+	jwt_private_key  *rsa.PrivateKey
 }
 
 type EventAPIPayload struct {
@@ -27,10 +27,15 @@ func NewEventAPI(producer *KafkaProducer, application_name string, jwt_private_k
 		return nil, err
 	}
 
+	private_key, err := jwt.ParseRSAPrivateKeyFromPEM(secret)
+	if err != nil {
+		return nil, err
+	}
+
 	return &EventAPI{
 		application_name: application_name,
 		producer:         producer,
-		jwt_private_key:  secret,
+		jwt_private_key:  private_key,
 	}, nil
 }
 
@@ -44,8 +49,6 @@ func (e *EventAPI) generateJWT(event_payload EventAPIPayload) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt_payload)
-
-	log.Println(string(e.jwt_private_key))
 
 	return token.SignedString(e.jwt_private_key)
 }
