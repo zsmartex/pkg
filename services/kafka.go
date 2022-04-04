@@ -37,7 +37,7 @@ func NewKafkaConsumer(brokers []string, group string, topics []string) (*KafkaCo
 			return nil, err
 		}
 	} else {
-		client, err = kgo.NewClient(seeds, kgo.ConsumeTopics(topics...))
+		client, err = kgo.NewClient(seeds, kgo.ConsumerGroup(group), kgo.ConsumeTopics(topics...))
 		if err != nil {
 			return nil, err
 		}
