@@ -32,12 +32,21 @@ func NewKafkaConsumer(brokers []string, group string, topics []string) (*KafkaCo
 	os, err := adm.FetchOffsetsForTopics(context.Background(), group, topics...)
 
 	if os.Ok() && err == nil {
-		client, err = kgo.NewClient(seeds, kgo.ConsumePartitions(os.Into().Into()))
+		client, err = kgo.NewClient(
+			seeds,
+			kgo.AllowAutoTopicCreation(),
+			kgo.ConsumePartitions(os.Into().Into()),
+		)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		client, err = kgo.NewClient(seeds, kgo.ConsumerGroup(group), kgo.ConsumeTopics(topics...))
+		client, err = kgo.NewClient(
+			seeds,
+			kgo.AllowAutoTopicCreation(),
+			kgo.ConsumerGroup(group),
+			kgo.ConsumeTopics(topics...),
+		)
 		if err != nil {
 			return nil, err
 		}
