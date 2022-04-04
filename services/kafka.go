@@ -113,7 +113,11 @@ func (p *KafkaProducer) produce(topic, key string, payload interface{}) {
 			Topic: topic,
 			Key:   []byte(key),
 			Value: data,
-		}, nil)
+		}, func(r *kgo.Record, err error) {
+			if err != nil {
+				p.logger.Errorf("Kafka producer produce to: %s, key: %s, payload: %s, error: %s", topic, key, payload, err)
+			}
+		})
 		return
 	default:
 		jdata, err := json.Marshal(payload)

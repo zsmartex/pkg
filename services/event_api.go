@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/base64"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -43,6 +44,8 @@ func (e *EventAPI) generateJWT(event_payload EventAPIPayload) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt_payload)
+
+	log.Println(e.jwt_private_key)
 
 	return token.SignedString(e.jwt_private_key)
 }
