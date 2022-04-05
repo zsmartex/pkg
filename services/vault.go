@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/hashicorp/vault/api"
@@ -79,13 +78,17 @@ func (t *TOTPService) startRenewToken(token string) error {
 	return nil
 }
 
-func (t *TOTPService) Create(uid, email string) {
-	t.vault.Logical().Write(t.totp_key(uid), map[string]interface{}{
+func (t *TOTPService) Create(uid, email string) (map[string]interface{}, error) {
+	if result, err := t.vault.Logical().Write(t.totp_key(uid), map[string]interface{}{
 		"generate":     true,
-		"issuer":       os.Getenv("BARONG_APP_NAME"),
+		"issuer":       t.application_name,
 		"account_name": email,
 		"qr_size":      100,
-	})
+	}); err != nil {
+		return nil, err
+	} else {
+		return result.Data, nil
+	}
 }
 
 func (t *TOTPService) Validate(uid, code string) bool {
@@ -112,14 +115,10 @@ func (t *TOTPService) Exist(uid string) bool {
 	return secret != nil
 }
 
-func (t *TOTPService) get_vault_application_name() string {
-	return os.Getenv("BARONG_VAULT_APPLICATION_NAME")
-}
-
 func (t *TOTPService) totp_key(uid string) string {
-	return fmt.Sprintf("totp/keys/%s_%s", t.get_vault_application_name(), uid)
+	return fmt.Sprintf("totp/keys/%s_%s", t.vault_application_name, uid)
 }
 
 func (t *TOTPService) totp_code_key(uid string) string {
-	return fmt.Sprintf("totp/codes/%s_%s", t.get_vault_application_name(), uid)
+	return fmt.Sprintf("totp/codes/%s_%s", t.vault_application_name, uid)
 }
