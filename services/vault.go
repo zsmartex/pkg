@@ -1,19 +1,18 @@
 package services
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/hashicorp/vault/api"
 )
 
-type TOTPService struct {
+type VaultService struct {
 	vault                  *api.Client
 	application_name       string
 	vault_application_name string
 }
 
-func NewTOTPService(vault_addr, token, application_name, vault_application_name string) (*TOTPService, error) {
+func NewVaultService(vault_addr, token, application_name, vault_application_name string) (*VaultService, error) {
 	config := &api.Config{
 		Address: vault_addr,
 		Timeout: time.Second * 2,
@@ -26,19 +25,19 @@ func NewTOTPService(vault_addr, token, application_name, vault_application_name 
 
 	client.SetToken(token)
 
-	ts := &TOTPService{
+	vs := &VaultService{
 		vault:                  client,
 		application_name:       application_name,
 		vault_application_name: vault_application_name,
 	}
 
-	ts.startRenewToken(token)
+	vs.startRenewToken(token)
 
-	return ts, nil
+	return vs, nil
 }
 
-func (t *TOTPService) startRenewToken(token string) error {
-	secret, err := t.vault.Auth().Token().Lookup(token)
+func (s *VaultService) startRenewToken(token string) error {
+	secret, err := s.vault.Auth().Token().Lookup(token)
 	if err != nil {
 		return err
 	}
@@ -52,7 +51,7 @@ func (t *TOTPService) startRenewToken(token string) error {
 		return nil
 	}
 
-	watcher, err := t.vault.NewLifetimeWatcher(&api.LifetimeWatcherInput{
+	watcher, err := s.vault.NewLifetimeWatcher(&api.LifetimeWatcherInput{
 		Secret: &api.Secret{
 			Auth: &api.SecretAuth{
 				Renewable:   renewable,
@@ -78,47 +77,18 @@ func (t *TOTPService) startRenewToken(token string) error {
 	return nil
 }
 
-func (t *TOTPService) Create(uid, email string) (map[string]interface{}, error) {
-	if result, err := t.vault.Logical().Write(t.totp_key(uid), map[string]interface{}{
-		"generate":     true,
-		"issuer":       t.application_name,
-		"account_name": email,
-		"qr_size":      100,
-	}); err != nil {
-		return nil, err
-	} else {
-		return result.Data, nil
-	}
+func (s *VaultService) Read(path string) (*api.Secret, error) {
+	return s.vault.Logical().Read(path)
 }
 
-func (t *TOTPService) Validate(uid, code string) bool {
-	secret, err := t.vault.Logical().Write(t.totp_code_key(uid), map[string]interface{}{
-		"code": code,
-	})
-	if err != nil {
-		return false
-	}
-
-	return secret.Data["valid"].(bool)
+func (s *VaultService) Write(path string, data map[string]interface{}) (*api.Secret, error) {
+	return s.vault.Logical().Write(path, data)
 }
 
-func (t *TOTPService) Delete(uid string) {
-	t.vault.Logical().Delete(t.totp_key(uid))
+func (s *VaultService) Unwrap(path string) (*api.Secret, error) {
+	return s.vault.Logical().Unwrap(path)
 }
 
-func (t *TOTPService) Exist(uid string) bool {
-	secret, err := t.vault.Logical().Read(t.totp_key(uid))
-	if err != nil {
-		return false
-	}
-
-	return secret != nil
-}
-
-func (t *TOTPService) totp_key(uid string) string {
-	return fmt.Sprintf("totp/keys/%s_%s", t.vault_application_name, uid)
-}
-
-func (t *TOTPService) totp_code_key(uid string) string {
-	return fmt.Sprintf("totp/codes/%s_%s", t.vault_application_name, uid)
+func (s *VaultService) Delete(path string) (*api.Secret, error) {
+	return s.vault.Logical().Delete(path)
 }
