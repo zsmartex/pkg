@@ -13,14 +13,12 @@ type TransitService struct {
 	vault_application_name string
 }
 
-func NewTransitService(vault_service *VaultService, application_name string, vault_application_name string) (*TransitService, error) {
-	s := &TransitService{
+func NewTransitService(vault_service *VaultService, application_name string, vault_application_name string) *TransitService {
+	return &TransitService{
 		vault_service:          vault_service,
 		application_name:       application_name,
 		vault_application_name: vault_application_name,
 	}
-
-	return s, nil
 }
 
 func (s *TransitService) Encrypt(key, value string) (*api.Secret, error) {

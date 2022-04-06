@@ -10,14 +10,12 @@ type TOTPService struct {
 	vault_application_name string
 }
 
-func NewTOTPService(vault_service *VaultService, application_name string, vault_application_name string) (*TOTPService, error) {
-	s := &TOTPService{
+func NewTOTPService(vault_service *VaultService, application_name string, vault_application_name string) *TOTPService {
+	return &TOTPService{
 		vault_service:          vault_service,
 		application_name:       application_name,
 		vault_application_name: vault_application_name,
 	}
-
-	return s, nil
 }
 
 func (s *TOTPService) Create(uid, email string) (map[string]interface{}, error) {
