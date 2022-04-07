@@ -35,6 +35,6 @@ func (s *TransitService) Decrypt(key, ciphertext string) (*api.Secret, error) {
 	})
 }
 
-func (s *TransitService) Delete(key string, value string) (*api.Secret, error) {
+func (s *TransitService) Delete(key string) (*api.Secret, error) {
 	return s.vault_service.Delete(fmt.Sprintf("transit/encrypt/%s", key))
 }
