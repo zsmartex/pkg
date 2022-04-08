@@ -31,7 +31,7 @@ func (r Repository) First(ctx context.Context, model interface{}, filters []Filt
 }
 
 func (r Repository) FirstOrCreate(ctx context.Context, model interface{}, opts []TransactionOption) error {
-	return MakeTransaction(FirstOrCreate, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
+	return MakeTransactionWithActionNonValue(FirstOrCreate, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
 }
 
 func (r Repository) Take(ctx context.Context, model interface{}, filters []Filter) error {
@@ -39,17 +39,21 @@ func (r Repository) Take(ctx context.Context, model interface{}, filters []Filte
 }
 
 func (r Repository) Create(ctx context.Context, model interface{}, opts []TransactionOption) error {
-	return MakeTransaction(Create, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
+	return MakeTransactionWithActionNonValue(Create, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
 }
 
 func (r Repository) Update(ctx context.Context, model interface{}, opts []TransactionOption) error {
-	return MakeTransaction(Updates, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
+	return MakeTransactionWithActionNonValue(Updates, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
+}
+
+func (r Repository) UpdateColumns(ctx context.Context, model interface{}, value interface{}, opts []TransactionOption) error {
+	return MakeTransactionWithActionValue(UpdateColumns, model, value, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
 }
 
 func (r Repository) Save(ctx context.Context, model interface{}, opts []TransactionOption) error {
-	return MakeTransaction(Save, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
+	return MakeTransactionWithActionNonValue(Save, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
 }
 
 func (r Repository) Delete(ctx context.Context, model interface{}, opts []TransactionOption) error {
-	return MakeTransaction(Delete, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
+	return MakeTransactionWithActionNonValue(Delete, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
 }

@@ -2,8 +2,14 @@ package repository
 
 import "gorm.io/gorm"
 
+type ActionWithNonValue func(tx *gorm.DB, models interface{}) *gorm.DB
+type ActionWithValue func(tx *gorm.DB, models interface{}, value interface{}) *gorm.DB
+
+type Action interface {
+	ActionWithNonValue | ActionWithValue
+}
+
 type Transaction func(tx *gorm.DB) error
-type Action func(tx *gorm.DB, models interface{}) *gorm.DB
 type TransactionTrigger func(tx *gorm.DB, models interface{}) error
 type TransactionOption func(optional *Optional)
 type Optional struct {
@@ -29,7 +35,7 @@ func TriggerAfterAction(triggers ...TransactionTrigger) TransactionOption {
 	}
 }
 
-func MakeTransaction(action Action, models interface{}, opts []TransactionOption) Transaction {
+func MakeTransactionWithActionNonValue(action ActionWithNonValue, models interface{}, opts []TransactionOption) Transaction {
 	var options Optional
 	for _, opt := range opts {
 		opt(&options)
@@ -48,6 +54,32 @@ func MakeTransaction(action Action, models interface{}, opts []TransactionOption
 		}
 		for _, trigger := range options.afterActions {
 			if err = trigger(tx, models); err != nil {
+				return err
+			}
+		}
+		return
+	}
+}
+
+func MakeTransactionWithActionValue(action ActionWithValue, model interface{}, value interface{}, opts []TransactionOption) Transaction {
+	var options Optional
+	for _, opt := range opts {
+		opt(&options)
+	}
+	return func(tx *gorm.DB) (err error) {
+		for _, filter := range options.filters {
+			tx = filter(tx)
+		}
+		for _, trigger := range options.beforeActions {
+			if err = trigger(tx, model); err != nil {
+				return err
+			}
+		}
+		if err = action(tx, model, value).Error; err != nil {
+			return err
+		}
+		for _, trigger := range options.afterActions {
+			if err = trigger(tx, model); err != nil {
 				return err
 			}
 		}

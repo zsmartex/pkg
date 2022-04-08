@@ -3,23 +3,27 @@ package repository
 import "gorm.io/gorm"
 
 var (
-	FirstOrCreate Action = func(tx *gorm.DB, models interface{}) *gorm.DB {
+	FirstOrCreate ActionWithNonValue = func(tx *gorm.DB, models interface{}) *gorm.DB {
 		return tx.FirstOrCreate(models)
 	}
 
-	Create Action = func(tx *gorm.DB, models interface{}) *gorm.DB {
+	Create ActionWithNonValue = func(tx *gorm.DB, models interface{}) *gorm.DB {
 		return tx.Create(models)
 	}
 
-	Save Action = func(tx *gorm.DB, models interface{}) *gorm.DB {
+	Save ActionWithNonValue = func(tx *gorm.DB, models interface{}) *gorm.DB {
 		return tx.Save(models)
 	}
 
-	Updates Action = func(tx *gorm.DB, models interface{}) *gorm.DB {
+	Updates ActionWithNonValue = func(tx *gorm.DB, models interface{}) *gorm.DB {
 		return tx.Updates(models)
 	}
 
-	Delete Action = func(tx *gorm.DB, models interface{}) *gorm.DB {
+	UpdateColumns ActionWithValue = func(tx *gorm.DB, model interface{}, value interface{}) *gorm.DB {
+		return tx.Model(model).UpdateColumns(value)
+	}
+
+	Delete ActionWithNonValue = func(tx *gorm.DB, models interface{}) *gorm.DB {
 		return tx.Delete(models)
 	}
 )
