@@ -35,6 +35,12 @@ func (r Repository) Last(ctx context.Context, model interface{}, filters []Filte
 }
 
 func (r Repository) FirstOrCreate(ctx context.Context, model interface{}, opts []TransactionOption) error {
+	opts = append(opts, WithFilters(
+		ChainFilters(func(query *gorm.DB) *gorm.DB {
+			return query.Assign(model)
+		}),
+	))
+
 	return MakeTransactionWithActionNonValue(FirstOrCreate, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
 }
 
