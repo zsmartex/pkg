@@ -45,3 +45,9 @@ func WithOmit(fields ...string) repository.Filter {
 		return query.Omit(fields...)
 	}
 }
+
+func WithGroup(name string) repository.Filter {
+	return func(query *gorm.DB) *gorm.DB {
+		return query.Group(name)
+	}
+}
