@@ -56,6 +56,10 @@ func (r Repository) Updates(ctx context.Context, model interface{}, value interf
 	return MakeTransactionWithActionValue(Updates, model, value, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
 }
 
+func (r Repository) UpdateColumns(ctx context.Context, model interface{}, value interface{}, opts []TransactionOption) error {
+	return MakeTransactionWithActionValue(UpdateColumns, model, value, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
+}
+
 func (r Repository) Save(ctx context.Context, model interface{}, opts []TransactionOption) error {
 	return MakeTransactionWithActionNonValue(Save, model, opts)(r.DB.WithContext(ctx).Table(r.TableName()))
 }

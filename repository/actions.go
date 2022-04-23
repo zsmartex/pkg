@@ -19,6 +19,10 @@ var (
 		return tx.Model(model).Updates(value)
 	}
 
+	UpdateColumns ActionWithValue = func(tx *gorm.DB, model interface{}, value interface{}) *gorm.DB {
+		return tx.Model(model).UpdateColumns(value)
+	}
+
 	Delete ActionWithNonValue = func(tx *gorm.DB, models interface{}) *gorm.DB {
 		return tx.Delete(models)
 	}
