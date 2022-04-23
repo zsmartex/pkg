@@ -34,6 +34,12 @@ func WithJoin(modelName string, args ...interface{}) repository.Filter {
 	}
 }
 
+func WithAssign(attrs ...interface{}) repository.Filter {
+	return func(query *gorm.DB) *gorm.DB {
+		return query.Assign(attrs...)
+	}
+}
+
 func WithSelect(query string, args ...interface{}) repository.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Select(query, args...)
