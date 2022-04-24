@@ -57,3 +57,9 @@ func WithGroup(name string) repository.Filter {
 		return query.Group(name)
 	}
 }
+
+func WithPluck(column string, dest interface{}) repository.Filter {
+	return func(query *gorm.DB) *gorm.DB {
+		return query.Pluck(column, dest)
+	}
+}
