@@ -3,28 +3,28 @@ package filters
 import (
 	"gorm.io/gorm"
 
-	"github.com/zsmartex/pkg/repository"
+	"github.com/zsmartex/pkg/gpa"
 )
 
-func WithLimit(limit int) repository.Filter {
+func WithLimit(limit int) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Limit(limit)
 	}
 }
 
-func WithOrder(order string) repository.Filter {
+func WithOrder(order string) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Order(order)
 	}
 }
 
-func WithOffset(offset int) repository.Filter {
+func WithOffset(offset int) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Offset(offset)
 	}
 }
 
-func WithPageable(page, size int, order string) repository.Filter {
+func WithPageable(page, size int, order string) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		query = query.Limit(size)
 		if page > 0 {

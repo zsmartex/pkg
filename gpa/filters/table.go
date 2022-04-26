@@ -7,52 +7,52 @@ import (
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
 
-	"github.com/zsmartex/pkg/repository"
+	"github.com/zsmartex/pkg/gpa"
 )
 
-func WithSchema(schema, table schema.Tabler) repository.Filter {
+func WithSchema(schema, table schema.Tabler) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Table(fmt.Sprintf("%s.%s", schema, table))
 	}
 }
 
-func WithPreload(tableName string, cond ...interface{}) repository.Filter {
+func WithPreload(tableName string, cond ...interface{}) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Preload(tableName, cond...)
 	}
 }
 
-func WithPreloadAll() repository.Filter {
+func WithPreloadAll() gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Preload(clause.Associations)
 	}
 }
 
-func WithJoin(modelName string, args ...interface{}) repository.Filter {
+func WithJoin(modelName string, args ...interface{}) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Joins(modelName, args...)
 	}
 }
 
-func WithAssign(attrs ...interface{}) repository.Filter {
+func WithAssign(attrs ...interface{}) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Assign(attrs...)
 	}
 }
 
-func WithSelect(query string, args ...interface{}) repository.Filter {
+func WithSelect(query string, args ...interface{}) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Select(query, args...)
 	}
 }
 
-func WithOmit(fields ...string) repository.Filter {
+func WithOmit(fields ...string) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Omit(fields...)
 	}
 }
 
-func WithGroup(name string) repository.Filter {
+func WithGroup(name string) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Group(name)
 	}

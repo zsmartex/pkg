@@ -1,4 +1,4 @@
-package repository
+package gpa
 
 import "gorm.io/gorm"
 
