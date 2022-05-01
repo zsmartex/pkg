@@ -57,3 +57,11 @@ func WithGroup(name string) gpa.Filter {
 		return query.Group(name)
 	}
 }
+
+func WithLock() gpa.Filter {
+	return func(query *gorm.DB) *gorm.DB {
+		return query.Clauses(clause.Locking{
+			Strength: "UPDATE",
+		})
+	}
+}
