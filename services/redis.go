@@ -41,7 +41,7 @@ func (r *RedisClient) Get(key string) (value *redis.StringCmd, err error) {
 	return result, nil
 }
 
-func (r *RedisClient) GetWithDefault(key string, target interface{}, funcDefaultData func() interface{}) error {
+func (r *RedisClient) GetWithDefault(key string, target interface{}, expiration time.Duration, funcDefaultData func() interface{}) error {
 	if exist, err := r.Exist(key); err != nil {
 		return err
 	} else if !exist {
@@ -54,7 +54,7 @@ func (r *RedisClient) GetWithDefault(key string, target interface{}, funcDefault
 
 		val.Elem().Set(reflect.ValueOf(data))
 
-		if err := r.Set(key, data, 0); err != nil {
+		if err := r.Set(key, data, expiration); err != nil {
 			return err
 		}
 	}
