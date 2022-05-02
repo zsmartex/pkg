@@ -8,16 +8,12 @@ import (
 )
 
 type TransitService struct {
-	vault_service          *VaultService
-	application_name       string
-	vault_application_name string
+	vault_service *VaultService
 }
 
-func NewTransitService(vault_service *VaultService, application_name string, vault_application_name string) *TransitService {
+func NewTransitService(vault_service *VaultService) *TransitService {
 	return &TransitService{
-		vault_service:          vault_service,
-		application_name:       application_name,
-		vault_application_name: vault_application_name,
+		vault_service: vault_service,
 	}
 }
 

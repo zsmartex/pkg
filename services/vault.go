@@ -7,12 +7,10 @@ import (
 )
 
 type VaultService struct {
-	vault                  *api.Client
-	application_name       string
-	vault_application_name string
+	vault *api.Client
 }
 
-func NewVaultService(vault_addr, token, application_name, vault_application_name string) (*VaultService, error) {
+func NewVaultService(vault_addr, token string) (*VaultService, error) {
 	config := &api.Config{
 		Address: vault_addr,
 		Timeout: time.Second * 2,
@@ -26,9 +24,7 @@ func NewVaultService(vault_addr, token, application_name, vault_application_name
 	client.SetToken(token)
 
 	vs := &VaultService{
-		vault:                  client,
-		application_name:       application_name,
-		vault_application_name: vault_application_name,
+		vault: client,
 	}
 
 	vs.startRenewToken(token)
