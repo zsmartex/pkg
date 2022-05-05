@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"reflect"
 	"time"
 
@@ -54,7 +55,12 @@ func (r *RedisClient) GetWithDefault(key string, target interface{}, expiration 
 
 		val.Elem().Set(reflect.ValueOf(data))
 
-		if err := r.Set(key, data, expiration); err != nil {
+		bytes, err := json.Marshal(data)
+		if err != nil {
+			return err
+		}
+
+		if err := r.Set(key, bytes, expiration); err != nil {
 			return err
 		}
 	}
@@ -64,7 +70,12 @@ func (r *RedisClient) GetWithDefault(key string, target interface{}, expiration 
 	} else if value == nil {
 		return nil
 	} else {
-		return value.Scan(target)
+		bytes, err := value.Bytes()
+		if err != nil {
+			return err
+		}
+
+		return json.Unmarshal(bytes, target)
 	}
 }
 
