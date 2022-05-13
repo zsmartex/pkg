@@ -51,11 +51,11 @@ func (r Repository) Create(ctx context.Context, model interface{}, filters ...Fi
 }
 
 func (r Repository) Updates(ctx context.Context, model interface{}, value interface{}, filters ...Filter) error {
-	return ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).Updates(model).Error
+	return ApplyFilters(r.DB.WithContext(ctx).Model(model), filters).Updates(value).Error
 }
 
 func (r Repository) UpdateColumns(ctx context.Context, model interface{}, value interface{}, filters ...Filter) error {
-	return ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).UpdateColumns(model).Error
+	return ApplyFilters(r.DB.WithContext(ctx).Model(model), filters).UpdateColumns(value).Error
 }
 
 func (r Repository) Save(ctx context.Context, model interface{}, filters ...Filter) error {
