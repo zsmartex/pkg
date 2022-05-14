@@ -42,6 +42,10 @@ func (r *RedisClient) Get(key string) (value *redis.StringCmd, err error) {
 	return result, nil
 }
 
+func (r *RedisClient) Delete(key string) error {
+	return r.client.Del(context.Background(), key).Err()
+}
+
 func (r *RedisClient) GetWithDefault(key string, target interface{}, expiration time.Duration, funcDefaultData func() interface{}) error {
 	if exist, err := r.Exist(key); err != nil {
 		return err
