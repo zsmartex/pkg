@@ -28,6 +28,28 @@ func NewRedisClient(addr string) (*RedisClient, error) {
 	}, nil
 }
 
+func (r *RedisClient) Keys(prefix string) ([]string, error) {
+	result := r.client.Keys(context.Background(), prefix)
+
+	if err := result.Err(); err != nil {
+		return nil, err
+	}
+
+	return result.Val(), nil
+}
+
+func (r *RedisClient) HGet(key, field string) *redis.StringCmd {
+	return r.client.HGet(context.Background(), key, field)
+}
+
+func (r *RedisClient) HSet(key string, values ...interface{}) error {
+	return r.client.HSet(context.Background(), key, values...).Err()
+}
+
+func (r *RedisClient) HGetAll(key string) *redis.StringStringMapCmd {
+	return r.client.HGetAll(context.Background(), key)
+}
+
 func (r *RedisClient) Set(key string, value interface{}, expiration time.Duration) error {
 	return r.client.Set(context.Background(), key, value, expiration).Err()
 }
