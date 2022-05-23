@@ -12,8 +12,8 @@ type Repository struct {
 	schema.Tabler
 }
 
-func New(db *gorm.DB, entity schema.Tabler) *Repository {
-	return &Repository{db, entity}
+func New(db *gorm.DB, entity schema.Tabler) Repository {
+	return Repository{db, entity}
 }
 
 func (r Repository) Count(ctx context.Context, filters ...Filter) (int, error) {
