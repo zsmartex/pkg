@@ -16,6 +16,12 @@ func New(db *gorm.DB, entity schema.Tabler) Repository {
 	return Repository{db, entity}
 }
 
+func (r Repository) WithTrx(tx *gorm.DB) Repository {
+	r.DB = tx
+
+	return r
+}
+
 func (r Repository) Count(ctx context.Context, filters ...Filter) (int, error) {
 	var result int64
 	err := ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).Count(&result).Error
