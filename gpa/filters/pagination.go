@@ -24,15 +24,12 @@ func WithOffset(offset int) gpa.Filter {
 	}
 }
 
-func WithPageable(page, size int, order string) gpa.Filter {
+func WithPageable(page, size int) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		query = query.Limit(size)
 		if page > 0 {
 			offset := (page - 1) * size
 			query = query.Offset(offset)
-		}
-		if order != "" {
-			query = query.Order(order)
 		}
 		return query
 	}
