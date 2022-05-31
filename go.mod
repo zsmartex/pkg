@@ -10,8 +10,8 @@ require (
 	github.com/hashicorp/vault/api v1.4.1
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/twmb/franz-go v1.4.2
-	github.com/twmb/franz-go/pkg/kadm v0.0.0-20220319065723-845bc50e6da0
+	github.com/twmb/franz-go v1.5.3
+	github.com/twmb/franz-go/pkg/kadm v0.0.0-20220531203917-16c397dd45aa
 	github.com/volatiletech/null/v9 v9.0.0
 	go.mongodb.org/mongo-driver v1.8.4
 	google.golang.org/grpc v1.45.0
@@ -57,7 +57,7 @@ require (
 	github.com/jackc/pgx/v4 v4.14.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
-	github.com/klauspost/compress v1.15.1 // indirect
+	github.com/klauspost/compress v1.15.4 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
@@ -69,10 +69,10 @@ require (
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/pierrec/lz4/v4 v4.1.14 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
-	github.com/twmb/franz-go/pkg/kmsg v1.0.0 // indirect
+	github.com/twmb/franz-go/pkg/kmsg v1.1.0 // indirect
 	github.com/twmb/go-rbtree v1.0.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
+	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7 // indirect
