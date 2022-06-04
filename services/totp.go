@@ -60,5 +60,5 @@ func (s *TOTPService) totp_key(uid string) string {
 }
 
 func (s *TOTPService) totp_code_key(uid string) string {
-	return fmt.Sprintf("totp/codes/%s_%s", s.vault_application_name, uid)
+	return fmt.Sprintf("totp/code/%s_%s", s.vault_application_name, uid)
 }
