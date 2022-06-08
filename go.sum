@@ -356,6 +356,8 @@ github.com/twmb/franz-go v1.4.2 h1:IFODFa111Wf5+5L5XOymWS2HIL47yFzbgbA2yQFkUAk=
 github.com/twmb/franz-go v1.4.2/go.mod h1:GFlQnHkJkC7gBoZRW3Sj1mWLPc8nkGW1ZcofBFzI8ss=
 github.com/twmb/franz-go v1.5.3 h1:uhknJZs/fiANWcyTqYMKxAtOPYb1xkC22y5dRKewlvo=
 github.com/twmb/franz-go v1.5.3/go.mod h1:eqHYpAuvlTArOdZ1XtPYyOQ1uUb40CSZwbpL3ccjibI=
+github.com/twmb/franz-go v1.6.0 h1:yri7YsVBe/k1LKcoZSLILgUI3U14e82qtD9i4VOcs9c=
+github.com/twmb/franz-go v1.6.0/go.mod h1:xdMwpUIQL/JDKKwerc5qJQG8TU1SNIddfjKJJyqRJIg=
 github.com/twmb/franz-go/pkg/kadm v0.0.0-20220319065723-845bc50e6da0 h1:l9PxDwT6LZ8aC6JXsEKvRZKU2mwGTLQ3RaOyfRGzx5o=
 github.com/twmb/franz-go/pkg/kadm v0.0.0-20220319065723-845bc50e6da0/go.mod h1:fuA2THFeFx/ms1w1R432uxWJqq7o3Q+olvJR4NFpWcM=
 github.com/twmb/franz-go/pkg/kadm v1.0.0 h1:+u7qzWg0jiUKU2YoDWsAtNZkvEuALcr6wGcT/55EfjI=
@@ -408,6 +410,8 @@ golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd h1:XcWmESyNjXJMLahc3mqVQJ
 golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f h1:OeJjE6G4dgCY4PIXvIRQbE8+RX+uXZyGhUy/ksMGJoc=
 golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
+golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898 h1:SLP7Q4Di66FONjDJbCYrCRrh97focO6sLogHO7/g8F0=
+golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=
 golang.org/x/lint v0.0.0-20190227174305-5b3e6a55c961/go.mod h1:wehouNa3lNwaWXcvxsM5YxQ5yQlVC4a0KAMCusXpPoU=
