@@ -17,10 +17,8 @@ require (
 	github.com/twmb/franz-go v1.6.0
 	github.com/twmb/franz-go/pkg/kadm v1.0.0
 	github.com/volatiletech/null/v9 v9.0.0
-	go.mongodb.org/mongo-driver v1.8.4
 	google.golang.org/grpc v1.47.0
 	google.golang.org/protobuf v1.27.1
-	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gorm.io/driver/postgres v1.3.1
 	gorm.io/gorm v1.23.3
 )
