@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/vault/api v1.4.1
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/twmb/franz-go v1.5.3
+	github.com/twmb/franz-go v1.6.0
 	github.com/twmb/franz-go/pkg/kadm v1.0.0
 	github.com/volatiletech/null/v9 v9.0.0
 	go.mongodb.org/mongo-driver v1.8.4
@@ -72,7 +72,7 @@ require (
 	github.com/twmb/franz-go/pkg/kmsg v1.1.0 // indirect
 	github.com/twmb/go-rbtree v1.0.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f // indirect
+	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7 // indirect
