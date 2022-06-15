@@ -34,7 +34,7 @@ func NewKafkaConsumer(brokers []string, group string, topics []string) (*KafkaCo
 	if os.Ok() && err == nil {
 		client, err = kgo.NewClient(
 			seeds,
-			kgo.ConsumePartitions(os.Into().Into()),
+			kgo.ConsumePartitions(os.KOffsets()),
 		)
 		if err != nil {
 			return nil, err
