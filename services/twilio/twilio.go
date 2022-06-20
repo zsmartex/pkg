@@ -7,13 +7,10 @@ import (
 
 type Twilio struct {
 	phoneNumber string
-	accountSID  string
-	authToken   string
-	serviceID   string
 	client      *twilio.RestClient
 }
 
-func New(phone_number, account_sid, auth_token, service_id string) *Twilio {
+func New(phone_number, account_sid, auth_token string) *Twilio {
 	client := twilio.NewRestClientWithParams(twilio.ClientParams{
 		Username: account_sid,
 		Password: auth_token,
@@ -21,9 +18,6 @@ func New(phone_number, account_sid, auth_token, service_id string) *Twilio {
 
 	return &Twilio{
 		phoneNumber: phone_number,
-		accountSID:  account_sid,
-		authToken:   auth_token,
-		serviceID:   service_id,
 		client:      client,
 	}
 }
