@@ -20,15 +20,15 @@ func WithIDs(ids ...interface{}) gpa.Filter {
 	}
 }
 
-func WithCreatedBy(user interface{}) gpa.Filter {
+func WithCreatedAtBy(created_at time.Time) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
-		return query.Where("created_by = ?", user)
+		return query.Where("created_by = ?", created_at)
 	}
 }
 
-func WithUpdatedBy(user interface{}) gpa.Filter {
+func WithUpdatedAtBy(updated_at time.Time) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
-		return query.Where("updated_by = ?", user)
+		return query.Where("updated_by = ?", updated_at)
 	}
 }
 

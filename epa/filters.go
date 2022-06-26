@@ -78,15 +78,22 @@ func WithID(id string) Filter {
 	}
 }
 
-func WithCreatedBy(user interface{}) Filter {
+func WithDateRange(field string, from time.Time, to time.Time) *elastic.BoolQuery {
+	return elastic.
+		NewBoolQuery().
+		Filter(elastic.NewRangeQuery(field).Gte(from)).
+		Filter(elastic.NewRangeQuery(field).Lte(to))
+}
+
+func WithCreatedAtBy(created_at time.Time) Filter {
 	return func(query *elastic.BoolQuery) *elastic.BoolQuery {
-		return query.Must(elastic.NewMatchQuery("created_by", user))
+		return query.Must(elastic.NewMatchQuery("created_at", created_at))
 	}
 }
 
-func WithUpdatedBy(user interface{}) Filter {
+func WithUpdatedAtBy(updated_at time.Time) Filter {
 	return func(query *elastic.BoolQuery) *elastic.BoolQuery {
-		return query.Must(elastic.NewMatchQuery("updated_by", user))
+		return query.Must(elastic.NewMatchQuery("updated_by", updated_at))
 	}
 }
 

@@ -12,38 +12,41 @@ type Result[T any] struct {
 	TotalHits int64
 }
 
-type repository[T any] struct {
-	client *elastic.Client
+type Schema interface {
+	TableName() string
 }
 
-type Config struct {
-	URL      string
-	Username string
-	Password string
+type Repository[T any] struct {
+	*elastic.Client
+	Schema
 }
 
-func New[T any](cfg *Config) (*repository[T], error) {
-	client, err := elastic.NewClient(elastic.SetBasicAuth(cfg.Username, cfg.Password), elastic.SetURL(cfg.URL), elastic.SetSniff(false))
-	if err != nil {
-		return nil, err
+func New[T Schema](client *elastic.Client, entity T) Repository[T] {
+	return Repository[T]{
+		client,
+		entity,
 	}
-
-	return &repository[T]{client}, nil
 }
 
-func (r *repository[T]) Create(ctx context.Context, index, id string, body *T) (*elastic.IndexResponse, error) {
-	return r.client.
+func (r Repository[T]) CheckHealth(ctx context.Context) bool {
+	_, err := r.ClusterHealth().Do(ctx)
+
+	return err == nil
+}
+
+func (r Repository[T]) Create(ctx context.Context, id string, body *T) (*elastic.IndexResponse, error) {
+	return r.
 		Index().
-		Index(index).
+		Index(r.TableName()).
 		Id(id).
 		BodyJson(body).
 		Do(ctx)
 }
 
-func (r *repository[T]) Find(ctx context.Context, index string, query Query) (*Result[T], error) {
-	search := r.client.
+func (r Repository[T]) Find(ctx context.Context, query Query) (*Result[T], error) {
+	search := r.
 		Search().
-		Index(index).
+		Index(r.TableName()).
 		Query(ApplyFilters(elastic.NewBoolQuery(), query.Filters))
 
 	if query.Page > 0 {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
+	"github.com/zsmartex/pkg/services/elasticsearch"
 )
 
 type Order struct {
@@ -17,12 +18,25 @@ type Order struct {
 	CreatedAt time.Time       `json:"created_at"`
 }
 
-func TestCreate(t *testing.T) {
-	repo, err := New[Order](&Config{
+func (o Order) TableName() string {
+	return "orders"
+}
+
+func newRepo() (Repository[Order], error) {
+	client, err := elasticsearch.New(&elasticsearch.Config{
 		URL:      "http://localhost:9200",
 		Username: "elastic",
 		Password: "elastic",
 	})
+	if err != nil {
+		return Repository[Order]{}, err
+	}
+
+	return New(client, Order{}), nil
+}
+
+func TestCreate(t *testing.T) {
+	repo, err := newRepo()
 	if err != nil {
 		t.Error(err)
 	}
@@ -31,28 +45,28 @@ func TestCreate(t *testing.T) {
 		{
 			ID:        1,
 			UserID:    1,
-			Price:     decimal.NewFromFloat(10.0),
+			Price:     decimal.NewFromFloat(20.7),
 			State:     100,
 			CreatedAt: time.Now(),
 		},
 		{
 			ID:        2,
 			UserID:    2,
-			Price:     decimal.NewFromFloat(20.0),
+			Price:     decimal.NewFromFloat(48.4),
 			State:     200,
 			CreatedAt: time.Now(),
 		},
 		{
 			ID:        3,
 			UserID:    1,
-			Price:     decimal.NewFromFloat(30.0),
+			Price:     decimal.NewFromFloat(15.0),
 			State:     200,
 			CreatedAt: time.Now(),
 		},
 	}
 
 	for _, order := range orders {
-		r, err := repo.Create(context.Background(), "orders", fmt.Sprint(order.ID), order)
+		r, err := repo.Create(context.Background(), fmt.Sprint(order.ID), order)
 		if err != nil {
 			t.Error(err)
 		}
@@ -62,22 +76,16 @@ func TestCreate(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
-	repo, err := New[Order](&Config{
-		URL:      "http://localhost:9200",
-		Username: "elastic",
-		Password: "elastic",
-	})
+	repo, err := newRepo()
 	if err != nil {
 		t.Error(err)
 	}
 
 	result, err := repo.Find(
 		context.Background(),
-		"orders",
 		Query{
-			Limit: 1,
 			Filters: []Filter{
-				WithCreateAtBefore(time.Now()),
+				WithFieldLessThanOrEqualTo("price", "30"),
 			},
 		},
 	)
