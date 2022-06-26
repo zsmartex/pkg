@@ -61,24 +61,12 @@ func NewKafkaConsumer(brokers []string, group string, topics []string) (*KafkaCo
 }
 
 func (c *KafkaConsumer) Poll() ([]*kgo.Record, error) {
-	records := make([]*kgo.Record, 0)
-	errors := make([]error, 0)
-
-	fetches := c.Client.PollRecords(context.Background(), -1)
-
-	fetches.EachError(func(s string, i int32, e error) {
-		errors = append(errors, e)
-	})
-
-	if len(errors) > 0 {
-		return records, errors[0]
+	fetches := c.Client.PollFetches(context.Background())
+	if err := fetches.Err(); err != nil {
+		return nil, err
 	}
 
-	fetches.EachRecord(func(r *kgo.Record) {
-		records = append(records, r)
-	})
-
-	return records, nil
+	return fetches.Records(), nil
 }
 
 func (c *KafkaConsumer) CommitRecords(records ...kgo.Record) error {
