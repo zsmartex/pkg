@@ -51,6 +51,7 @@ func (r Repository[T]) Find(ctx context.Context, query Query) (*Result[T], error
 
 	if query.Page > 0 {
 		search = search.From((query.Page - 1) * query.Limit)
+		search = search.TrackTotalHits(true)
 	}
 
 	if query.Limit > 0 {
