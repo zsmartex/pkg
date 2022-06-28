@@ -13,7 +13,7 @@ type Result[T any] struct {
 }
 
 type Schema interface {
-	TableName() string
+	IndexName() string
 }
 
 type Repository[T any] struct {
@@ -37,7 +37,7 @@ func (r Repository[T]) CheckHealth(ctx context.Context) bool {
 func (r Repository[T]) Create(ctx context.Context, id string, body *T) (*elastic.IndexResponse, error) {
 	return r.
 		Index().
-		Index(r.TableName()).
+		Index(r.IndexName()).
 		Id(id).
 		BodyJson(body).
 		Do(ctx)
@@ -46,7 +46,7 @@ func (r Repository[T]) Create(ctx context.Context, id string, body *T) (*elastic
 func (r Repository[T]) Find(ctx context.Context, query Query) (*Result[T], error) {
 	search := r.
 		Search().
-		Index(r.TableName()).
+		Index(r.IndexName()).
 		Query(ApplyFilters(elastic.NewBoolQuery(), query.Filters))
 
 	if query.Page > 0 {
