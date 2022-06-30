@@ -18,7 +18,7 @@ type Order struct {
 	CreatedAt time.Time       `json:"created_at"`
 }
 
-func (o Order) TableName() string {
+func (o Order) IndexName() string {
 	return "orders"
 }
 
