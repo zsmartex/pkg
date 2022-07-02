@@ -115,7 +115,7 @@ func WithCreatedAtAfter(t time.Time) Filter {
 	}
 }
 
-func WithCreateAtBefore(t time.Time) Filter {
+func WithCreatedAtBefore(t time.Time) Filter {
 	return func(query *elastic.BoolQuery) *elastic.BoolQuery {
 		return query.Filter(elastic.NewRangeQuery("created_at").Lt(t))
 	}
