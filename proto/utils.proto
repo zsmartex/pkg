@@ -1,9 +1,0 @@
-syntax = "proto3";
-package GrpcUtils;
-
-option go_package = "github.com/zsmartex/pkg/Grpc/utils;GrpcUtils";
-
-message Decimal {
-  int64 Val = 1;
-  int32 Exp = 2;
-}
