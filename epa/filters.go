@@ -6,6 +6,18 @@ import (
 	"github.com/olivere/elastic/v7"
 )
 
+func WithMultiFieldsNotEqual(value interface{}, fields ...string) Filter {
+	return func(query *elastic.BoolQuery) *elastic.BoolQuery {
+		return query.MustNot(elastic.NewMultiMatchQuery(value, fields...))
+	}
+}
+
+func WithMultiFieldsEqual(value interface{}, fields ...string) Filter {
+	return func(query *elastic.BoolQuery) *elastic.BoolQuery {
+		return query.Must(elastic.NewMultiMatchQuery(value, fields...))
+	}
+}
+
 func WithFieldEqual(field string, value interface{}) Filter {
 	return func(query *elastic.BoolQuery) *elastic.BoolQuery {
 		return query.Must(elastic.NewMatchQuery(field, value))
