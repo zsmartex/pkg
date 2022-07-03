@@ -4,20 +4,19 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/sirupsen/logrus"
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/zsmartex/pkg/log"
 )
 
-type KafkaConsumer struct {
+type Consumer struct {
 	CommitClient *kadm.Client
 	Client       *kgo.Client
 	Topics       []string
 	Group        string
 }
 
-func NewKafkaConsumer(brokers []string, group string, topics []string) (*KafkaConsumer, error) {
+func NewConsumer(brokers []string, group string, topics []string) (*Consumer, error) {
 	seeds := kgo.SeedBrokers(brokers...)
 
 	cl, err := kgo.NewClient(
@@ -53,7 +52,7 @@ func NewKafkaConsumer(brokers []string, group string, topics []string) (*KafkaCo
 		}
 	}
 
-	return &KafkaConsumer{
+	return &Consumer{
 		CommitClient: adm,
 		Client:       client,
 		Topics:       topics,
@@ -61,7 +60,7 @@ func NewKafkaConsumer(brokers []string, group string, topics []string) (*KafkaCo
 	}, nil
 }
 
-func (c *KafkaConsumer) Poll() ([]*kgo.Record, error) {
+func (c *Consumer) Poll() ([]*kgo.Record, error) {
 	fetches := c.Client.PollFetches(context.Background())
 	if err := fetches.Err(); err != nil {
 		return nil, err
@@ -70,20 +69,20 @@ func (c *KafkaConsumer) Poll() ([]*kgo.Record, error) {
 	return fetches.Records(), nil
 }
 
-func (c *KafkaConsumer) CommitRecords(records ...kgo.Record) error {
+func (c *Consumer) CommitRecords(records ...kgo.Record) error {
 	return c.CommitClient.CommitAllOffsets(context.Background(), c.Group, kadm.OffsetsFromRecords(records...))
 }
 
-func (c *KafkaConsumer) Close() {
+func (c *Consumer) Close() {
 	c.Client.Close()
 	c.CommitClient.Close()
 }
 
-type KafkaProducer struct {
+type Producer struct {
 	Client *kgo.Client
 }
 
-func NewKafkaProducer(brokers []string, logger *logrus.Entry) (*KafkaProducer, error) {
+func NewProducer(brokers []string) (*Producer, error) {
 	client, err := kgo.NewClient(
 		kgo.SeedBrokers(brokers...),
 		kgo.AllowAutoTopicCreation(),
@@ -92,20 +91,20 @@ func NewKafkaProducer(brokers []string, logger *logrus.Entry) (*KafkaProducer, e
 		return nil, err
 	}
 
-	return &KafkaProducer{
+	return &Producer{
 		Client: client,
 	}, nil
 }
 
-func (k *KafkaProducer) Produce(topic string, payload interface{}) {
+func (k *Producer) Produce(topic string, payload interface{}) {
 	k.produce(topic, "", payload)
 }
 
-func (k *KafkaProducer) ProduceWithKey(topic, key string, payload interface{}) {
+func (k *Producer) ProduceWithKey(topic, key string, payload interface{}) {
 	k.produce(topic, key, payload)
 }
 
-func (p *KafkaProducer) produce(topic, key string, payload interface{}) {
+func (p *Producer) produce(topic, key string, payload interface{}) {
 	switch data := payload.(type) {
 	case string:
 		p.produce(topic, key, []byte(data))

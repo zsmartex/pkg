@@ -9,11 +9,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/zsmartex/pkg/infrastucture/kafka"
 )
 
 type EventAPI struct {
 	application_name string
-	producer         *kafka.KafkaProducer
+	producer         *kafka.Producer
 	jwt_private_key  *rsa.PrivateKey
 }
 
@@ -21,7 +22,7 @@ type EventAPIPayload struct {
 	Record interface{} `json:"record"`
 }
 
-func NewEventAPI(producer *KafkaProducer, application_name string, jwt_private_key string) (*EventAPI, error) {
+func New(producer *kafka.Producer, application_name string, jwt_private_key string) (*EventAPI, error) {
 	secret, err := base64.StdEncoding.DecodeString(jwt_private_key)
 	if err != nil {
 		return nil, err

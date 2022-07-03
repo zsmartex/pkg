@@ -10,10 +10,10 @@ import (
 )
 
 type RedisClient struct {
-	client *redis.Client
+	*redis.Client
 }
 
-func NewRedisClient(addr string) (*RedisClient, error) {
+func New(addr string) (*RedisClient, error) {
 	opts, err := redis.ParseURL(addr)
 	if err != nil {
 		return nil, err
@@ -24,12 +24,12 @@ func NewRedisClient(addr string) (*RedisClient, error) {
 	}
 
 	return &RedisClient{
-		client: client,
+		client,
 	}, nil
 }
 
 func (r *RedisClient) Keys(prefix string) ([]string, error) {
-	result := r.client.Keys(context.Background(), prefix)
+	result := r.Client.Keys(context.Background(), prefix)
 
 	if err := result.Err(); err != nil {
 		return nil, err
@@ -39,23 +39,23 @@ func (r *RedisClient) Keys(prefix string) ([]string, error) {
 }
 
 func (r *RedisClient) HGet(key, field string) *redis.StringCmd {
-	return r.client.HGet(context.Background(), key, field)
+	return r.Client.HGet(context.Background(), key, field)
 }
 
 func (r *RedisClient) HSet(key string, values ...interface{}) error {
-	return r.client.HSet(context.Background(), key, values...).Err()
+	return r.Client.HSet(context.Background(), key, values...).Err()
 }
 
 func (r *RedisClient) HGetAll(key string) *redis.StringStringMapCmd {
-	return r.client.HGetAll(context.Background(), key)
+	return r.Client.HGetAll(context.Background(), key)
 }
 
 func (r *RedisClient) Set(key string, value interface{}, expiration time.Duration) error {
-	return r.client.Set(context.Background(), key, value, expiration).Err()
+	return r.Client.Set(context.Background(), key, value, expiration).Err()
 }
 
 func (r *RedisClient) Get(key string) (value *redis.StringCmd, err error) {
-	result := r.client.Get(context.Background(), key)
+	result := r.Client.Get(context.Background(), key)
 
 	if result.Err() != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (r *RedisClient) Get(key string) (value *redis.StringCmd, err error) {
 }
 
 func (r *RedisClient) Delete(key string) error {
-	return r.client.Del(context.Background(), key).Err()
+	return r.Client.Del(context.Background(), key).Err()
 }
 
 func (r *RedisClient) GetWithDefault(key string, target interface{}, expiration time.Duration, funcDefaultData func() interface{}) error {
@@ -106,7 +106,7 @@ func (r *RedisClient) GetWithDefault(key string, target interface{}, expiration 
 }
 
 func (r *RedisClient) Exist(key string) (exist bool, err error) {
-	result := r.client.Exists(context.Background(), key)
+	result := r.Client.Exists(context.Background(), key)
 
 	if result.Err() != nil {
 		return false, err
