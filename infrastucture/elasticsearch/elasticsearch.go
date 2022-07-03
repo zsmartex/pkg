@@ -10,5 +10,5 @@ type Config struct {
 }
 
 func New(cfg *Config) (*elastic.Client, error) {
-	return elastic.NewClient(elastic.SetBasicAuth(cfg.Username, cfg.Password), elastic.SetURL(cfg.URL), elastic.SetSniff(cfg.Sniff))
+	return elastic.NewClient(elastic.SetBasicAuth(cfg.Username, cfg.Password), elastic.SetGzip(true), elastic.SetURL(cfg.URL), elastic.SetSniff(cfg.Sniff))
 }

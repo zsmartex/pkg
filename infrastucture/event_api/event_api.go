@@ -1,4 +1,4 @@
-package services
+package event_api
 
 import (
 	"crypto/rsa"
@@ -13,7 +13,7 @@ import (
 
 type EventAPI struct {
 	application_name string
-	producer         *KafkaProducer
+	producer         *kafka.KafkaProducer
 	jwt_private_key  *rsa.PrivateKey
 }
 

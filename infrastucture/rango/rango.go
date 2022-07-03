@@ -4,13 +4,14 @@ import (
 	"strings"
 
 	"github.com/zsmartex/pkg"
+	"github.com/zsmartex/pkg/infrastucture/kafka"
 )
 
 type RangoClient struct {
-	producer *KafkaProducer
+	producer *kafka.KafkaProducer
 }
 
-func NewRangoClient(producer *KafkaProducer) (*RangoClient, error) {
+func NewRangoClient(producer *kafka.KafkaProducer) (*RangoClient, error) {
 	return &RangoClient{producer: producer}, nil
 }
 

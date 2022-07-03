@@ -1,4 +1,4 @@
-package services
+package kafka
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
+	"github.com/zsmartex/pkg/log"
 )
 
 type KafkaConsumer struct {
@@ -80,7 +81,6 @@ func (c *KafkaConsumer) Close() {
 
 type KafkaProducer struct {
 	Client *kgo.Client
-	logger *logrus.Entry
 }
 
 func NewKafkaProducer(brokers []string, logger *logrus.Entry) (*KafkaProducer, error) {
@@ -94,7 +94,6 @@ func NewKafkaProducer(brokers []string, logger *logrus.Entry) (*KafkaProducer, e
 
 	return &KafkaProducer{
 		Client: client,
-		logger: logger,
 	}, nil
 }
 
@@ -112,7 +111,7 @@ func (p *KafkaProducer) produce(topic, key string, payload interface{}) {
 		p.produce(topic, key, []byte(data))
 		return
 	case []byte:
-		p.logger.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
+		log.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
 
 		p.Client.Produce(context.Background(), &kgo.Record{
 			Topic: topic,
@@ -120,7 +119,7 @@ func (p *KafkaProducer) produce(topic, key string, payload interface{}) {
 			Value: data,
 		}, func(r *kgo.Record, err error) {
 			if err != nil {
-				p.logger.Errorf("Kafka producer produce to: %s, key: %s, payload: %s, error: %s", topic, key, payload, err)
+				log.Errorf("Kafka producer produce to: %s, key: %s, payload: %s, error: %s", topic, key, payload, err)
 			}
 		})
 		return
