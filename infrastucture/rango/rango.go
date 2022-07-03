@@ -8,10 +8,10 @@ import (
 )
 
 type RangoClient struct {
-	producer *kafka.KafkaProducer
+	producer *kafka.Producer
 }
 
-func NewRangoClient(producer *kafka.KafkaProducer) (*RangoClient, error) {
+func NewRangoClient(producer *kafka.Producer) (*RangoClient, error) {
 	return &RangoClient{producer: producer}, nil
 }
 
