@@ -1,4 +1,4 @@
-package services
+package rango
 
 import (
 	"strings"

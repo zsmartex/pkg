@@ -51,7 +51,7 @@ func (d *DBlogger) Trace(ctx context.Context, begin time.Time, fc func() (string
 	logrus.WithContext(ctx).WithFields(fields).Debugf("%s [%s]", sql, elapsed)
 }
 
-func NewDatabase(host string, port int, user, password, dbname string) (*gorm.DB, error) {
+func New(host string, port int, user, password, dbname string) (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)

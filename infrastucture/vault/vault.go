@@ -1,4 +1,4 @@
-package services
+package vault
 
 import (
 	"time"
@@ -10,7 +10,7 @@ type VaultService struct {
 	vault *api.Client
 }
 
-func NewVaultService(vault_addr, token string) (*VaultService, error) {
+func New(vault_addr, token string) (*VaultService, error) {
 	config := &api.Config{
 		Address: vault_addr,
 		Timeout: time.Second * 2,
