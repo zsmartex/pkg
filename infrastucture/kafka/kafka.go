@@ -16,7 +16,7 @@ type Consumer struct {
 	Group        string
 }
 
-func NewConsumer(brokers []string, group string, topics []string) (*Consumer, error) {
+func NewConsumer(brokers []string, group string, topics ...string) (*Consumer, error) {
 	seeds := kgo.SeedBrokers(brokers...)
 
 	cl, err := kgo.NewClient(
