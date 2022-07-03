@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-	"github.com/zsmartex/pkg/services/elasticsearch"
+	"github.com/zsmartex/pkg/infrastucture/elasticsearch"
 )
 
 type Order struct {
