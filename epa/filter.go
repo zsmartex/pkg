@@ -17,6 +17,7 @@ type Query struct {
 	OrderBy  string
 	Ordering Ordering
 	Filters  []Filter
+	Addons   func(*elastic.SearchService) *elastic.SearchService
 }
 
 type Filter func(query *elastic.BoolQuery) *elastic.BoolQuery

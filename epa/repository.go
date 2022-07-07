@@ -62,6 +62,10 @@ func (r Repository[T]) Find(ctx context.Context, query Query) (*Result[T], error
 		search = search.Sort(query.OrderBy, query.Ordering == OrderingAscending)
 	}
 
+	if query.Addons != nil {
+		search = query.Addons(search)
+	}
+
 	result, err := search.Do(ctx)
 	if err != nil {
 		return nil, err
