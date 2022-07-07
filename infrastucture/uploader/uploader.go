@@ -3,6 +3,7 @@ package uploader
 import (
 	"bytes"
 	"context"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -49,6 +50,24 @@ func (u *Uploader) GetURL(key string) (string, error) {
 	}
 
 	return resp.URL, nil
+}
+
+func (u *Uploader) GetBodyContent(key string) ([]byte, error) {
+	resp, err := u.client.GetObject(context.Background(), &s3.GetObjectInput{
+		Bucket: aws.String(u.bucket),
+		Key:    aws.String(key),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
 }
 
 func (u *Uploader) Upload(key string, body []byte) (*manager.UploadOutput, error) {
