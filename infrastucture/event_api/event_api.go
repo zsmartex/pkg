@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/zsmartex/pkg/infrastucture/kafka"
+	"github.com/zsmartex/pkg/v2/infrastucture/kafka"
 )
 
 type EventAPI struct {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
-	"github.com/zsmartex/pkg/log"
+	"github.com/zsmartex/pkg/v2/log"
 )
 
 type Consumer struct {

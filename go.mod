@@ -1,4 +1,4 @@
-module github.com/zsmartex/pkg
+module github.com/zsmartex/pkg/v2
 
 go 1.18
 

@@ -3,8 +3,8 @@ package rango
 import (
 	"strings"
 
-	"github.com/zsmartex/pkg"
-	"github.com/zsmartex/pkg/infrastucture/kafka"
+	"github.com/zsmartex/pkg/v2"
+	"github.com/zsmartex/pkg/v2/infrastucture/kafka"
 )
 
 type RangoClient struct {

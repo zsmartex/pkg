@@ -2,7 +2,7 @@ package validate
 
 import (
 	"github.com/gookit/validate"
-	"github.com/zsmartex/pkg/queries"
+	"github.com/zsmartex/pkg/v2/queries"
 )
 
 func InitValidation() {

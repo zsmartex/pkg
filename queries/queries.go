@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/zsmartex/pkg/gpa"
-	"github.com/zsmartex/pkg/gpa/filters"
+	"github.com/zsmartex/pkg/v2/gpa"
+	"github.com/zsmartex/pkg/v2/gpa/filters"
 )
 
 type Pagination struct {

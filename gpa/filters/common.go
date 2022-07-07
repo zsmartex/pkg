@@ -5,7 +5,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/zsmartex/pkg/gpa"
+	"github.com/zsmartex/pkg/v2/gpa"
 )
 
 func WithID(id interface{}) gpa.Filter {
