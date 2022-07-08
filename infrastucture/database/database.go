@@ -10,6 +10,10 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"database/sql"
+
+	_ "github.com/lib/pq"
 )
 
 type DBlogger struct {
@@ -70,5 +74,22 @@ func New(host string, port int, user, password, dbname string) (*gorm.DB, error)
 		return nil, err
 	}
 
+	// TODO: add support EventAPI here
+
 	return db, nil
+}
+
+// create database if it doesn't exist
+func CreateDatabase(host string, port int, user, password, dbname string) error {
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s sslmode=disable", host, port, user, password)
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		return err
+	}
+
+	if _, err := db.Exec(fmt.Sprintf("CREATE DATABASE %s", dbname)); err != nil {
+		return err
+	}
+
+	return nil
 }

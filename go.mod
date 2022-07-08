@@ -14,6 +14,7 @@ require (
 	github.com/hashicorp/vault/api v1.4.1
 	github.com/jackc/pgconn v1.10.1
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
+	github.com/lib/pq v1.10.2
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.8.1
