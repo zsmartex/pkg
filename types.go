@@ -37,4 +37,5 @@ type EnqueueEventKind string
 var (
 	EnqueueEventKindPublic  EnqueueEventKind = "public"
 	EnqueueEventKindPrivate EnqueueEventKind = "private"
+	EnqueueEventKindSystem  EnqueueEventKind = "system"
 )
