@@ -24,6 +24,12 @@ func WithFieldEqual(field string, value interface{}) Filter {
 	}
 }
 
+func WithFieldExtractEqual(field string, value string) Filter {
+	return func(query *elastic.BoolQuery) *elastic.BoolQuery {
+		return query.Must(elastic.NewQueryStringQuery(value).DefaultField(field))
+	}
+}
+
 func WithFieldNotEqual(field string, value interface{}) Filter {
 	return func(query *elastic.BoolQuery) *elastic.BoolQuery {
 		return query.MustNot(elastic.NewMatchQuery(field, value))
