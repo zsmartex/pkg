@@ -4,9 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/zsmartex/pkg/v2/infrastucture/event_api"
+	"github.com/zsmartex/pkg/v2/infrastucture/kafka"
+	"github.com/zsmartex/pkg/v2/infrastucture/rango"
+	"github.com/zsmartex/pkg/v2/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -15,6 +20,21 @@ import (
 
 	_ "github.com/lib/pq"
 )
+
+type CallbackConfig struct {
+	KafkaProducer *kafka.Producer
+	RangoClient   *rango.RangoClient
+	EventAPI      *event_api.EventAPI
+}
+
+type Config struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	DBName   string
+	Callback *CallbackConfig
+}
 
 type DBlogger struct {
 	SlowThreshold         time.Duration
@@ -55,10 +75,10 @@ func (d *DBlogger) Trace(ctx context.Context, begin time.Time, fc func() (string
 	logrus.WithContext(ctx).WithFields(fields).Debugf("%s [%s]", sql, elapsed)
 }
 
-func New(host string, port int, user, password, dbname string) (*gorm.DB, error) {
+func New(config *Config) (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.Host, config.Port, config.User, config.Password, config.DBName)
 
 	dialector = postgres.Open(dsn)
 
@@ -75,6 +95,100 @@ func New(host string, port int, user, password, dbname string) (*gorm.DB, error)
 	}
 
 	// TODO: add support EventAPI here
+
+	if config.Callback != nil {
+		if config.Callback.KafkaProducer != nil && config.Callback.RangoClient != nil {
+			db.Callback().Update().After("gorm:after_update").
+				Register("model:updated", func(db *gorm.DB) {
+					if db.Statement.Schema != nil {
+						if methodValue := db.Statement.ReflectValue.MethodByName("CustomAfterUpdate"); methodValue.IsValid() {
+							switch methodValue.Type().String() {
+							case "func(*kafka.Producer, *rango.RangoClient) error":
+								methodValue.Call([]reflect.Value{reflect.ValueOf(config.Callback.KafkaProducer), reflect.ValueOf(config.Callback.RangoClient)})
+							default:
+								log.Warnf("Model %v don't match %v Interface, should be `%v(*kafka.Producer, *rango.RangoClient) error`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
+							}
+						}
+					}
+				})
+
+			db.Callback().Create().After("gorm:after_create").
+				Register("model:created", func(db *gorm.DB) {
+					if db.Statement.Schema != nil {
+						if methodValue := db.Statement.ReflectValue.MethodByName("CustomAfterCreate"); methodValue.IsValid() {
+							switch methodValue.Type().String() {
+							case "func(*kafka.Producer, *rango.RangoClient) error":
+								methodValue.Call([]reflect.Value{reflect.ValueOf(config.Callback.KafkaProducer), reflect.ValueOf(config.Callback.RangoClient)})
+							default:
+								log.Warnf("Model %v don't match %v Interface, should be `%v(*kafka.Producer, *rango.RangoClient) error`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
+							}
+						}
+					}
+				})
+		}
+
+		if config.Callback.EventAPI != nil {
+			db.Callback().Create().After("gorm:create").Register("eventapi:created", func(db *gorm.DB) {
+				if db.Statement.Schema != nil {
+					methodTableNameValue := db.Statement.ReflectValue.MethodByName("TableName")
+
+					if !methodTableNameValue.IsValid() {
+						log.Errorf("Failed to find TableName method in %v", db.Statement.Schema)
+						return
+					}
+
+					if methodValue := db.Statement.ReflectValue.MethodByName("AsMapForEventAPI"); methodValue.IsValid() {
+						switch methodValue.Type().String() {
+						case "func() map[string]interface{}":
+							table_name := methodTableNameValue.Call([]reflect.Value{})[0].Interface().(string)
+							results := methodValue.Call([]reflect.Value{})
+
+							event_name := fmt.Sprintf("model.%s.created", table_name)
+							err := config.Callback.EventAPI.Notify(event_name, event_api.EventAPIPayload{
+								Record: results[0].Interface().(map[string]interface{}),
+							})
+
+							if err != nil {
+								log.Errorf("Failed to send event to event api event_name: %s, err: %v", event_name, err)
+							}
+						default:
+							log.Warnf("Model %v don't match %v Interface, should be `%v() map[string]interface{}`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
+						}
+					}
+				}
+			})
+
+			db.Callback().Update().After("gorm:update").Register("eventapi:updated", func(db *gorm.DB) {
+				if db.Statement.Schema != nil {
+					methodTableNameValue := db.Statement.ReflectValue.MethodByName("TableName")
+
+					if !methodTableNameValue.IsValid() {
+						log.Errorf("Failed to find TableName method in %v", db.Statement.Schema)
+						return
+					}
+
+					if methodValue := db.Statement.ReflectValue.MethodByName("AsMapForEventAPI"); methodValue.IsValid() {
+						switch methodValue.Type().String() {
+						case "func() map[string]interface{}":
+							table_name := methodTableNameValue.Call([]reflect.Value{})[0].Interface().(string)
+							results := methodValue.Call([]reflect.Value{})
+
+							event_name := fmt.Sprintf("model.%s.updated", table_name)
+							err := config.Callback.EventAPI.Notify(event_name, event_api.EventAPIPayload{
+								Record: results[0].Interface().(map[string]interface{}),
+							})
+
+							if err != nil {
+								log.Errorf("Failed to send event to event api event_name: %s, err: %v", event_name, err)
+							}
+						default:
+							log.Warnf("Model %v don't match %v Interface, should be `%v() map[string]interface{}`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
+						}
+					}
+				}
+			})
+		}
+	}
 
 	return db, nil
 }
