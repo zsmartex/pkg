@@ -71,3 +71,7 @@ func (r Repository) Save(ctx context.Context, model interface{}, filters ...Filt
 func (r Repository) Delete(ctx context.Context, model interface{}, filters ...Filter) error {
 	return ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).Delete(model).Error
 }
+
+func (r Repository) Raw(ctx context.Context, sql string, values ...interface{}) *gorm.DB {
+	return r.DB.WithContext(ctx).Table(r.TableName()).Raw(sql, values...)
+}

@@ -3,26 +3,27 @@ package repository
 import (
 	"context"
 
-	"github.com/zsmartex/pkg/v2/gpa"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
+
+	"github.com/zsmartex/pkg/v2/gpa"
 
 	"github.com/zsmartex/pkg/v2/log"
 )
 
 type Repository[T schema.Tabler] interface {
-	Count(filters ...gpa.Filter) (int, error)
-	First(model interface{}, filters ...gpa.Filter) error
-	Last(model interface{}, filters ...gpa.Filter) error
-	Find(models interface{}, filters ...gpa.Filter) error
+	Count(context context.Context, filters ...gpa.Filter) (int, error)
+	First(context context.Context, dst interface{}, filters ...gpa.Filter) error
+	Last(context context.Context, dst interface{}, filters ...gpa.Filter) error
+	Find(context context.Context, dst interface{}, filters ...gpa.Filter) error
 	WithTrx(trxHandle *gorm.DB) Repository[T]
 	Transaction(handler func(tx *gorm.DB) error) error
-	FirstOrCreate(model interface{}, filters ...gpa.Filter) error
-	Create(model interface{}) error
-	Updates(model interface{}, value interface{}, filters ...gpa.Filter) error
-	UpdateColumns(model interface{}, value interface{}, filters ...gpa.Filter) error
-	Delete(model interface{}, filters ...gpa.Filter) error
-	Raw(sql string, values ...interface{}) (tx *gorm.DB)
+	FirstOrCreate(context context.Context, dst interface{}, filters ...gpa.Filter) error
+	Create(context context.Context, dst interface{}) error
+	Updates(context context.Context, dst interface{}, value interface{}, filters ...gpa.Filter) error
+	UpdateColumns(context context.Context, dst interface{}, value interface{}, filters ...gpa.Filter) error
+	Delete(context context.Context, dst interface{}, filters ...gpa.Filter) error
+	Raw(context context.Context, sql string, values ...interface{}) (tx *gorm.DB)
 }
 
 type repository[T schema.Tabler] struct {
@@ -41,20 +42,20 @@ func (r repository[T]) WithTrx(trxHandle *gorm.DB) Repository[T] {
 	return r
 }
 
-func (r repository[T]) Count(filters ...gpa.Filter) (int, error) {
-	return r.repository.Count(context.Background(), filters...)
+func (r repository[T]) Count(context context.Context, filters ...gpa.Filter) (int, error) {
+	return r.repository.Count(context, filters...)
 }
 
-func (r repository[T]) First(model interface{}, filters ...gpa.Filter) (err error) {
-	return r.repository.First(context.Background(), model, filters...)
+func (r repository[T]) First(context context.Context, model interface{}, filters ...gpa.Filter) (err error) {
+	return r.repository.First(context, model, filters...)
 }
 
-func (r repository[T]) Last(model interface{}, filters ...gpa.Filter) (err error) {
-	return r.repository.Last(context.Background(), model, filters...)
+func (r repository[T]) Last(context context.Context, model interface{}, filters ...gpa.Filter) (err error) {
+	return r.repository.Last(context, model, filters...)
 }
 
-func (r repository[T]) Find(models interface{}, filters ...gpa.Filter) error {
-	return r.repository.Find(context.Background(), models, filters...)
+func (r repository[T]) Find(context context.Context, models interface{}, filters ...gpa.Filter) error {
+	return r.repository.Find(context, models, filters...)
 }
 
 func (r repository[T]) Transaction(handler func(tx *gorm.DB) error) (err error) {
@@ -85,26 +86,26 @@ func (r repository[T]) Transaction(handler func(tx *gorm.DB) error) (err error) 
 	return nil
 }
 
-func (r repository[T]) FirstOrCreate(model interface{}, filters ...gpa.Filter) error {
-	return r.repository.FirstOrCreate(context.Background(), model, filters...)
+func (r repository[T]) FirstOrCreate(context context.Context, model interface{}, filters ...gpa.Filter) error {
+	return r.repository.FirstOrCreate(context, model, filters...)
 }
 
-func (r repository[T]) Create(model interface{}) error {
-	return r.repository.Create(context.Background(), model)
+func (r repository[T]) Create(context context.Context, model interface{}) error {
+	return r.repository.Create(context, model)
 }
 
-func (r repository[T]) Updates(model interface{}, value interface{}, filters ...gpa.Filter) error {
-	return r.repository.Updates(context.Background(), model, value, filters...)
+func (r repository[T]) Updates(context context.Context, model interface{}, value interface{}, filters ...gpa.Filter) error {
+	return r.repository.Updates(context, model, value, filters...)
 }
 
-func (r repository[T]) UpdateColumns(model interface{}, value interface{}, filters ...gpa.Filter) error {
-	return r.repository.UpdateColumns(context.Background(), model, value, filters...)
+func (r repository[T]) UpdateColumns(context context.Context, model interface{}, value interface{}, filters ...gpa.Filter) error {
+	return r.repository.UpdateColumns(context, model, value, filters...)
 }
 
-func (r repository[T]) Delete(model interface{}, filters ...gpa.Filter) error {
-	return r.repository.Delete(context.Background(), model, filters...)
+func (r repository[T]) Delete(context context.Context, model interface{}, filters ...gpa.Filter) error {
+	return r.repository.Delete(context, model, filters...)
 }
 
-func (r repository[T]) Raw(sql string, values ...interface{}) (tx *gorm.DB) {
-	return r.repository.DB.Raw(sql, values...)
+func (r repository[T]) Raw(context context.Context, sql string, values ...interface{}) (tx *gorm.DB) {
+	return r.repository.Raw(context, sql, values...)
 }
