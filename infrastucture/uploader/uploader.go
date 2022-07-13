@@ -38,8 +38,8 @@ func New(bucket, accessKey, accessSecret string, region string) *Uploader {
 	}
 }
 
-func (u *Uploader) GetURL(key string) (string, error) {
-	resp, err := u.presignClient.PresignGetObject(context.Background(), &s3.GetObjectInput{
+func (u *Uploader) GetURL(context context.Context, key string) (string, error) {
+	resp, err := u.presignClient.PresignGetObject(context, &s3.GetObjectInput{
 		Bucket:                     aws.String(u.bucket),
 		Key:                        aws.String(key),
 		ResponseContentDisposition: aws.String("inline"),
@@ -52,8 +52,8 @@ func (u *Uploader) GetURL(key string) (string, error) {
 	return resp.URL, nil
 }
 
-func (u *Uploader) GetBodyContent(key string) ([]byte, error) {
-	resp, err := u.client.GetObject(context.Background(), &s3.GetObjectInput{
+func (u *Uploader) GetBodyContent(context context.Context, key string) ([]byte, error) {
+	resp, err := u.client.GetObject(context, &s3.GetObjectInput{
 		Bucket: aws.String(u.bucket),
 		Key:    aws.String(key),
 	})
@@ -70,10 +70,10 @@ func (u *Uploader) GetBodyContent(key string) ([]byte, error) {
 	return body, nil
 }
 
-func (u *Uploader) Upload(key string, body []byte) (*manager.UploadOutput, error) {
+func (u *Uploader) Upload(context context.Context, key string, body []byte) (*manager.UploadOutput, error) {
 	content_type := http.DetectContentType(body)
 
-	return u.uploader.Upload(context.Background(), &s3.PutObjectInput{
+	return u.uploader.Upload(context, &s3.PutObjectInput{
 		Bucket:      aws.String(u.bucket),
 		Key:         aws.String(key),
 		Body:        bytes.NewReader(body),
@@ -81,8 +81,8 @@ func (u *Uploader) Upload(key string, body []byte) (*manager.UploadOutput, error
 	})
 }
 
-func (u *Uploader) Delete(key string) error {
-	_, err := u.client.DeleteObject(context.Background(), &s3.DeleteObjectInput{
+func (u *Uploader) Delete(context context.Context, key string) error {
+	_, err := u.client.DeleteObject(context, &s3.DeleteObjectInput{
 		Bucket: aws.String(u.bucket),
 		Key:    aws.String(key),
 	})

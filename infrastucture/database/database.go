@@ -2,29 +2,29 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"reflect"
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"github.com/zsmartex/pkg/v2/infrastucture/event_api"
-	"github.com/zsmartex/pkg/v2/infrastucture/kafka"
-	"github.com/zsmartex/pkg/v2/infrastucture/rango"
-	"github.com/zsmartex/pkg/v2/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"database/sql"
+	"github.com/zsmartex/pkg/v2/infrastucture/event_api"
+	"github.com/zsmartex/pkg/v2/infrastucture/kafka"
+	"github.com/zsmartex/pkg/v2/infrastucture/rango"
+	"github.com/zsmartex/pkg/v2/log"
 
 	_ "github.com/lib/pq"
 )
 
 type CallbackConfig struct {
-	KafkaProducer *kafka.Producer
-	RangoClient   *rango.RangoClient
-	EventAPI      *event_api.EventAPI
+	Producer *kafka.Producer
+	Rango    *rango.Client
+	EventAPI *event_api.EventAPI
 }
 
 type Config struct {
@@ -94,19 +94,17 @@ func New(config *Config) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// TODO: add support EventAPI here
-
 	if config.Callback != nil {
-		if config.Callback.KafkaProducer != nil && config.Callback.RangoClient != nil {
+		if config.Callback.Producer != nil && config.Callback.Rango != nil {
 			db.Callback().Update().After("gorm:after_update").
 				Register("model:updated", func(db *gorm.DB) {
 					if db.Statement.Schema != nil {
 						if methodValue := db.Statement.ReflectValue.MethodByName("CustomAfterUpdate"); methodValue.IsValid() {
 							switch methodValue.Type().String() {
-							case "func(*kafka.Producer, *rango.RangoClient) error":
-								methodValue.Call([]reflect.Value{reflect.ValueOf(config.Callback.KafkaProducer), reflect.ValueOf(config.Callback.RangoClient)})
+							case "func(context.Context, *kafka.Producer, *rango.Client) error":
+								methodValue.Call([]reflect.Value{reflect.ValueOf(db.Statement.Context), reflect.ValueOf(config.Callback.Producer), reflect.ValueOf(config.Callback.Rango)})
 							default:
-								log.Warnf("Model %v don't match %v Interface, should be `%v(*kafka.Producer, *rango.RangoClient) error`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
+								log.Warnf("Model %v don't match %v Interface, should be `%v(context.Context, *kafka.Producer, *rango.RangoClient) error`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
 							}
 						}
 					}
@@ -117,10 +115,10 @@ func New(config *Config) (*gorm.DB, error) {
 					if db.Statement.Schema != nil {
 						if methodValue := db.Statement.ReflectValue.MethodByName("CustomAfterCreate"); methodValue.IsValid() {
 							switch methodValue.Type().String() {
-							case "func(*kafka.Producer, *rango.RangoClient) error":
-								methodValue.Call([]reflect.Value{reflect.ValueOf(config.Callback.KafkaProducer), reflect.ValueOf(config.Callback.RangoClient)})
+							case "func(context.Context, *kafka.Producer, *rango.Client) error":
+								methodValue.Call([]reflect.Value{reflect.ValueOf(db.Statement.Context), reflect.ValueOf(config.Callback.Producer), reflect.ValueOf(config.Callback.Rango)})
 							default:
-								log.Warnf("Model %v don't match %v Interface, should be `%v(*kafka.Producer, *rango.RangoClient) error`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
+								log.Warnf("Model %v don't match %v Interface, should be `%v(context.Context, *kafka.Producer, *rango.RangoClient) error`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
 							}
 						}
 					}
@@ -140,16 +138,16 @@ func New(config *Config) (*gorm.DB, error) {
 					if methodValue := db.Statement.ReflectValue.MethodByName("AsMapForEventAPI"); methodValue.IsValid() {
 						switch methodValue.Type().String() {
 						case "func() map[string]interface{}":
-							table_name := methodTableNameValue.Call([]reflect.Value{})[0].Interface().(string)
+							tableName := methodTableNameValue.Call([]reflect.Value{})[0].Interface().(string)
 							results := methodValue.Call([]reflect.Value{})
 
-							event_name := fmt.Sprintf("model.%s.created", table_name)
-							err := config.Callback.EventAPI.Notify(event_name, event_api.EventAPIPayload{
+							eventName := fmt.Sprintf("model.%s.created", tableName)
+							err := config.Callback.EventAPI.Notify(db.Statement.Context, eventName, event_api.EventAPIPayload{
 								Record: results[0].Interface().(map[string]interface{}),
 							})
 
 							if err != nil {
-								log.Errorf("Failed to send event to event api event_name: %s, err: %v", event_name, err)
+								log.Errorf("Failed to send event to event api event_name: %s, err: %v", eventName, err)
 							}
 						default:
 							log.Warnf("Model %v don't match %v Interface, should be `%v() map[string]interface{}`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
@@ -170,16 +168,16 @@ func New(config *Config) (*gorm.DB, error) {
 					if methodValue := db.Statement.ReflectValue.MethodByName("AsMapForEventAPI"); methodValue.IsValid() {
 						switch methodValue.Type().String() {
 						case "func() map[string]interface{}":
-							table_name := methodTableNameValue.Call([]reflect.Value{})[0].Interface().(string)
+							tableName := methodTableNameValue.Call([]reflect.Value{})[0].Interface().(string)
 							results := methodValue.Call([]reflect.Value{})
 
-							event_name := fmt.Sprintf("model.%s.updated", table_name)
-							err := config.Callback.EventAPI.Notify(event_name, event_api.EventAPIPayload{
+							eventName := fmt.Sprintf("model.%s.updated", tableName)
+							err := config.Callback.EventAPI.Notify(db.Statement.Context, eventName, event_api.EventAPIPayload{
 								Record: results[0].Interface().(map[string]interface{}),
 							})
 
 							if err != nil {
-								log.Errorf("Failed to send event to event api event_name: %s, err: %v", event_name, err)
+								log.Errorf("Failed to send event to event api event_name: %s, err: %v", eventName, err)
 							}
 						default:
 							log.Warnf("Model %v don't match %v Interface, should be `%v() map[string]interface{}`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
@@ -193,7 +191,6 @@ func New(config *Config) (*gorm.DB, error) {
 	return db, nil
 }
 
-// create database if it doesn't exist
 func CreateDatabase(host string, port int, user, password, dbname string) error {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s sslmode=disable", host, port, user, password)
 	db, err := sql.Open("postgres", dsn)
