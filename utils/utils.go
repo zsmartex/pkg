@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
@@ -9,6 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +18,8 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"gorm.io/gorm"
+
+	"github.com/zsmartex/pkg/v2/log"
 )
 
 func Contains[T any](arr []T, v T) bool {
@@ -186,4 +190,16 @@ func ValidateImageFile(file multipart.File) bool {
 	file.Seek(0, 0)
 
 	return strings.HasPrefix(http.DetectContentType(fileHeader), "image/")
+}
+
+func StackTraceHandler(e interface{}) {
+	if err, ok := e.(error); ok {
+		if errors.Is(err, context.Canceled) {
+			return
+		}
+	}
+
+	buf := make([]byte, 2048)
+	buf = buf[:runtime.Stack(buf, false)]
+	log.Errorf("Panic: %v\n%s\n", e, string(buf))
 }
