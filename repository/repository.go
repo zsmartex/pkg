@@ -62,7 +62,7 @@ func (r repository[T]) Transaction(handler func(tx *gorm.DB) error) (err error) 
 	tx := r.repository.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
-			if err = tx.Rollback().Error; err != nil {
+			if err := tx.Rollback().Error; err != nil {
 				log.Errorf("failed to rollback transaction: %v", err)
 			}
 
@@ -70,15 +70,15 @@ func (r repository[T]) Transaction(handler func(tx *gorm.DB) error) (err error) 
 		}
 	}()
 
-	if err = handler(tx); err != nil {
-		if err = tx.Rollback().Error; err != nil {
+	if err := handler(tx); err != nil {
+		if err := tx.Rollback().Error; err != nil {
 			log.Errorf("failed to rollback transaction: %v", err)
 		}
 
 		return err
 	}
 
-	if err = tx.Commit().Error; err != nil {
+	if err := tx.Commit().Error; err != nil {
 		log.Errorf("failed to commit transaction: %v", err)
 		return err
 	}
