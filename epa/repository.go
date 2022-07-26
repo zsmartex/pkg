@@ -8,8 +8,9 @@ import (
 )
 
 type Result[T any] struct {
-	Values    []T
-	TotalHits int64
+	Values       []T
+	TotalHits    int64
+	Aggregations elastic.Aggregations
 }
 
 type Schema interface {
@@ -54,9 +55,7 @@ func (r Repository[T]) Find(ctx context.Context, query Query) (*Result[T], error
 		search = search.TrackTotalHits(true)
 	}
 
-	if query.Limit > 0 {
-		search = search.Size(query.Limit)
-	}
+	search = search.Size(query.Limit)
 
 	if query.OrderBy != "" {
 		search = search.Sort(query.OrderBy, query.Ordering == OrderingAscending)
@@ -79,7 +78,8 @@ func (r Repository[T]) Find(ctx context.Context, query Query) (*Result[T], error
 	}
 
 	return &Result[T]{
-		Values:    values,
-		TotalHits: result.TotalHits(),
+		Values:       values,
+		TotalHits:    result.TotalHits(),
+		Aggregations: result.Aggregations,
 	}, nil
 }
