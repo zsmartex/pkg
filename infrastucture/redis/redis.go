@@ -46,6 +46,16 @@ func (r *RedisClient) HSet(context context.Context, key string, values ...interf
 	return r.Client.HSet(context, key, values...).Err()
 }
 
+func (r *RedisClient) HExists(context context.Context, key, field string) (exist bool, err error) {
+	result := r.Client.HExists(context, key, field)
+
+	if result.Err() != nil {
+		return false, err
+	}
+
+	return result.Val(), nil
+}
+
 func (r *RedisClient) HGetAll(context context.Context, key string) *redis.StringStringMapCmd {
 	return r.Client.HGetAll(context, key)
 }
