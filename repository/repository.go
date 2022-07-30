@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"github.com/zsmartex/pkg/v2/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 
@@ -65,6 +66,8 @@ func (r repository[T]) Transaction(handler func(tx *gorm.DB) error) (err error) 
 			if err := tx.Rollback().Error; err != nil {
 				log.Errorf("failed to rollback transaction: %v", err)
 			}
+
+			utils.StackTraceHandler(r)
 
 			err = r.(error)
 		}
