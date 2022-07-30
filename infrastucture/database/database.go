@@ -96,33 +96,31 @@ func New(config *Config) (*gorm.DB, error) {
 
 	if config.Callback != nil {
 		if config.Callback.Producer != nil && config.Callback.Rango != nil {
-			db.Callback().Update().After("gorm:after_update").
-				Register("model:updated", func(db *gorm.DB) {
-					if db.Statement.Schema != nil {
-						if methodValue := db.Statement.ReflectValue.MethodByName("CustomAfterUpdate"); methodValue.IsValid() {
-							switch methodValue.Type().String() {
-							case "func(context.Context, *kafka.Producer, *rango.Client) error":
-								methodValue.Call([]reflect.Value{reflect.ValueOf(db.Statement.Context), reflect.ValueOf(config.Callback.Producer), reflect.ValueOf(config.Callback.Rango)})
-							default:
-								log.Warnf("Model %v don't match %v Interface, should be `%v(context.Context, *kafka.Producer, *rango.RangoClient) error`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
-							}
+			db.Callback().Update().Register("model:updated", func(db *gorm.DB) {
+				if db.Statement.Schema != nil {
+					if methodValue := db.Statement.ReflectValue.MethodByName("CustomAfterUpdate"); methodValue.IsValid() {
+						switch methodValue.Type().String() {
+						case "func(context.Context, *kafka.Producer, *rango.Client) error":
+							methodValue.Call([]reflect.Value{reflect.ValueOf(db.Statement.Context), reflect.ValueOf(config.Callback.Producer), reflect.ValueOf(config.Callback.Rango)})
+						default:
+							log.Warnf("Model %v don't match %v Interface, should be `%v(context.Context, *kafka.Producer, *rango.RangoClient) error`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
 						}
 					}
-				})
+				}
+			})
 
-			db.Callback().Create().After("gorm:after_create").
-				Register("model:created", func(db *gorm.DB) {
-					if db.Statement.Schema != nil {
-						if methodValue := db.Statement.ReflectValue.MethodByName("CustomAfterCreate"); methodValue.IsValid() {
-							switch methodValue.Type().String() {
-							case "func(context.Context, *kafka.Producer, *rango.Client) error":
-								methodValue.Call([]reflect.Value{reflect.ValueOf(db.Statement.Context), reflect.ValueOf(config.Callback.Producer), reflect.ValueOf(config.Callback.Rango)})
-							default:
-								log.Warnf("Model %v don't match %v Interface, should be `%v(context.Context, *kafka.Producer, *rango.RangoClient) error`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
-							}
+			db.Callback().Create().Register("model:created", func(db *gorm.DB) {
+				if db.Statement.Schema != nil {
+					if methodValue := db.Statement.ReflectValue.MethodByName("CustomAfterCreate"); methodValue.IsValid() {
+						switch methodValue.Type().String() {
+						case "func(context.Context, *kafka.Producer, *rango.Client) error":
+							methodValue.Call([]reflect.Value{reflect.ValueOf(db.Statement.Context), reflect.ValueOf(config.Callback.Producer), reflect.ValueOf(config.Callback.Rango)})
+						default:
+							log.Warnf("Model %v don't match %v Interface, should be `%v(context.Context, *kafka.Producer, *rango.RangoClient) error`. Please see https://gorm.io/docs/hooks.html", db.Statement.Schema, db.Statement.Schema.Name, db.Statement.Schema.Name)
 						}
 					}
-				})
+				}
+			})
 		}
 
 		if config.Callback.EventAPI != nil {

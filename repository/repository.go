@@ -20,7 +20,7 @@ type Repository[T schema.Tabler] interface {
 	WithTrx(trxHandle *gorm.DB) Repository[T]
 	Transaction(handler func(tx *gorm.DB) error) error
 	FirstOrCreate(context context.Context, dst interface{}, filters ...gpa.Filter) error
-	Create(context context.Context, dst interface{}) error
+	Create(context context.Context, dst interface{}, filters ...gpa.Filter) error
 	Updates(context context.Context, dst interface{}, value interface{}, filters ...gpa.Filter) error
 	UpdateColumns(context context.Context, dst interface{}, value interface{}, filters ...gpa.Filter) error
 	Delete(context context.Context, dst interface{}, filters ...gpa.Filter) error
@@ -93,8 +93,8 @@ func (r repository[T]) FirstOrCreate(context context.Context, model interface{},
 	return r.repository.FirstOrCreate(context, model, filters...)
 }
 
-func (r repository[T]) Create(context context.Context, model interface{}) error {
-	return r.repository.Create(context, model)
+func (r repository[T]) Create(context context.Context, model interface{}, filters ...gpa.Filter) error {
+	return r.repository.Create(context, model, filters...)
 }
 
 func (r repository[T]) Updates(context context.Context, model interface{}, value interface{}, filters ...gpa.Filter) error {
