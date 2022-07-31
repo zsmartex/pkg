@@ -60,15 +60,25 @@ func WithFieldLessThanOrEqualTo(field string, value interface{}) Filter {
 	}
 }
 
-func WithFieldIn(field string, value interface{}) Filter {
+func WithFieldIn(field string, values ...interface{}) Filter {
+	fs := make([]elastic.Query, len(values))
+	for i, v := range values {
+		fs[i] = elastic.NewMatchQuery(field, v)
+	}
+
 	return func(query *elastic.BoolQuery) *elastic.BoolQuery {
-		return query.Must(elastic.NewTermsQuery(field, value))
+		return query.Filter(fs...)
 	}
 }
 
-func WithFieldNotIn(field string, value interface{}) Filter {
+func WithFieldNotIn(field string, values ...interface{}) Filter {
+	fs := make([]elastic.Query, len(values))
+	for i, v := range values {
+		fs[i] = elastic.NewMatchQuery(field, v)
+	}
+
 	return func(query *elastic.BoolQuery) *elastic.BoolQuery {
-		return query.MustNot(elastic.NewTermsQuery(field, value))
+		return query.MustNot(query.Filter(fs...))
 	}
 }
 
