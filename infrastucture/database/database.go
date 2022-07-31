@@ -72,7 +72,7 @@ func (d *DBlogger) Trace(ctx context.Context, begin time.Time, fc func() (string
 		return
 	}
 
-	logrus.WithContext(ctx).WithFields(fields).Debugf("%s [%s]", sql, elapsed)
+	logrus.WithContext(ctx).WithFields(fields).Tracef("%s [%s]", sql, elapsed)
 }
 
 func New(config *Config) (*gorm.DB, error) {
