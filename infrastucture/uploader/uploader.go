@@ -71,13 +71,13 @@ func (u *Uploader) GetBodyContent(context context.Context, key string) ([]byte, 
 }
 
 func (u *Uploader) Upload(context context.Context, key string, body []byte) (*manager.UploadOutput, error) {
-	content_type := http.DetectContentType(body)
+	contentType := http.DetectContentType(body)
 
 	return u.uploader.Upload(context, &s3.PutObjectInput{
 		Bucket:      aws.String(u.bucket),
 		Key:         aws.String(key),
 		Body:        bytes.NewReader(body),
-		ContentType: aws.String(content_type),
+		ContentType: aws.String(contentType),
 	})
 }
 
