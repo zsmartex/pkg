@@ -11,14 +11,15 @@ import (
 
 // Auth struct represents parsed jwt information.
 type Auth struct {
-	UID         string   `json:"uid"`
-	State       string   `json:"state"`
-	Email       string   `json:"email"`
-	Username    string   `json:"username"`
-	Role        string   `json:"role"`
-	ReferralUID string   `json:"referral_uid"`
-	Level       int64    `json:"level"`
-	Audience    []string `json:"aud,omitempty"`
+	UID         string      `json:"uid"`
+	State       string      `json:"state"`
+	Email       string      `json:"email"`
+	Username    string      `json:"username"`
+	Role        string      `json:"role"`
+	ReferralUID null.String `json:"referral_uid,omitempty"`
+	HasPhone    bool        `json:"has_phone"`
+	Level       int64       `json:"level"`
+	Audience    []string    `json:"aud,omitempty"`
 
 	jwt.StandardClaims
 }
@@ -58,7 +59,7 @@ func ForgeToken(uid, email, role string, referralUID null.String, level int64, h
 		"exp":          time.Now().UTC().Add(time.Hour).Unix(),
 		"sub":          "session",
 		"iss":          "barong",
-		"aud":          [3]string{"peatio", "barong", "finex"},
+		"aud":          [3]string{"peatio", "barong", "kouda"},
 		"uid":          uid,
 		"email":        email,
 		"role":         role,
