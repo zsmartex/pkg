@@ -10,6 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"reflect"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -202,4 +203,9 @@ func StackTraceHandler(e interface{}) {
 	buf := make([]byte, 2048)
 	buf = buf[:runtime.Stack(buf, false)]
 	log.Errorf("Panic: %v\n%s\n", e, string(buf))
+}
+
+func RemoveDuplicateSpace(str string) string {
+	space := regexp.MustCompile(`\s+`)
+	return space.ReplaceAllString(str, " ")
 }
