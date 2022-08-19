@@ -14,6 +14,7 @@ import (
 
 type Repository[T schema.Tabler] interface {
 	DB() *gorm.DB
+	TableName() string
 	WithTrx(trxHandle *gorm.DB) Repository[T]
 	Count(context context.Context, filters ...gpa.Filter) (int, error)
 	First(context context.Context, dst interface{}, filters ...gpa.Filter) error
@@ -30,6 +31,7 @@ type Repository[T schema.Tabler] interface {
 
 type repository[T schema.Tabler] struct {
 	repository gpa.Repository
+	entity T
 }
 
 func New[T schema.Tabler](db *gorm.DB, entity T) Repository[T] {
@@ -40,6 +42,10 @@ func New[T schema.Tabler](db *gorm.DB, entity T) Repository[T] {
 
 func (r repository[T]) DB() *gorm.DB {
 	return r.repository.DB
+}
+
+func (r repository[T]) TableName() string {
+	return r.entity.TableName()
 }
 
 func (r repository[T]) WithTrx(trxHandle *gorm.DB) Repository[T] {
