@@ -13,11 +13,12 @@ import (
 )
 
 type Repository[T schema.Tabler] interface {
+	DB() *gorm.DB
+	WithTrx(trxHandle *gorm.DB) Repository[T]
 	Count(context context.Context, filters ...gpa.Filter) (int, error)
 	First(context context.Context, dst interface{}, filters ...gpa.Filter) error
 	Last(context context.Context, dst interface{}, filters ...gpa.Filter) error
 	Find(context context.Context, dst interface{}, filters ...gpa.Filter) error
-	WithTrx(trxHandle *gorm.DB) Repository[T]
 	Transaction(handler func(tx *gorm.DB) error) error
 	FirstOrCreate(context context.Context, dst interface{}, filters ...gpa.Filter) error
 	Create(context context.Context, dst interface{}, filters ...gpa.Filter) error
@@ -35,6 +36,10 @@ func New[T schema.Tabler](db *gorm.DB, entity T) Repository[T] {
 	return repository[T]{
 		repository: gpa.New(db, entity),
 	}
+}
+
+func (r repository[T]) DB() *gorm.DB {
+	return r.repository.DB
 }
 
 func (r repository[T]) WithTrx(trxHandle *gorm.DB) Repository[T] {
