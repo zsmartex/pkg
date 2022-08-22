@@ -209,3 +209,54 @@ func RemoveDuplicateSpace(str string) string {
 	space := regexp.MustCompile(`\s+`)
 	return space.ReplaceAllString(str, " ")
 }
+
+func compareDiff(dst, origin, model reflect.Value) {
+	switch dst.Kind() {
+	case reflect.Struct:
+		for i := 0; i < model.NumField(); i++ {
+			compareDiff(dst.Field(i), origin.Field(i), model.Field(i))
+		}
+	case reflect.Slice:
+		if origin.IsNil() && !model.IsNil() {
+			dst.Set(model)
+		} else if !reflect.DeepEqual(origin.Interface(), model.Interface()) && !model.IsNil() {
+			dst.Set(model)
+		}
+	case reflect.Map:
+		if origin.IsNil() && !model.IsNil() {
+			dst.Set(model)
+		} else if !reflect.DeepEqual(origin.Interface(), model.Interface()) && !model.IsNil() {
+			dst.Set(model)
+		}
+	case reflect.Ptr:
+		fallthrough
+	default:
+		if origin.Interface() != model.Interface() {
+			if dst.CanSet() {
+				dst.Set(model)
+			}
+		}
+	}
+}
+
+func CompareDiff(dst, origin, model interface{}) error {
+	if dst != nil && reflect.ValueOf(dst).Kind() != reflect.Ptr {
+		return errors.New("non pointer dst")
+	}
+
+	dstValue := reflect.ValueOf(dst).Elem()
+	originValue := reflect.ValueOf(origin)
+	modelValue := reflect.ValueOf(model)
+
+	if originValue.Kind() == reflect.Ptr {
+		originValue = originValue.Elem()
+	}
+
+	if modelValue.Kind() == reflect.Ptr {
+		modelValue = modelValue.Elem()
+	}
+
+	compareDiff(dstValue, originValue, modelValue)
+
+	return nil
+}
