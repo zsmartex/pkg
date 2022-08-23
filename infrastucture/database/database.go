@@ -83,7 +83,8 @@ func New(config *Config) (*gorm.DB, error) {
 	dialector = postgres.Open(dsn)
 
 	db, err := gorm.Open(dialector, &gorm.Config{
-		SkipDefaultTransaction: true,
+		SkipDefaultTransaction:   true,
+		DisableNestedTransaction: true,
 		Logger: &DBlogger{
 			SlowThreshold:         200 * time.Millisecond,
 			SkipErrRecordNotFound: true,

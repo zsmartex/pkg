@@ -3,13 +3,10 @@ package repository
 import (
 	"context"
 
-	"github.com/zsmartex/pkg/v2/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 
 	"github.com/zsmartex/pkg/v2/gpa"
-
-	"github.com/zsmartex/pkg/v2/log"
 )
 
 type Repository[T schema.Tabler] interface {
@@ -31,7 +28,7 @@ type Repository[T schema.Tabler] interface {
 
 type repository[T schema.Tabler] struct {
 	repository gpa.Repository
-	entity T
+	entity     T
 }
 
 func New[T schema.Tabler](db *gorm.DB, entity T) Repository[T] {
@@ -71,33 +68,7 @@ func (r repository[T]) Find(context context.Context, models interface{}, filters
 }
 
 func (r repository[T]) Transaction(handler func(tx *gorm.DB) error) (err error) {
-	tx := r.repository.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			if err := tx.Rollback().Error; err != nil {
-				log.Errorf("failed to rollback transaction: %v", err)
-			}
-
-			utils.StackTraceHandler(r)
-
-			err = r.(error)
-		}
-	}()
-
-	if err := handler(tx); err != nil {
-		if err := tx.Rollback().Error; err != nil {
-			log.Errorf("failed to rollback transaction: %v", err)
-		}
-
-		return err
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		log.Errorf("failed to commit transaction: %v", err)
-		return err
-	}
-
-	return nil
+	return r.repository.DB.Transaction(handler)
 }
 
 func (r repository[T]) FirstOrCreate(context context.Context, model interface{}, filters ...gpa.Filter) error {
