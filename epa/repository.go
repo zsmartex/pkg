@@ -2,9 +2,14 @@ package epa
 
 import (
 	"context"
+	"errors"
 	"reflect"
 
 	"github.com/olivere/elastic/v7"
+)
+
+var (
+	ErrNoSuchIndex = errors.New("no such index")
 )
 
 type Result[T any] struct {
@@ -66,7 +71,9 @@ func (r Repository[T]) Find(ctx context.Context, query Query) (*Result[T], error
 	}
 
 	result, err := search.Do(ctx)
-	if err != nil {
+	if result.Status == 404 {
+		return nil, ErrNoSuchIndex
+	} else if err != nil {
 		return nil, err
 	}
 
