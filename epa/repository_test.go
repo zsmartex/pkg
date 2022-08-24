@@ -2,11 +2,10 @@ package epa
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
-	"github.com/olivere/elastic/v7"
+	"github.com/zsmartex/pkg/v2/epa/aggregation"
 	"github.com/zsmartex/pkg/v2/infrastucture/elasticsearch"
 )
 
@@ -21,7 +20,7 @@ func (o Order) IndexName() string {
 
 func newRepo() (Repository[Order], error) {
 	client, err := elasticsearch.New(&elasticsearch.Config{
-		URL:      "http://zsmartex.com:9200",
+		URL:      []string{"http://demo.zsmartex.com:9200"},
 		Username: "elastic",
 		Password: "elastic",
 	})
@@ -33,34 +32,34 @@ func newRepo() (Repository[Order], error) {
 }
 
 func TestCreate(t *testing.T) {
-	repo, err := newRepo()
-	if err != nil {
-		t.Error(err)
-	}
-
-	orders := []*Order{
-		{
-			ID:        1,
-			CreatedAt: time.Now(),
-		},
-		{
-			ID:        2,
-			CreatedAt: time.Now(),
-		},
-		{
-			ID:        3,
-			CreatedAt: time.Now(),
-		},
-	}
-
-	for _, order := range orders {
-		r, err := repo.Create(context.Background(), fmt.Sprint(order.ID), order)
-		if err != nil {
-			t.Error(err)
-		}
-
-		t.Error(r)
-	}
+	//repo, err := newRepo()
+	//if err != nil {
+	//	t.Error(err)
+	//}
+	//
+	//orders := []*Order{
+	//	{
+	//		ID:        1,
+	//		CreatedAt: time.Now(),
+	//	},
+	//	{
+	//		ID:        2,
+	//		CreatedAt: time.Now(),
+	//	},
+	//	{
+	//		ID:        3,
+	//		CreatedAt: time.Now(),
+	//	},
+	//}
+	//
+	//for _, order := range orders {
+	//	r, err := repo.Create(context.Background(), fmt.Sprint(order.ID), order)
+	//	if err != nil {
+	//		t.Error(err)
+	//	}
+	//
+	//	t.Error(r)
+	//}
 }
 
 func TestFind(t *testing.T) {
@@ -73,15 +72,21 @@ func TestFind(t *testing.T) {
 		context.Background(),
 		Query{
 			Limit: 0,
-			Addons: func(searchService *elastic.SearchService) *elastic.SearchService {
-				return searchService.Aggregation("sales", elastic.NewDateHistogramAggregation().Field("created_at").CalendarInterval("day").Format("yyyy-MM-dd"))
+			Filters: []Filter{
+				WithDateRange("created_at", "2022-07-05T00:00:00.551Z", "2022-07-08T17:10:26.697Z"),
+				WithFieldLessThan("price", 12),
+			},
+			Aggregations: map[string]aggregation.Aggregation{
+				"price": aggregation.NewDateHistogramAggregation("created_at").FixedInterval("1d"),
 			},
 		},
 	)
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	t.Error(result.Values)
-	t.Error(result.TotalHits)
+	t.Log(result.Values)
+	t.Log(result.TotalHits)
+	t.Log(result.Aggregations)
 }

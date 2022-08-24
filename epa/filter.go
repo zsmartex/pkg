@@ -1,39 +1,35 @@
 package epa
 
 import (
-	"github.com/olivere/elastic/v7"
-)
-
-type Ordering string
-
-const (
-	OrderingAscending  Ordering = "asc"
-	OrderingDescending Ordering = "desc"
+	"github.com/zsmartex/pkg/v2/epa/aggregation"
+	"github.com/zsmartex/pkg/v2/epa/query"
+	"github.com/zsmartex/pkg/v2/queries"
 )
 
 type Query struct {
-	Page     int
-	Limit    int
-	OrderBy  string
-	Ordering Ordering
-	Filters  []Filter
-	Addons   func(*elastic.SearchService) *elastic.SearchService
+	Page         int
+	Limit        int
+	OrderBy      string
+	Ordering     queries.Ordering
+	Filters      []Filter
+	Aggregations aggregation.Aggregations
 }
 
-type Filter func(query *elastic.BoolQuery) *elastic.BoolQuery
+type Aggregation func(...*aggregation.Aggregation) *aggregation.Aggregation
+type Filter func(*query.BoolQuery) *query.BoolQuery
 
-func ApplyFilters(query *elastic.BoolQuery, filters []Filter) *elastic.BoolQuery {
+func ApplyFilters(q *query.BoolQuery, filters []Filter) *query.BoolQuery {
 	for _, f := range filters {
-		query = f(query)
+		q = f(q)
 	}
-	return query
+	return q
 }
 
 func ChainFilters(filters ...Filter) Filter {
-	return func(query *elastic.BoolQuery) *elastic.BoolQuery {
+	return func(q *query.BoolQuery) *query.BoolQuery {
 		for _, f := range filters {
-			query = f(query)
+			q = f(q)
 		}
-		return query
+		return q
 	}
 }

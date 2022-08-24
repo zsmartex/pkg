@@ -1,46 +1,19 @@
 package elasticsearch
 
 import (
-	"github.com/olivere/elastic/v7"
-	"github.com/zsmartex/pkg/v2/log"
+	"github.com/elastic/go-elasticsearch/v8"
 )
 
 type Config struct {
-	URL      string
+	URL      []string
 	Username string
 	Password string
-	Sniff    bool
 }
 
-type LoggerError struct {
-}
-
-func (LoggerError) Printf(format string, v ...interface{}) {
-	log.Errorf(format, v...)
-}
-
-type LoggerInfo struct {
-}
-
-func (LoggerInfo) Printf(format string, v ...interface{}) {
-	log.Infof(format, v...)
-}
-
-type LoggerTrace struct {
-}
-
-func (LoggerTrace) Printf(format string, v ...interface{}) {
-	log.Tracef(format, v...)
-}
-
-func New(cfg *Config) (*elastic.Client, error) {
-	return elastic.NewClient(
-		elastic.SetBasicAuth(cfg.Username, cfg.Password),
-		elastic.SetGzip(true),
-		elastic.SetURL(cfg.URL),
-		elastic.SetSniff(cfg.Sniff),
-		elastic.SetTraceLog(LoggerError{}),
-		elastic.SetInfoLog(LoggerInfo{}),
-		elastic.SetInfoLog(LoggerTrace{}),
-	)
+func New(cfg *Config) (*elasticsearch.Client, error) {
+	return elasticsearch.NewClient(elasticsearch.Config{
+		Addresses: cfg.URL,
+		Username:  cfg.Username,
+		Password:  cfg.Password,
+	})
 }

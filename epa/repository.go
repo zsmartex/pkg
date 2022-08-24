@@ -1,21 +1,28 @@
 package epa
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
-	"reflect"
+	"io/ioutil"
 
-	"github.com/olivere/elastic/v7"
+	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v8/esapi"
+	"github.com/zsmartex/pkg/v2/epa/query"
+	"github.com/zsmartex/pkg/v2/queries"
 )
 
-var (
-	ErrNoSuchIndex = errors.New("no such index")
-)
+type AggregationResult struct {
+	Key         int    `json:"key"`
+	DocCount    int    `json:"doc_count"`
+	KeyAsString string `json:"key_as_string"`
+}
 
 type Result[T any] struct {
 	Values       []T
-	TotalHits    int64
-	Aggregations elastic.Aggregations
+	TotalHits    int
+	Aggregations map[string][]AggregationResult
 }
 
 type Schema interface {
@@ -23,11 +30,11 @@ type Schema interface {
 }
 
 type Repository[T any] struct {
-	*elastic.Client
+	*elasticsearch.Client
 	Schema
 }
 
-func New[T Schema](client *elastic.Client, entity T) Repository[T] {
+func New[T Schema](client *elasticsearch.Client, entity T) Repository[T] {
 	return Repository[T]{
 		client,
 		entity,
@@ -35,58 +42,165 @@ func New[T Schema](client *elastic.Client, entity T) Repository[T] {
 }
 
 func (r Repository[T]) CheckHealth(ctx context.Context) bool {
-	_, err := r.ClusterHealth().Do(ctx)
-
+	_, err := r.Info(r.Info.WithContext(ctx))
 	return err == nil
 }
 
-func (r Repository[T]) Create(ctx context.Context, id string, body *T) (*elastic.IndexResponse, error) {
-	return r.
-		Index().
-		Index(r.IndexName()).
-		Id(id).
-		BodyJson(body).
-		Do(ctx)
+type Response struct {
+	Hits struct {
+		Hits []struct {
+			Index  string          `json:"_index"`
+			ID     string          `json:"_id"`
+			Score  float64         `json:"_score"`
+			Source json.RawMessage `json:"_source"`
+		} `json:"hits"`
+		Total struct {
+			Value    int    `json:"value"`
+			Relation string `json:"relation"`
+		} `json:"total"`
+	} `json:"hits"`
+
+	Aggregations map[string]struct {
+		Buckets []struct {
+			Key         int    `json:"key"`
+			DocCount    int    `json:"doc_count"`
+			KeyAsString string `json:"key_as_string"`
+		} `json:"buckets"`
+	} `json:"aggregations"`
 }
 
-func (r Repository[T]) Find(ctx context.Context, query Query) (*Result[T], error) {
-	search := r.
-		Search().
-		Index(r.IndexName()).
-		Query(ApplyFilters(elastic.NewBoolQuery(), query.Filters))
+type ErrorResponse struct {
+	Error struct {
+		RootCause []struct {
+			Type         string `json:"type"`
+			Reason       string `json:"reason"`
+			ResourceType string `json:"resource.type"`
+			ResourceID   string `json:"resource.id"`
+			IndexUUID    string `json:"index_uuid"`
+			Index        string `json:"index"`
+		} `json:"root_cause"`
+		Type         string `json:"type"`
+		Reason       string `json:"reason"`
+		ResourceType string `json:"resource.type"`
+		ResourceID   string `json:"resource.id"`
+		IndexUUID    string `json:"index_uuid"`
+		Index        string `json:"index"`
+	} `json:"error"`
+	Status int `json:"status"`
+}
 
-	if query.Page > 0 {
-		search = search.From((query.Page - 1) * query.Limit)
-		search = search.TrackTotalHits(true)
+func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
+	searchRequest := make([]func(*esapi.SearchRequest), 0)
+	searchRequest = append(searchRequest,
+		r.Search.WithContext(ctx),
+		r.Client.Search.WithIndex(r.IndexName()),
+	)
+
+	if q.Page > 0 {
+		searchRequest = append(
+			searchRequest,
+			r.Client.Search.WithFrom((q.Page-1)*q.Limit),
+			r.Client.Search.WithTrackTotalHits(true),
+		)
 	}
 
-	search = search.Size(query.Limit)
+	searchRequest = append(searchRequest, r.Client.Search.WithSize(q.Limit))
 
-	if query.OrderBy != "" {
-		search = search.Sort(query.OrderBy, query.Ordering == OrderingAscending)
+	queryMap := map[string]interface{}{}
+
+	if len(q.Filters) > 0 {
+		q, err := ApplyFilters(query.NewBoolQuery(), q.Filters).Source()
+		if err != nil {
+			return nil, err
+		}
+		queryMap["query"] = q
 	}
 
-	if query.Addons != nil {
-		search = query.Addons(search)
+	if len(q.Aggregations) > 0 {
+		aggs, err := q.Aggregations.Source()
+		if err != nil {
+			return nil, err
+		}
+
+		queryMap["aggs"] = aggs
 	}
 
-	result, err := search.Do(ctx)
-	if result.Status == 404 {
-		return nil, ErrNoSuchIndex
-	} else if err != nil {
+	if q.OrderBy != "" {
+		ordering := q.Ordering
+		if len(ordering) == 0 {
+			ordering = queries.OrderingAsc
+		}
+
+		queryMap["sort"] = []interface{}{
+			map[string]interface{}{
+				q.OrderBy: ordering,
+			},
+		}
+	}
+
+	data, err := json.Marshal(queryMap)
+	if err != nil {
 		return nil, err
 	}
 
-	var value T
+	searchRequest = append(searchRequest, r.Client.Search.WithBody(bytes.NewReader(data)))
+
+	res, err := r.Client.Search(searchRequest...)
+	if err != nil {
+		return nil, err
+	}
+
+	resBuf, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode == 404 {
+		return &Result[T]{
+			TotalHits: 0,
+			Values:    []T{},
+		}, nil
+	}
+
+	if res.IsError() {
+		var errResponse ErrorResponse
+		if err := json.Unmarshal(resBuf, &errResponse); err != nil {
+			return nil, err
+		}
+
+		return nil, errors.New(errResponse.Error.RootCause[0].Reason)
+	}
+
+	var response Response
+	if err := json.Unmarshal(resBuf, &response); err != nil {
+		return nil, err
+	}
+
 	values := make([]T, 0)
 
-	for _, v := range result.Each(reflect.TypeOf(value)) {
-		values = append(values, v.(T))
+	for _, hit := range response.Hits.Hits {
+		var value T
+		if err := json.Unmarshal(hit.Source, &value); err != nil {
+			return nil, err
+		}
+		values = append(values, value)
+	}
+
+	aggregations := make(map[string][]AggregationResult, 0)
+	for name, agg := range response.Aggregations {
+		aggregations[name] = make([]AggregationResult, 0)
+		for _, bucket := range agg.Buckets {
+			aggregations[name] = append(aggregations[name], AggregationResult{
+				Key:         bucket.Key,
+				DocCount:    bucket.DocCount,
+				KeyAsString: bucket.KeyAsString,
+			})
+		}
 	}
 
 	return &Result[T]{
+		TotalHits:    response.Hits.Total.Value,
 		Values:       values,
-		TotalHits:    result.TotalHits(),
-		Aggregations: result.Aggregations,
+		Aggregations: aggregations,
 	}, nil
 }
