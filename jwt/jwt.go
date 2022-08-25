@@ -18,7 +18,7 @@ type Auth struct {
 	Role        string      `json:"role"`
 	ReferralUID null.String `json:"referral_uid,omitempty"`
 	HasPhone    bool        `json:"has_phone"`
-	Level       int64       `json:"level"`
+	Level       int         `json:"level"`
 	Audience    []string    `json:"aud,omitempty"`
 
 	jwt.StandardClaims
