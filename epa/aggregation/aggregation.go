@@ -1,27 +1,23 @@
 package aggregation
 
+import "encoding/json"
+
 type Aggregation interface {
 	Source() (interface{}, error)
 }
 
-type Aggregations map[string]Aggregation
+type Aggregations map[string]json.RawMessage
 
-func (a Aggregations) Source() (interface{}, error) {
-	//
-	// {
-	//   "aggs" : {
-	//     "avg_grade" : { "avg" : { "field" : "grade" } }
-	//   }
-	// }
-	//
-	source := make(map[string]interface{})
-	for name, agg := range a {
-		src, err := agg.Source()
-		if err != nil {
-			return nil, err
+func (a Aggregations) DateHistogram(name string) (items *AggregationBucketHistogramItems, found bool) {
+	if raw, found := a[name]; found {
+		agg := new(AggregationBucketHistogramItems)
+		if raw == nil {
+			return agg, true
 		}
-
-		source[name] = src
+		if err := json.Unmarshal(raw, agg); err == nil {
+			return agg, true
+		}
 	}
-	return source, nil
+
+	return nil, false
 }

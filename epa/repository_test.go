@@ -20,7 +20,7 @@ func (o Order) IndexName() string {
 
 func newRepo() (Repository[Order], error) {
 	client, err := elasticsearch.New(&elasticsearch.Config{
-		URL:      []string{"http://demo.zsmartex.com:9200"},
+		URL:      []string{"http://zsmartex.com:9200"},
 		Username: "elastic",
 		Password: "elastic",
 	})
@@ -71,11 +71,8 @@ func TestFind(t *testing.T) {
 	result, err := repo.Find(
 		context.Background(),
 		Query{
-			Limit: 0,
-			Filters: []Filter{
-				WithDateRange("created_at", "2022-07-05T00:00:00.551Z", "2022-07-08T17:10:26.697Z"),
-				WithFieldLessThan("price", 12),
-			},
+			Limit:   0,
+			Filters: []Filter{},
 			Aggregations: map[string]aggregation.Aggregation{
 				"price": aggregation.NewDateHistogramAggregation("created_at").FixedInterval("1d"),
 			},
@@ -88,5 +85,4 @@ func TestFind(t *testing.T) {
 
 	t.Log(result.Values)
 	t.Log(result.TotalHits)
-	t.Log(result.Aggregations)
 }

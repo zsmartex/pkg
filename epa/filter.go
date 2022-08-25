@@ -12,10 +12,9 @@ type Query struct {
 	OrderBy      string
 	Ordering     queries.Ordering
 	Filters      []Filter
-	Aggregations aggregation.Aggregations
+	Aggregations map[string]aggregation.Aggregation
 }
 
-type Aggregation func(...*aggregation.Aggregation) *aggregation.Aggregation
 type Filter func(*query.BoolQuery) *query.BoolQuery
 
 func ApplyFilters(q *query.BoolQuery, filters []Filter) *query.BoolQuery {

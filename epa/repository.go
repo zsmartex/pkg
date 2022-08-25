@@ -9,20 +9,15 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
+	"github.com/zsmartex/pkg/v2/epa/aggregation"
 	"github.com/zsmartex/pkg/v2/epa/query"
 	"github.com/zsmartex/pkg/v2/queries"
 )
 
-type AggregationResult struct {
-	Key         int    `json:"key"`
-	DocCount    int    `json:"doc_count"`
-	KeyAsString string `json:"key_as_string"`
-}
-
 type Result[T any] struct {
 	Values       []T
 	TotalHits    int
-	Aggregations map[string][]AggregationResult
+	Aggregations aggregation.Aggregations
 }
 
 type Schema interface {
@@ -60,13 +55,7 @@ type Response struct {
 		} `json:"total"`
 	} `json:"hits"`
 
-	Aggregations map[string]struct {
-		Buckets []struct {
-			Key         int    `json:"key"`
-			DocCount    int    `json:"doc_count"`
-			KeyAsString string `json:"key_as_string"`
-		} `json:"buckets"`
-	} `json:"aggregations"`
+	Aggregations json.RawMessage `json:"aggregations"`
 }
 
 type ErrorResponse struct {
@@ -117,9 +106,14 @@ func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
 	}
 
 	if len(q.Aggregations) > 0 {
-		aggs, err := q.Aggregations.Source()
-		if err != nil {
-			return nil, err
+		aggs := make(map[string]interface{})
+
+		for name, aggregation := range q.Aggregations {
+			var err error
+			aggs[name], err = aggregation.Source()
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		queryMap["aggs"] = aggs
@@ -186,16 +180,9 @@ func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
 		values = append(values, value)
 	}
 
-	aggregations := make(map[string][]AggregationResult, 0)
-	for name, agg := range response.Aggregations {
-		aggregations[name] = make([]AggregationResult, 0)
-		for _, bucket := range agg.Buckets {
-			aggregations[name] = append(aggregations[name], AggregationResult{
-				Key:         bucket.Key,
-				DocCount:    bucket.DocCount,
-				KeyAsString: bucket.KeyAsString,
-			})
-		}
+	aggregations := make(aggregation.Aggregations)
+	if err := json.Unmarshal(response.Aggregations, &aggregations); err != nil {
+		return nil, err
 	}
 
 	return &Result[T]{
