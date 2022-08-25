@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 
 	"github.com/elastic/go-elasticsearch/v8"
@@ -108,9 +109,9 @@ func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
 	if len(q.Aggregations) > 0 {
 		aggs := make(map[string]interface{})
 
-		for name, aggregation := range q.Aggregations {
+		for name, agg := range q.Aggregations {
 			var err error
-			aggs[name], err = aggregation.Source()
+			aggs[name], err = agg.Source()
 			if err != nil {
 				return nil, err
 			}
@@ -136,6 +137,8 @@ func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println(string(data))
 
 	searchRequest = append(searchRequest, r.Client.Search.WithBody(bytes.NewReader(data)))
 
@@ -181,8 +184,10 @@ func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
 	}
 
 	aggregations := make(aggregation.Aggregations)
-	if err := json.Unmarshal(response.Aggregations, &aggregations); err != nil {
-		return nil, err
+	if len(q.Aggregations) > 0 {
+		if err := json.Unmarshal(response.Aggregations, &aggregations); err != nil {
+			return nil, err
+		}
 	}
 
 	return &Result[T]{

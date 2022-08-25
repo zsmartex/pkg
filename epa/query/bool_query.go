@@ -22,13 +22,13 @@ func NewBoolQuery() *BoolQuery {
 }
 
 func (q *BoolQuery) Must(queries ...Query) *BoolQuery {
-	q.mustClauses = queries
+	q.mustClauses = append(q.mustClauses, queries...)
 
 	return q
 }
 
 func (q *BoolQuery) MustNot(queries ...Query) *BoolQuery {
-	q.mustNotClauses = queries
+	q.mustNotClauses = append(q.mustNotClauses, queries...)
 
 	q.MustNot(NewMultiMatchQuery(""))
 
@@ -36,19 +36,19 @@ func (q *BoolQuery) MustNot(queries ...Query) *BoolQuery {
 }
 
 func (q *BoolQuery) Filter(queries ...Query) *BoolQuery {
-	q.filterClauses = queries
+	q.filterClauses = append(q.filterClauses, queries...)
 
 	return q
 }
 
 func (q *BoolQuery) Should(queries ...Query) *BoolQuery {
-	q.shouldClauses = queries
+	q.shouldClauses = append(q.shouldClauses, queries...)
 
 	return q
 }
 
 func (q *BoolQuery) ShouldNot(queries ...Query) *BoolQuery {
-	q.shouldNotClauses = queries
+	q.shouldNotClauses = append(q.shouldNotClauses, queries...)
 
 	return q
 }

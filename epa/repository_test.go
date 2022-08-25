@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/zsmartex/pkg/v2/epa/aggregation"
 	"github.com/zsmartex/pkg/v2/infrastucture/elasticsearch"
 )
 
@@ -71,10 +70,10 @@ func TestFind(t *testing.T) {
 	result, err := repo.Find(
 		context.Background(),
 		Query{
-			Limit:   0,
-			Filters: []Filter{},
-			Aggregations: map[string]aggregation.Aggregation{
-				"price": aggregation.NewDateHistogramAggregation("created_at").FixedInterval("1d"),
+			Limit: 10,
+			Filters: []Filter{
+				WithCreatedAtBefore(time.Now()),
+				WithFieldEqual("price", 10),
 			},
 		},
 	)
