@@ -9,8 +9,8 @@ import (
 )
 
 type Pagination struct {
-	Page  int `query:"page" validate:"uint" default:"1"`
-	Limit int `query:"limit" validate:"uint" default:"100"`
+	Page  int `query:"page" validate:"int|uint" default:"1"`
+	Limit int `query:"limit" validate:"int|uint|max:1000" default:"100"`
 }
 
 func (p *Pagination) GetFilter() gpa.Filter {
@@ -18,8 +18,8 @@ func (p *Pagination) GetFilter() gpa.Filter {
 }
 
 type Period struct {
-	TimeFrom int64 `query:"time_from" validate:"uint"`
-	TimeTo   int64 `query:"time_to" validate:"uint"`
+	TimeFrom int64 `query:"time_from" validate:"int|uint"`
+	TimeTo   int64 `query:"time_to" validate:"int|uint"`
 }
 
 func (p *Period) GetFilter() gpa.Filter {
