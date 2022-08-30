@@ -38,13 +38,13 @@ func (p *Period) GetFilter() gpa.Filter {
 	)
 }
 
-func (p *Period) Validate(limit_months int) error {
+func (p *Period) Validate(limitMonths int) error {
 	if p.TimeFrom > 0 && p.TimeTo > 0 && p.TimeFrom > p.TimeTo {
 		return fmt.Errorf("time_from must be less than time_to")
 	}
 
 	// time to and time from must between in 3 months
-	if limit_months > 0 && time.Unix(p.TimeTo, 0).Sub(time.Unix(p.TimeFrom, 0)).Hours() > float64(limit_months*30*24) {
+	if limitMonths > 0 && time.Unix(p.TimeTo, 0).Sub(time.Unix(p.TimeFrom, 0)).Hours() > float64(limitMonths*30*24) {
 		return fmt.Errorf("time_to and time_from must be less than 3 months")
 	}
 

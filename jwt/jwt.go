@@ -18,6 +18,7 @@ type Auth struct {
 	Role        string      `json:"role"`
 	ReferralUID null.String `json:"referral_uid,omitempty"`
 	HasPhone    bool        `json:"has_phone"`
+	OTP         bool        `json:"otp"`
 	Level       int         `json:"level"`
 	Audience    []string    `json:"aud,omitempty"`
 
@@ -52,7 +53,7 @@ func appendClaims(defaultClaims, customClaims jwt.MapClaims) jwt.MapClaims {
 }
 
 // ForgeToken creates a valid JWT signed by the given private key
-func ForgeToken(uid, email, role string, referralUID null.String, level int64, hasPhone bool, key *rsa.PrivateKey, customClaims jwt.MapClaims) (string, error) {
+func ForgeToken(uid, email, role string, referralUID null.String, level int64, otp bool, hasPhone bool, key *rsa.PrivateKey, customClaims jwt.MapClaims) (string, error) {
 	claims := appendClaims(jwt.MapClaims{
 		"iat":          time.Now().Unix(),
 		"jti":          strconv.FormatInt(time.Now().Unix(), 10),
@@ -67,6 +68,7 @@ func ForgeToken(uid, email, role string, referralUID null.String, level int64, h
 		"state":        "active",
 		"referral_uid": referralUID,
 		"has_phone":    hasPhone,
+		"otp":          otp,
 	}, customClaims)
 
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
