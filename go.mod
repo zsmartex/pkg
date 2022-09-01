@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.12.11
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.22
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.3
+	github.com/creasty/defaults v1.6.0
 	github.com/elastic/go-elasticsearch/v8 v8.3.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible

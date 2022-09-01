@@ -211,7 +211,7 @@ func RemoveDuplicateSpace(str string) string {
 }
 
 func compareDiff(dst, origin, model reflect.Value) {
-	switch dst.Kind() {
+	switch dst.Type().Kind() {
 	case reflect.Struct:
 		for i := 0; i < model.NumField(); i++ {
 			compareDiff(dst.Field(i), origin.Field(i), model.Field(i))
@@ -231,10 +231,8 @@ func compareDiff(dst, origin, model reflect.Value) {
 	case reflect.Ptr:
 		fallthrough
 	default:
-		if origin.Interface() != model.Interface() {
-			if dst.CanSet() {
-				dst.Set(model)
-			}
+		if origin.CanInterface() && model.CanInterface() && !reflect.DeepEqual(origin.Interface(), model.Interface()) {
+			dst.Set(model)
 		}
 	}
 }
