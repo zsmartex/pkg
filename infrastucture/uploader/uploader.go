@@ -36,8 +36,8 @@ type Config struct {
 	AccessKey    string
 	AccessSecret string
 	Region       string
-	Enpoint      string
-	Version      int64
+	Endpoint     string
+	Version      int
 }
 
 func New(config *Config) *Uploader {
@@ -64,7 +64,7 @@ func New(config *Config) *Uploader {
 	// version 1
 	s3Config := &awsV1.Config{
 		Credentials: credentialsV1.NewStaticCredentials(config.AccessKey, config.AccessSecret, ""),
-		Endpoint:    awsV1.String(config.Enpoint),
+		Endpoint:    awsV1.String(config.Endpoint),
 		Region:      awsV1.String(config.Region),
 	}
 
