@@ -28,10 +28,10 @@ const (
 var callbacks = make(map[CallbackType]map[string]func(*gorm.DB) error, 0)
 
 type Usecase[V schema.Tabler] struct {
-	repository           repository.Repository[V]
-	elasticsearchUsecase ElasticsearchUsecase[V]
-	questDBUsecase       QuestDBUsecase[V]
-	omits                []string
+	Repository           repository.Repository[V]
+	ElasticsearchUsecase ElasticsearchUsecase[V]
+	QuestDBUsecase       QuestDBUsecase[V]
+	Omits                []string
 }
 
 func validateModel(model any) error {
@@ -110,11 +110,11 @@ func InitCallback(db *gorm.DB) {
 }
 
 func (u Usecase[V]) AddCallback(kind CallbackType, callback func(db *gorm.DB, value *V) error) {
-	if callbacks[kind][u.repository.TableName()] != nil {
+	if callbacks[kind][u.Repository.TableName()] != nil {
 		return
 	}
 
-	callbacks[kind][u.repository.TableName()] = func(db *gorm.DB) error {
+	callbacks[kind][u.Repository.TableName()] = func(db *gorm.DB) error {
 		model, ok := db.Statement.Model.(*V)
 
 		if model == nil {
@@ -171,7 +171,7 @@ func (u Usecase[V]) AddCallback(kind CallbackType, callback func(db *gorm.DB, va
 }
 
 func (u Usecase[V]) Count(context context.Context, filters ...gpa.Filter) int {
-	if count, err := u.repository.Count(context, filters...); err != nil {
+	if count, err := u.Repository.Count(context, filters...); err != nil {
 		panic(err)
 	} else {
 		return count
@@ -179,7 +179,7 @@ func (u Usecase[V]) Count(context context.Context, filters ...gpa.Filter) int {
 }
 
 func (u Usecase[V]) Last(context context.Context, filters ...gpa.Filter) (model *V, err error) {
-	if err := u.repository.Last(context, &model, filters...); errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := u.Repository.Last(context, &model, filters...); errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	} else if err != nil {
 		panic(err)
@@ -189,7 +189,7 @@ func (u Usecase[V]) Last(context context.Context, filters ...gpa.Filter) (model 
 }
 
 func (u Usecase[V]) First(context context.Context, filters ...gpa.Filter) (model *V, err error) {
-	if err := u.repository.First(context, &model, filters...); errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := u.Repository.First(context, &model, filters...); errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	} else if err != nil {
 		panic(err)
@@ -199,7 +199,7 @@ func (u Usecase[V]) First(context context.Context, filters ...gpa.Filter) (model
 }
 
 func (u Usecase[V]) Find(context context.Context, filters ...gpa.Filter) (models []*V) {
-	if err := u.repository.Find(context, &models, filters...); err != nil {
+	if err := u.Repository.Find(context, &models, filters...); err != nil {
 		panic(err)
 	}
 
@@ -207,61 +207,61 @@ func (u Usecase[V]) Find(context context.Context, filters ...gpa.Filter) (models
 }
 
 func (u Usecase[V]) Transaction(handler func(tx *gorm.DB) error) error {
-	return u.repository.Transaction(handler)
+	return u.Repository.Transaction(handler)
 }
 
 func (u Usecase[V]) FirstOrCreate(context context.Context, model *V, filters ...gpa.Filter) {
-	if err := u.repository.FirstOrCreate(context, model, filters...); err != nil {
+	if err := u.Repository.FirstOrCreate(context, model, filters...); err != nil {
 		panic(err)
 	}
 }
 
 func (u Usecase[V]) Create(context context.Context, model *V, fs ...gpa.Filter) {
-	fs = append(fs, filters.WithOmit(u.omits...))
+	fs = append(fs, filters.WithOmit(u.Omits...))
 
-	if err := u.repository.Create(context, model, fs...); err != nil {
+	if err := u.Repository.Create(context, model, fs...); err != nil {
 		panic(err)
 	}
 }
 
 func (u Usecase[V]) Updates(context context.Context, model *V, value interface{}, fs ...gpa.Filter) {
-	fs = append(fs, filters.WithOmit(u.omits...))
+	fs = append(fs, filters.WithOmit(u.Omits...))
 
-	if err := u.repository.Updates(context, model, value, fs...); err != nil {
+	if err := u.Repository.Updates(context, model, value, fs...); err != nil {
 		panic(err)
 	}
 }
 
 func (u Usecase[V]) UpdateColumns(context context.Context, model *V, value interface{}, fs ...gpa.Filter) {
-	fs = append(fs, filters.WithOmit(u.omits...))
+	fs = append(fs, filters.WithOmit(u.Omits...))
 
-	if err := u.repository.UpdateColumns(context, model, value, fs...); err != nil {
+	if err := u.Repository.UpdateColumns(context, model, value, fs...); err != nil {
 		panic(err)
 	}
 }
 
 func (u Usecase[V]) Delete(context context.Context, model *V, fs ...gpa.Filter) {
-	fs = append(fs, filters.WithOmit(u.omits...))
+	fs = append(fs, filters.WithOmit(u.Omits...))
 
-	if err := u.repository.Delete(context, model, fs...); err != nil {
+	if err := u.Repository.Delete(context, model, fs...); err != nil {
 		panic(err)
 	}
 }
 
 func (u Usecase[V]) Es() ElasticsearchUsecase[V] {
-	return u.elasticsearchUsecase
+	return u.ElasticsearchUsecase
 }
 
 func (u Usecase[V]) QuestDB() QuestDBUsecase[V] {
-	return u.questDBUsecase
+	return u.QuestDBUsecase
 }
 
 type ElasticsearchUsecase[T schema.Tabler] struct {
-	repository epa.Repository[T]
+	Repository epa.Repository[T]
 }
 
 func (u ElasticsearchUsecase[T]) Find(context context.Context, query epa.Query) *epa.Result[T] {
-	result, err := u.repository.Find(context, query)
+	result, err := u.Repository.Find(context, query)
 	if err != nil {
 		panic(err)
 	}
@@ -270,11 +270,11 @@ func (u ElasticsearchUsecase[T]) Find(context context.Context, query epa.Query) 
 }
 
 type QuestDBUsecase[V schema.Tabler] struct {
-	repository repository.Repository[V]
+	Repository repository.Repository[V]
 }
 
 func (u QuestDBUsecase[V]) Count(context context.Context, filters ...gpa.Filter) int {
-	if count, err := u.repository.Count(context, filters...); err != nil {
+	if count, err := u.Repository.Count(context, filters...); err != nil {
 		panic(err)
 	} else {
 		return count
@@ -282,7 +282,7 @@ func (u QuestDBUsecase[V]) Count(context context.Context, filters ...gpa.Filter)
 }
 
 func (u QuestDBUsecase[V]) First(context context.Context, filters ...gpa.Filter) (model *V, err error) {
-	if err := u.repository.First(context, &model, filters...); errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := u.Repository.First(context, &model, filters...); errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	} else if err != nil {
 		panic(err)
@@ -292,7 +292,7 @@ func (u QuestDBUsecase[V]) First(context context.Context, filters ...gpa.Filter)
 }
 
 func (u QuestDBUsecase[V]) Find(context context.Context, filters ...gpa.Filter) (models []*V) {
-	if err := u.repository.Find(context, &models, filters...); err != nil {
+	if err := u.Repository.Find(context, &models, filters...); err != nil {
 		panic(err)
 	}
 
@@ -300,13 +300,13 @@ func (u QuestDBUsecase[V]) Find(context context.Context, filters ...gpa.Filter) 
 }
 
 func (u QuestDBUsecase[V]) RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.repository.Raw(context, sql, attrs...).Find(dst).Error
+	return u.Repository.Raw(context, sql, attrs...).Find(dst).Error
 }
 
 func (u QuestDBUsecase[V]) RawScan(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.repository.Raw(context, sql, attrs...).Scan(dst).Error
+	return u.Repository.Raw(context, sql, attrs...).Scan(dst).Error
 }
 
 func (u QuestDBUsecase[V]) RawFirst(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.repository.Raw(context, sql, attrs...).First(dst).Error
+	return u.Repository.Raw(context, sql, attrs...).First(dst).Error
 }
