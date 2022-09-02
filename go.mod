@@ -15,6 +15,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gookit/validate v1.4.2
 	github.com/hashicorp/vault/api v1.4.1
+	github.com/imdario/mergo v0.3.13
 	github.com/jackc/pgconn v1.10.1
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v4 v4.14.1
