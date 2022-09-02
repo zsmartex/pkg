@@ -16,7 +16,7 @@ import (
 )
 
 type Result[T any] struct {
-	Values       []T
+	Values       []*T
 	TotalHits    int
 	Aggregations aggregation.Aggregations
 }
@@ -155,7 +155,7 @@ func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
 	if res.StatusCode == 404 {
 		return &Result[T]{
 			TotalHits: 0,
-			Values:    []T{},
+			Values:    []*T{},
 		}, nil
 	}
 
@@ -173,10 +173,10 @@ func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
 		return nil, err
 	}
 
-	values := make([]T, 0)
+	values := make([]*T, 0)
 
 	for _, hit := range response.Hits.Hits {
-		var value T
+		var value *T
 		if err := json.Unmarshal(hit.Source, &value); err != nil {
 			return nil, err
 		}
