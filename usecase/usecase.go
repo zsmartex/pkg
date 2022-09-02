@@ -265,6 +265,10 @@ func (u Usecase[V]) Delete(context context.Context, model *V, fs ...gpa.Filter) 
 	}
 }
 
+func (u Usecase[V]) RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
+	return u.Repository.Raw(context, sql, attrs...).Find(dst).Error
+}
+
 func (u Usecase[V]) Es() ElasticsearchUsecase[V] {
 	return u.ElasticsearchUsecase
 }
