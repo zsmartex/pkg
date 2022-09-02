@@ -34,6 +34,23 @@ type Usecase[V schema.Tabler] struct {
 	Omits                []string
 }
 
+type IUsecase[V schema.Tabler] interface {
+	Count(context context.Context, filters ...gpa.Filter) int
+	Last(context context.Context, filters ...gpa.Filter) (*V, error)
+	First(context context.Context, filters ...gpa.Filter) (*V, error)
+	Find(context context.Context, filters ...gpa.Filter) []*V
+	Transaction(handler func(tx *gorm.DB) error) error
+	FirstOrCreate(context context.Context, model *V, filters ...gpa.Filter)
+	Create(context context.Context, model *V, filters ...gpa.Filter)
+	Updates(context context.Context, model *V, value interface{}, filters ...gpa.Filter)
+	UpdateColumns(context context.Context, model *V, value interface{}, filters ...gpa.Filter)
+	Delete(context context.Context, model *V, filters ...gpa.Filter)
+	RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error
+
+	Es() ElasticsearchUsecase[V]
+	QuestDB() QuestDBUsecase[V]
+}
+
 func validateModel(model any) error {
 	v := validate.Struct(model)
 
