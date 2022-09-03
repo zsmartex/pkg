@@ -6,7 +6,7 @@ import (
 
 	"github.com/creasty/defaults"
 	"github.com/gookit/validate"
-	"github.com/imdario/mergo"
+	"github.com/zsmartex/mergo"
 	"github.com/zsmartex/pkg/v2/epa"
 	"github.com/zsmartex/pkg/v2/gpa"
 	"github.com/zsmartex/pkg/v2/gpa/filters"
@@ -167,7 +167,7 @@ func (u Usecase[V]) AddCallback(kind CallbackType, callback func(db *gorm.DB, va
 
 		destCopy := *dest
 
-		mergo.Merge(&destCopy, model)
+		mergo.Merge(&destCopy, model, mergo.WithOverwriteOnlyEmptyValue)
 
 		if err := callback(db, &destCopy); err != nil {
 			return err
