@@ -24,8 +24,9 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/twilio/twilio-go v0.26.0
 	github.com/twmb/franz-go v1.6.0
-	github.com/twmb/franz-go/pkg/kadm v1.0.0
+	github.com/twmb/franz-go/pkg/kadm v1.2.1
 	github.com/volatiletech/null/v9 v9.0.0
+	github.com/zsmartex/mergo v0.0.1-rc.1
 	gorm.io/driver/postgres v1.3.1
 	gorm.io/gorm v1.23.3
 )
@@ -80,7 +81,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/klauspost/compress v1.15.4 // indirect
+	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
@@ -90,11 +91,10 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
-	github.com/pierrec/lz4/v4 v4.1.14 // indirect
+	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
-	github.com/twmb/franz-go/pkg/kmsg v1.1.0 // indirect
-	github.com/zsmartex/mergo v0.0.1-rc.1 // indirect
+	github.com/twmb/franz-go/pkg/kmsg v1.2.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
