@@ -3,54 +3,29 @@ package utils
 import (
 	"testing"
 
-	"github.com/creasty/defaults"
-	"github.com/volatiletech/null/v9"
+	"github.com/shopspring/decimal"
 )
 
 func TestCompareDiff(t *testing.T) {
-	type Phone struct {
-		Number string `default:"1234567890"`
+	type Order struct {
+		Price decimal.Decimal
 	}
 
-	type Label struct {
-		Key   string
-		Phone *Phone
+	order1 := Order{
+		Price: decimal.NewFromFloat(1.1),
 	}
 
-	type Test struct {
-		Name   string
-		Age    int
-		Level  null.Int
-		Labels *Label
+	order2 := Order{
+		Price: decimal.NewFromFloat(1.2),
 	}
 
-	user1 := &Test{
-		Name: "John",
-		Age:  20,
-		Level: null.Int{
-			Int: 1,
-		},
-		Labels: nil,
+	order3 := Order{
+		Price: decimal.NewFromFloat(1.3),
 	}
 
-	user2 := &Test{
-		Name: "John",
-		Age:  21,
-		Level: null.Int{
-			Int: 2,
-		},
-		Labels: &Label{
-			Key:   "label2",
-			Phone: &Phone{},
-		},
-	}
-
-	defaults.MustSet(user1)
-	defaults.MustSet(user2)
-
-	if err := CompareDiff(user1, user2, user1); err != nil {
+	if err := CompareDiff(&order1, order2, order3); err != nil {
 		t.Error(err)
 	}
 
-	t.Log(user1)
+	t.Log(order1)
 }

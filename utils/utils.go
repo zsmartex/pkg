@@ -212,10 +212,6 @@ func RemoveDuplicateSpace(str string) string {
 
 func compareDiff(dst, origin, model reflect.Value) {
 	switch dst.Type().Kind() {
-	case reflect.Struct:
-		for i := 0; i < model.NumField(); i++ {
-			compareDiff(dst.Field(i), origin.Field(i), model.Field(i))
-		}
 	case reflect.Slice:
 		if origin.IsNil() && !model.IsNil() {
 			dst.Set(model)
