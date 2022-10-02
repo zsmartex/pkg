@@ -24,6 +24,7 @@ type Repository[T schema.Tabler] interface {
 	UpdateColumns(context context.Context, dst interface{}, value interface{}, filters ...gpa.Filter) error
 	Delete(context context.Context, dst interface{}, filters ...gpa.Filter) error
 	Raw(context context.Context, sql string, values ...interface{}) (tx *gorm.DB)
+	Exec(context context.Context, sql string, values ...interface{}) (tx *gorm.DB)
 }
 
 type repository[T schema.Tabler] struct {
@@ -93,4 +94,8 @@ func (r repository[T]) Delete(context context.Context, model interface{}, filter
 
 func (r repository[T]) Raw(context context.Context, sql string, values ...interface{}) (tx *gorm.DB) {
 	return r.repository.Raw(context, sql, values...)
+}
+
+func (r repository[T]) Exec(context context.Context, sql string, values ...interface{}) (tx *gorm.DB) {
+	return r.repository.Exec(context, sql, values...)
 }

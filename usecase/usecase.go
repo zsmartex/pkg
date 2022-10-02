@@ -45,7 +45,10 @@ type IUsecase[V schema.Tabler] interface {
 	Updates(context context.Context, model *V, value interface{}, filters ...gpa.Filter)
 	UpdateColumns(context context.Context, model *V, value interface{}, filters ...gpa.Filter)
 	Delete(context context.Context, model *V, filters ...gpa.Filter)
+	Exec(context context.Context, sql string, attrs ...interface{}) error
 	RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error
+	RawScan(context context.Context, dst interface{}, sql string, attrs ...interface{}) error
+	RawFirst(context context.Context, dst interface{}, sql string, attrs ...interface{}) error
 
 	Es() ElasticsearchUsecase[V]
 	QuestDB() QuestDBUsecase[V]
@@ -265,8 +268,20 @@ func (u Usecase[V]) Delete(context context.Context, model *V, fs ...gpa.Filter) 
 	}
 }
 
+func (u Usecase[V]) Exec(context context.Context, sql string, attrs ...interface{}) error {
+	return u.Repository.Exec(context, sql, attrs...).Error
+}
+
 func (u Usecase[V]) RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
 	return u.Repository.Raw(context, sql, attrs...).Find(dst).Error
+}
+
+func (u Usecase[V]) RawScan(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
+	return u.Repository.Raw(context, sql, attrs...).Scan(dst).Error
+}
+
+func (u Usecase[V]) RawFirst(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
+	return u.Repository.Raw(context, sql, attrs...).First(dst).Error
 }
 
 func (u Usecase[V]) Es() ElasticsearchUsecase[V] {
@@ -318,6 +333,10 @@ func (u QuestDBUsecase[V]) Find(context context.Context, filters ...gpa.Filter) 
 	}
 
 	return
+}
+
+func (u QuestDBUsecase[V]) Exec(context context.Context, sql string, attrs ...interface{}) error {
+	return u.Repository.Exec(context, sql, attrs...).Error
 }
 
 func (u QuestDBUsecase[V]) RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {

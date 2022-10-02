@@ -75,3 +75,7 @@ func (r Repository) Delete(ctx context.Context, model interface{}, filters ...Fi
 func (r Repository) Raw(ctx context.Context, sql string, values ...interface{}) *gorm.DB {
 	return r.DB.WithContext(ctx).Table(r.TableName()).Raw(sql, values...)
 }
+
+func (r Repository) Exec(ctx context.Context, sql string, values ...interface{}) *gorm.DB {
+	return r.DB.WithContext(ctx).Table(r.TableName()).Exec(sql, values...)
+}
