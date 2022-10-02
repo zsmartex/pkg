@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -59,20 +60,22 @@ func (d *DBlogger) Error(ctx context.Context, s string, args ...interface{}) {
 
 func (d *DBlogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
 	elapsed := time.Since(begin)
-	sql, _ := fc()
+	sqlStr, _ := fc()
+	space := regexp.MustCompile(`\s+`)
+	sqlStr = space.ReplaceAllString(sqlStr, " ")
 	fields := logrus.Fields{}
 	if err != nil && !(errors.Is(err, gorm.ErrRecordNotFound) && d.SkipErrRecordNotFound) {
 		fields[logrus.ErrorKey] = err
-		logrus.WithContext(ctx).WithFields(fields).Errorf("%s [%s]", sql, elapsed)
+		logrus.WithContext(ctx).WithFields(fields).Errorf("%s [%s]", sqlStr, elapsed)
 		return
 	}
 
 	if d.SlowThreshold != 0 && elapsed > d.SlowThreshold {
-		logrus.WithContext(ctx).WithFields(fields).Warnf("%s [%s]", sql, elapsed)
+		logrus.WithContext(ctx).WithFields(fields).Warnf("%s [%s]", sqlStr, elapsed)
 		return
 	}
 
-	logrus.WithContext(ctx).WithFields(fields).Tracef("%s [%s]", sql, elapsed)
+	logrus.WithContext(ctx).WithFields(fields).Tracef("%s [%s]", sqlStr, elapsed)
 }
 
 func New(config *Config) (*gorm.DB, error) {
