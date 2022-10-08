@@ -22,47 +22,25 @@ func NewConsumer(context context.Context, brokers []string, group string, topics
 
 	cl, err := kgo.NewClient(
 		seeds,
+		kgo.AllowAutoTopicCreation(),
+		kgo.ConsumerGroup(group),
+		kgo.ConsumeTopics(topics...),
+		kgo.DisableAutoCommit(),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	var client *kgo.Client
-
-	adm := kadm.NewClient(cl)
-	os, err := adm.FetchOffsetsForTopics(context, group, topics...)
-
-	if os.Ok() && err == nil {
-		client, err = kgo.NewClient(
-			seeds,
-			kgo.ConsumePartitions(os.KOffsets()),
-		)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		client, err = kgo.NewClient(
-			seeds,
-			kgo.AllowAutoTopicCreation(),
-			kgo.ConsumerGroup(group),
-			kgo.ConsumeTopics(topics...),
-			kgo.DisableAutoCommit(),
-		)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	return &Consumer{
-		CommitClient: adm,
-		Client:       client,
+		CommitClient: kadm.NewClient(cl),
+		Client:       cl,
 		Topics:       topics,
 		Group:        group,
 	}, nil
 }
 
-func (c *Consumer) Poll(context context.Context) ([]*kgo.Record, error) {
-	fetches := c.Client.PollFetches(context)
+func (c *Consumer) Poll(ctx context.Context) ([]*kgo.Record, error) {
+	fetches := c.Client.PollFetches(ctx)
 	if err := fetches.Err(); err != nil {
 		return nil, err
 	}
