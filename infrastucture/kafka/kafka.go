@@ -36,6 +36,9 @@ func NewConsumer(context context.Context, brokers []string, group string, topics
 		client, err = kgo.NewClient(
 			seeds,
 			kgo.ConsumePartitions(os.KOffsets()),
+			kgo.ConsumeTopics(topics...),
+			kgo.ConsumerGroup(group),
+			kgo.DisableAutoCommit(),
 		)
 		if err != nil {
 			return nil, err
