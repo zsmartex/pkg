@@ -48,8 +48,8 @@ func (c *Consumer) Poll(ctx context.Context) ([]*kgo.Record, error) {
 	return fetches.Records(), nil
 }
 
-func (c *Consumer) CommitRecords(context context.Context, records ...kgo.Record) error {
-	return c.CommitClient.CommitAllOffsets(context, c.Group, kadm.OffsetsFromRecords(records...))
+func (c *Consumer) CommitRecords(context context.Context, records ...*kgo.Record) error {
+	return c.Client.CommitRecords(context, records...)
 }
 
 func (c *Consumer) Close() {
