@@ -15,9 +15,9 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gookit/validate v1.4.2
 	github.com/hashicorp/vault/api v1.4.1
-	github.com/jackc/pgconn v1.10.1
+	github.com/jackc/pgconn v1.13.0
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
-	github.com/jackc/pgx/v4 v4.14.1
+	github.com/jackc/pgx/v4 v4.17.2
 	github.com/lib/pq v1.10.4
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.8.1
@@ -26,8 +26,8 @@ require (
 	github.com/twmb/franz-go/pkg/kadm v1.2.1
 	github.com/volatiletech/null/v9 v9.0.0
 	github.com/zsmartex/mergo v0.0.1-rc.1
-	gorm.io/driver/postgres v1.3.1
-	gorm.io/gorm v1.23.4
+	gorm.io/driver/postgres v1.4.5
+	gorm.io/gorm v1.24.1-0.20221019064659-5dd2bb482755
 )
 
 require (
@@ -73,10 +73,10 @@ require (
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
-	github.com/jackc/pgproto3/v2 v2.2.0 // indirect
+	github.com/jackc/pgproto3/v2 v2.3.1 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
-	github.com/jackc/pgtype v1.9.1 // indirect
-	github.com/jackc/puddle v1.2.0 // indirect
+	github.com/jackc/pgtype v1.12.0 // indirect
+	github.com/jackc/puddle v1.3.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
