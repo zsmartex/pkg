@@ -46,7 +46,7 @@ func newBucket() *Uploader {
 		AccessKey:    "DO00KNY6QY9WY74X3ULM",
 		AccessSecret: "1oRKb2zH8H2VcgR4goLnC6r4DNQr7TfeSWsUKUCRQbo",
 		Region:       "sgp1",
-		Enpoint:      "sgp1.digitaloceanspaces.com",
+		Endpoint:     "sgp1.digitaloceanspaces.com",
 		Version:      1,
 	}
 	return New(config)

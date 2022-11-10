@@ -124,3 +124,7 @@ func (r *RedisClient) Exist(context context.Context, key string) (exist bool, er
 
 	return result.Val() >= 1, nil
 }
+
+func (r *RedisClient) Health(context context.Context) error {
+	return r.Client.Ping(context).Err()
+}

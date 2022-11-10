@@ -61,7 +61,7 @@ func TestAuth_JWT(t *testing.T) {
 	}
 
 	t.Run("should validate jwt", func(t *testing.T) {
-		token, err := ForgeToken("uid", "email", "role", null.StringFrom("UID123165658"), 3, false, ks.PrivateKey, nil)
+		token, err := ForgeToken("uid", "email", "role", null.StringFrom("UID123165658"), 3, false, false, nil, ks.PrivateKey, nil)
 		if err != nil {
 			t.Fatal(err)
 		}

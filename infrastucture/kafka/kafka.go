@@ -110,3 +110,7 @@ func (p *Producer) produce(context context.Context, topic, key string, payload i
 		p.produce(context, topic, key, data)
 	}
 }
+
+func (p Producer) Health(ctx context.Context) error {
+	return p.Client.Ping(ctx)
+}
