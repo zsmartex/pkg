@@ -8,6 +8,7 @@ import (
 	"github.com/zsmartex/pkg/v2/gpa/filters"
 )
 
+// Pagination is the pagination query parameters.
 type Pagination struct {
 	Page  int `query:"page" validate:"int|uint" default:"1"`
 	Limit int `query:"limit" validate:"int|max:1000" default:"100"`
@@ -17,11 +18,13 @@ func (p *Pagination) GetFilter() gpa.Filter {
 	return filters.WithPagination(p.Page, p.Limit)
 }
 
+// Period is a query parameter for time period.
 type Period struct {
 	TimeFrom int64 `query:"time_from" validate:"int"`
 	TimeTo   int64 `query:"time_to" validate:"int"`
 }
 
+// GetFilter return the filter for the query.
 func (p *Period) GetFilter() gpa.Filter {
 	fs := make([]gpa.Filter, 0)
 
@@ -38,6 +41,11 @@ func (p *Period) GetFilter() gpa.Filter {
 	)
 }
 
+// Validate validate the query parameters and return the error.
+//
+// parameters:
+//   - limitMonths is the maximum number of months that can be queried.
+//   - limitUntil is whether to limit the time_from parameter.
 func (p *Period) Validate(limitMonths int, limitUntil bool) error {
 	if p.TimeFrom > 0 && p.TimeTo > 0 && p.TimeFrom > p.TimeTo {
 		return fmt.Errorf("time_from must be less than time_to")
@@ -64,11 +72,13 @@ var (
 	OrderingDesc Ordering = "desc"
 )
 
+// Order is the order query parameters.
 type Order struct {
 	OrderBy  string   `query:"order_by" default:"created_at"`
 	Ordering Ordering `query:"ordering" validate:"ordering" default:"asc"`
 }
 
+// GetFilter return the filter for the query.
 func (o *Order) GetFilter() gpa.Filter {
 	return filters.WithOrder(fmt.Sprintf("%s %s", o.OrderBy, o.Ordering))
 }
