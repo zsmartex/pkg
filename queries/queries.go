@@ -41,11 +41,24 @@ func (p *Period) GetFilter() gpa.Filter {
 	)
 }
 
+// Init init the query parameters.
+func (p *Period) Init(month int) {
+	if p.TimeFrom == 0 && p.TimeTo == 0 {
+		p.TimeFrom = time.Now().AddDate(0, -month, 0).Unix()
+		p.TimeTo = time.Now().Unix()
+	}
+}
+
 // Validate validate the query parameters and return the error.
 //
 // parameters:
 //   - limitMonths is the maximum number of months that can be queried.
 //   - limitUntil is whether to limit the time_from parameter.
+//
+// if:
+//   - time_from is greater than time_to, return error.
+//   - time_to - time_from are greater than limitMonths months, return error.
+//   - limitMonths skip validate limit month
 func (p *Period) Validate(limitMonths int, limitUntil bool) error {
 	if p.TimeFrom > 0 && p.TimeTo > 0 && p.TimeFrom > p.TimeTo {
 		return fmt.Errorf("time_from must be less than time_to")
