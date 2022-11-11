@@ -14,7 +14,7 @@ type Pagination struct {
 }
 
 func (p *Pagination) GetFilter() gpa.Filter {
-	return filters.WithPageable(p.Page, p.Limit)
+	return filters.WithPagination(p.Page, p.Limit)
 }
 
 type Period struct {
@@ -38,7 +38,7 @@ func (p *Period) GetFilter() gpa.Filter {
 	)
 }
 
-func (p *Period) Validate(limitMonths int) error {
+func (p *Period) Validate(limitMonths int, limitUntil bool) error {
 	if p.TimeFrom > 0 && p.TimeTo > 0 && p.TimeFrom > p.TimeTo {
 		return fmt.Errorf("time_from must be less than time_to")
 	}
@@ -46,6 +46,12 @@ func (p *Period) Validate(limitMonths int) error {
 	// time to and time from must between in 3 months
 	if limitMonths > 0 && time.Unix(p.TimeTo, 0).Sub(time.Unix(p.TimeFrom, 0)).Hours() > float64(limitMonths*30*24) {
 		return fmt.Errorf("time_to and time_from must be less than 3 months")
+	}
+
+	if limitUntil {
+		if time.Since(time.Unix(p.TimeTo, 0)) > time.Duration(24*30*limitMonths)*time.Hour {
+			return fmt.Errorf("time_to must be less than %d months", limitMonths)
+		}
 	}
 
 	return nil
