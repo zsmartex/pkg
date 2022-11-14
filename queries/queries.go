@@ -61,7 +61,7 @@ func (p *Period) Init(month int) {
 //   - time_to - time_from are greater than limitMonths months, return error.
 //   - limitMonths skip validate limit month
 func (p *Period) Validate(limitMonths int, limitUntil bool) error {
-	if p.TimeFrom == 0 && p.TimeTo == 0 {
+	if p.TimeFrom == 0 && p.TimeTo == 0 || limitMonths <= 0 {
 		return nil
 	}
 
