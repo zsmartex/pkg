@@ -44,8 +44,9 @@ func (p *Period) GetFilter() gpa.Filter {
 // Init init the query parameters.
 func (p *Period) Init(month int) {
 	if p.TimeFrom == 0 && p.TimeTo == 0 {
-		p.TimeFrom = time.Now().AddDate(0, -month, 0).Unix()
-		p.TimeTo = time.Now().Unix()
+		now := time.Now()
+		p.TimeTo = now.Truncate(time.Hour*24).AddDate(0, 0, 1).Add(-time.Millisecond).Unix()
+		p.TimeFrom = now.Truncate(time.Hour*24).AddDate(0, -month, 0).Unix()
 	}
 }
 
@@ -64,13 +65,16 @@ func (p *Period) Validate(limitMonths int, limitUntil bool) error {
 		return fmt.Errorf("time_from must be less than time_to")
 	}
 
+	timeFrom := time.Unix(p.TimeFrom, 0).Truncate(time.Hour * 24)
+	timeTo := time.Unix(p.TimeTo, 0).Truncate(time.Hour * 24)
+
 	// time to and time from must between in 3 months
-	if time.Unix(p.TimeFrom, 0).Before(time.Unix(p.TimeTo, 0).AddDate(0, -limitMonths, 0)) {
+	if timeFrom.Before(timeTo.AddDate(0, -limitMonths, 0)) {
 		return fmt.Errorf("time_to and time_from must be less than 3 months")
 	}
 
 	if limitUntil {
-		if time.Unix(p.TimeTo, 0).Before(time.Now().AddDate(0, -limitMonths, 0)) {
+		if timeTo.Before(time.Now().AddDate(0, -limitMonths, 0)) {
 			return fmt.Errorf("time_to must be less than %d months", limitMonths)
 		}
 	}
