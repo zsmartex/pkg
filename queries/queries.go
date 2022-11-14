@@ -61,6 +61,10 @@ func (p *Period) Init(month int) {
 //   - time_to - time_from are greater than limitMonths months, return error.
 //   - limitMonths skip validate limit month
 func (p *Period) Validate(limitMonths int, limitUntil bool) error {
+	if p.TimeFrom == 0 && p.TimeTo == 0 {
+		return nil
+	}
+
 	if p.TimeFrom > 0 && p.TimeTo > 0 && p.TimeFrom > p.TimeTo {
 		return fmt.Errorf("time_from must be less than time_to")
 	}
@@ -74,8 +78,8 @@ func (p *Period) Validate(limitMonths int, limitUntil bool) error {
 	}
 
 	if limitUntil {
-		if timeFrom.Before(time.Now().AddDate(0, -limitMonths, 0).Truncate(time.Hour * 24)) {
-			return fmt.Errorf("time_to must be less than %d months", limitMonths)
+		if timeFrom.Before(time.Now().AddDate(0, -limitMonths, 1).Truncate(time.Hour * 24)) {
+			return fmt.Errorf("time_from must be less than %d months", limitMonths)
 		}
 	}
 
