@@ -65,12 +65,12 @@ func (p *Period) Validate(limitMonths int, limitUntil bool) error {
 	}
 
 	// time to and time from must between in 3 months
-	if limitMonths > 0 && time.Unix(p.TimeTo, 0).Sub(time.Unix(p.TimeFrom, 0)).Hours() > float64(limitMonths*30*24) {
+	if time.Unix(p.TimeFrom, 0).Before(time.Unix(p.TimeTo, 0).AddDate(0, -limitMonths, 0)) {
 		return fmt.Errorf("time_to and time_from must be less than 3 months")
 	}
 
 	if limitUntil {
-		if time.Since(time.Unix(p.TimeTo, 0)) > time.Duration(24*30*limitMonths)*time.Hour {
+		if time.Unix(p.TimeTo, 0).Before(time.Now().AddDate(0, -limitMonths, 0)) {
 			return fmt.Errorf("time_to must be less than %d months", limitMonths)
 		}
 	}
