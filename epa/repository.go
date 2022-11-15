@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 
 	"github.com/elastic/go-elasticsearch/v8"
@@ -137,8 +136,6 @@ func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(string(data))
 
 	searchRequest = append(searchRequest, r.Client.Search.WithBody(bytes.NewReader(data)))
 

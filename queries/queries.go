@@ -78,7 +78,7 @@ func (p *Period) Validate(limitMonths int, limitUntil bool) error {
 	}
 
 	if limitUntil {
-		if timeFrom.Before(time.Now().AddDate(0, -limitMonths, 1).Truncate(time.Hour * 24)) {
+		if timeFrom.Before(time.Now().AddDate(0, -limitMonths, -1).Truncate(time.Hour * 24)) {
 			return fmt.Errorf("time_from must be less than %d months", limitMonths)
 		}
 	}
