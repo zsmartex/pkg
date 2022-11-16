@@ -29,12 +29,13 @@ type CallbackConfig struct {
 }
 
 type Config struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	DBName   string
-	Callback *CallbackConfig
+	Host                 string
+	Port                 int
+	User                 string
+	Password             string
+	DBName               string
+	PreferSimpleProtocol bool
+	Callback             *CallbackConfig
 }
 
 type DBlogger struct {
@@ -79,11 +80,10 @@ func (d *DBlogger) Trace(ctx context.Context, begin time.Time, fc func() (string
 }
 
 func New(config *Config) (*gorm.DB, error) {
-	var dialector gorm.Dialector
-
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.Host, config.Port, config.User, config.Password, config.DBName)
-
-	dialector = postgres.Open(dsn)
+	dialector := postgres.New(postgres.Config{
+		DSN:                  fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.Host, config.Port, config.User, config.Password, config.DBName),
+		PreferSimpleProtocol: config.PreferSimpleProtocol,
+	})
 
 	db, err := gorm.Open(dialector, &gorm.Config{
 		SkipDefaultTransaction:   true,
