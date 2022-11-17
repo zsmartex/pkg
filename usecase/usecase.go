@@ -5,7 +5,9 @@ import (
 	"errors"
 
 	"github.com/creasty/defaults"
+	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/gookit/validate"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/zsmartex/mergo"
 	"github.com/zsmartex/pkg/v2/epa"
 	"github.com/zsmartex/pkg/v2/gpa"
@@ -310,63 +312,22 @@ func (u ElasticsearchUsecase[T]) Find(context context.Context, query epa.Query) 
 }
 
 type QuestDBUsecase[V schema.Tabler] struct {
-	Repository repository.Repository[V]
+	conn *pgxpool.Pool
 }
 
-func (u QuestDBUsecase[V]) retryQuery(count int, call func() error) error {
-	for i := 1; i < count; i++ {
-		if err := call(); errors.Is(err, ErrBadConnection) && i < count {
-			continue
-		} else {
-			return err
-		}
+func (u QuestDBUsecase[V]) Exec(ctx context.Context, sql string, attrs interface{}) error {
+	_, err := u.conn.Exec(ctx, sql, attrs)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (u QuestDBUsecase[V]) First(context context.Context, filters ...gpa.Filter) (model *V, err error) {
-	if err = u.retryQuery(2, func() error {
-		return u.Repository.First(context, &model, filters...)
-	}); errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
-	} else if err != nil {
-		panic(err)
-	}
-
-	return
+func (u QuestDBUsecase[V]) Query(ctx context.Context, dst interface{}, sql string, attrs interface{}) error {
+	return pgxscan.Select(ctx, u.conn, dst, sql, attrs)
 }
 
-func (u QuestDBUsecase[V]) Find(context context.Context, filters ...gpa.Filter) (models []*V) {
-	if err := u.retryQuery(2, func() error {
-		return u.Repository.Find(context, &models, filters...)
-	}); err != nil {
-		panic(err)
-	}
-
-	return models
-}
-
-func (u QuestDBUsecase[V]) Exec(context context.Context, sql string, attrs ...interface{}) error {
-	return u.retryQuery(2, func() error {
-		return u.Repository.Exec(context, sql, attrs...).Error
-	})
-}
-
-func (u QuestDBUsecase[V]) RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.retryQuery(2, func() error {
-		return u.Repository.Raw(context, sql, attrs...).Find(dst).Error
-	})
-}
-
-func (u QuestDBUsecase[V]) RawScan(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.retryQuery(2, func() error {
-		return u.Repository.Raw(context, sql, attrs...).Scan(dst).Error
-	})
-}
-
-func (u QuestDBUsecase[V]) RawFirst(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.retryQuery(2, func() error {
-		return u.Repository.Raw(context, sql, attrs...).First(dst).Error
-	})
+func (u QuestDBUsecase[V]) QueryRow(ctx context.Context, dst interface{}, sql string, attrs interface{}) error {
+	return pgxscan.Get(ctx, u.conn, dst, sql, attrs)
 }
