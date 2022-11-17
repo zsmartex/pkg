@@ -16,6 +16,10 @@ import (
 	"gorm.io/gorm/schema"
 )
 
+var (
+	ErrBadConnection = errors.New("driver: bad connection")
+)
+
 type CallbackType string
 
 const (
@@ -309,16 +313,22 @@ type QuestDBUsecase[V schema.Tabler] struct {
 	Repository repository.Repository[V]
 }
 
-func (u QuestDBUsecase[V]) Count(context context.Context, filters ...gpa.Filter) int {
-	if count, err := u.Repository.Count(context, filters...); err != nil {
-		panic(err)
-	} else {
-		return count
+func (u QuestDBUsecase[V]) retryQuery(count int, call func() error) error {
+	for i := 1; i < count; i++ {
+		if err := call(); errors.Is(err, ErrBadConnection) && i < count {
+			continue
+		} else {
+			return err
+		}
 	}
+
+	return nil
 }
 
 func (u QuestDBUsecase[V]) First(context context.Context, filters ...gpa.Filter) (model *V, err error) {
-	if err := u.Repository.First(context, &model, filters...); errors.Is(err, gorm.ErrRecordNotFound) {
+	if err = u.retryQuery(2, func() error {
+		return u.Repository.First(context, &model, filters...)
+	}); errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	} else if err != nil {
 		panic(err)
@@ -328,25 +338,35 @@ func (u QuestDBUsecase[V]) First(context context.Context, filters ...gpa.Filter)
 }
 
 func (u QuestDBUsecase[V]) Find(context context.Context, filters ...gpa.Filter) (models []*V) {
-	if err := u.Repository.Find(context, &models, filters...); err != nil {
+	if err := u.retryQuery(2, func() error {
+		return u.Repository.Find(context, &models, filters...)
+	}); err != nil {
 		panic(err)
 	}
 
-	return
+	return models
 }
 
 func (u QuestDBUsecase[V]) Exec(context context.Context, sql string, attrs ...interface{}) error {
-	return u.Repository.Exec(context, sql, attrs...).Error
+	return u.retryQuery(2, func() error {
+		return u.Repository.Exec(context, sql, attrs...).Error
+	})
 }
 
 func (u QuestDBUsecase[V]) RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.Repository.Raw(context, sql, attrs...).Find(dst).Error
+	return u.retryQuery(2, func() error {
+		return u.Repository.Raw(context, sql, attrs...).Find(dst).Error
+	})
 }
 
 func (u QuestDBUsecase[V]) RawScan(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.Repository.Raw(context, sql, attrs...).Scan(dst).Error
+	return u.retryQuery(2, func() error {
+		return u.Repository.Raw(context, sql, attrs...).Scan(dst).Error
+	})
 }
 
 func (u QuestDBUsecase[V]) RawFirst(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.Repository.Raw(context, sql, attrs...).First(dst).Error
+	return u.retryQuery(2, func() error {
+		return u.Repository.Raw(context, sql, attrs...).First(dst).Error
+	})
 }
