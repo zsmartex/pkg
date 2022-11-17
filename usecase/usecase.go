@@ -315,8 +315,8 @@ type QuestDBUsecase[V schema.Tabler] struct {
 	conn *pgxpool.Pool
 }
 
-func (u QuestDBUsecase[V]) Exec(ctx context.Context, sql string, attrs interface{}) error {
-	_, err := u.conn.Exec(ctx, sql, attrs)
+func (u QuestDBUsecase[V]) Exec(ctx context.Context, sql string, attrs ...interface{}) error {
+	_, err := u.conn.Exec(ctx, sql, attrs...)
 	if err != nil {
 		return err
 	}
@@ -324,10 +324,10 @@ func (u QuestDBUsecase[V]) Exec(ctx context.Context, sql string, attrs interface
 	return nil
 }
 
-func (u QuestDBUsecase[V]) Query(ctx context.Context, dst interface{}, sql string, attrs interface{}) error {
-	return pgxscan.Select(ctx, u.conn, dst, sql, attrs)
+func (u QuestDBUsecase[V]) Query(ctx context.Context, dst interface{}, sql string, attrs ...interface{}) error {
+	return pgxscan.Select(ctx, u.conn, dst, sql, attrs...)
 }
 
-func (u QuestDBUsecase[V]) QueryRow(ctx context.Context, dst interface{}, sql string, attrs interface{}) error {
-	return pgxscan.Get(ctx, u.conn, dst, sql, attrs)
+func (u QuestDBUsecase[V]) QueryRow(ctx context.Context, dst interface{}, sql string, attrs ...interface{}) error {
+	return pgxscan.Get(ctx, u.conn, dst, sql, attrs...)
 }
