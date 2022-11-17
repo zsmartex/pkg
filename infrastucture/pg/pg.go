@@ -3,9 +3,44 @@ package pg
 import (
 	"context"
 	"fmt"
+	"os"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	pgxDecimal "github.com/jackc/pgx-shopspring-decimal"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/tracelog"
+	"github.com/sirupsen/logrus"
+	pgxUUID "github.com/vgarvardt/pgx-google-uuid/v5"
 )
+
+type Logger struct {
+}
+
+func NewLogger() *Logger {
+	return &Logger{}
+}
+
+func (l *Logger) Log(ctx context.Context, level tracelog.LogLevel, msg string, data map[string]interface{}) {
+	logger := logrus.WithContext(ctx)
+	if data != nil {
+		logger = logrus.WithContext(ctx).WithFields(data)
+	}
+
+	switch level {
+	case tracelog.LogLevelTrace:
+		logger.Trace(msg)
+	case tracelog.LogLevelDebug:
+		logger.Debug(msg)
+	case tracelog.LogLevelInfo:
+		logger.Info(msg)
+	case tracelog.LogLevelWarn:
+		logger.Warn(msg)
+	case tracelog.LogLevelError:
+		logger.Error(msg)
+	default:
+		logger.Error(msg)
+	}
+}
 
 func New(
 	host string,
@@ -16,10 +51,45 @@ func New(
 ) (*pgxpool.Pool, error) {
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", user, password, host, port, dbname)
 
-	db, err := pgxpool.Connect(context.Background(), connStr)
+	pgxConfig, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
 		return nil, err
 	}
 
-	return db, nil
+	pgxConfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+		pgxUUID.Register(conn.TypeMap())
+		pgxDecimal.Register(conn.TypeMap())
+
+		return nil
+	}
+
+	var logLevel tracelog.LogLevel
+	switch os.Getenv("LOG_LEVEL") {
+	case "WARN":
+		logLevel = tracelog.LogLevelWarn
+	case "INFO":
+		logLevel = tracelog.LogLevelInfo
+	case "DEBUG":
+		logLevel = tracelog.LogLevelDebug
+	case "ERROR":
+		logLevel = tracelog.LogLevelError
+	case "FATAL":
+		logLevel = tracelog.LogLevelError
+	case "PANIC":
+		logLevel = tracelog.LogLevelError
+	case "TRACE":
+		logLevel = tracelog.LogLevelTrace
+	}
+
+	pgxConfig.ConnConfig.Tracer = &tracelog.TraceLog{
+		Logger:   NewLogger(),
+		LogLevel: logLevel,
+	}
+
+	pgxConnPool, err := pgxpool.NewWithConfig(context.TODO(), pgxConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return pgxConnPool, nil
 }
