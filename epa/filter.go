@@ -7,6 +7,7 @@ import (
 )
 
 type Query struct {
+	Indexes      []string
 	Page         int
 	Limit        int
 	OrderBy      string

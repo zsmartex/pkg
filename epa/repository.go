@@ -79,10 +79,17 @@ type ErrorResponse struct {
 }
 
 func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
+	var indexes []string
+	if len(q.Indexes) > 0 {
+		indexes = q.Indexes
+	} else {
+		indexes = []string{r.IndexName()}
+	}
+
 	searchRequest := make([]func(*esapi.SearchRequest), 0)
 	searchRequest = append(searchRequest,
 		r.Search.WithContext(ctx),
-		r.Client.Search.WithIndex(r.IndexName()),
+		r.Client.Search.WithIndex(indexes...),
 	)
 
 	if q.Page > 0 {
