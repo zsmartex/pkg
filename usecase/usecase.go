@@ -31,6 +31,7 @@ const (
 	CallbackTypeAfterSave    CallbackType = "AfterSave"
 )
 
+var callbackReady = false
 var callbacks = make(map[CallbackType]map[string]func(*gorm.DB) error, 0)
 
 type Usecase[V schema.Tabler] struct {
@@ -133,9 +134,15 @@ func InitCallback(db *gorm.DB) {
 			db.AddError(callback(db))
 		}
 	})
+
+	callbackReady = true
 }
 
 func (u Usecase[V]) AddCallback(kind CallbackType, callback func(db *gorm.DB, value *V) error) {
+	if !callbackReady {
+		return
+	}
+
 	if callbacks[kind][u.Repository.TableName()] != nil {
 		return
 	}
