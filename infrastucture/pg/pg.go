@@ -21,26 +21,21 @@ func NewLogger() *Logger {
 }
 
 func (l *Logger) Log(ctx context.Context, level tracelog.LogLevel, msg string, data map[string]interface{}) {
-	logger := log.Logger
-	if data != nil {
-		logger = logger.WithContext(ctx).WithFields(data)
-	} else {
-		logger = logger.WithContext(ctx)
-	}
+	logger := log.Logger.WithContext(ctx)
 
 	logger.Info(data)
 
 	switch level {
 	case tracelog.LogLevelTrace:
-		logger.Trace(msg)
+		logger.WithFields(data).Trace(msg)
 	case tracelog.LogLevelDebug:
-		logger.Debug(msg)
+		logger.WithFields(data).Debug(msg)
 	case tracelog.LogLevelInfo:
-		logger.Info(msg)
+		logger.WithFields(data).Info(msg)
 	case tracelog.LogLevelWarn:
-		logger.Warn(msg)
+		logger.WithFields(data).Warn(msg)
 	case tracelog.LogLevelError:
-		logger.Error(msg)
+		logger.WithFields(data).Error(msg)
 	}
 }
 
