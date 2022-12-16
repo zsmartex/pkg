@@ -28,6 +28,8 @@ func (l *Logger) Log(ctx context.Context, level tracelog.LogLevel, msg string, d
 		logger = logger.WithContext(ctx)
 	}
 
+	logger.Info(data)
+
 	switch level {
 	case tracelog.LogLevelTrace:
 		logger.Trace(msg)
