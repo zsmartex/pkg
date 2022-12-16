@@ -9,8 +9,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/tracelog"
-	"github.com/sirupsen/logrus"
 	pgxUUID "github.com/vgarvardt/pgx-google-uuid/v5"
+	"github.com/zsmartex/pkg/v2/log"
 )
 
 type Logger struct {
@@ -21,11 +21,11 @@ func NewLogger() *Logger {
 }
 
 func (l *Logger) Log(ctx context.Context, level tracelog.LogLevel, msg string, data map[string]interface{}) {
-	var logger *logrus.Entry
+	logger := log.Logger
 	if data != nil {
-		logger = logrus.WithContext(ctx).WithFields(data)
+		logger = logger.WithContext(ctx).WithFields(data)
 	} else {
-		logger = logrus.WithContext(ctx)
+		logger = logger.WithContext(ctx)
 	}
 
 	switch level {
