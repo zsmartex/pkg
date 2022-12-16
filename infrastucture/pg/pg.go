@@ -3,40 +3,56 @@ package pg
 import (
 	"context"
 	"fmt"
-	"os"
+	"regexp"
+	"strings"
+	"time"
 
 	pgxDecimal "github.com/jackc/pgx-shopspring-decimal"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/jackc/pgx/v5/tracelog"
 	pgxUUID "github.com/vgarvardt/pgx-google-uuid/v5"
 	"github.com/zsmartex/pkg/v2/log"
 )
 
-type Logger struct {
+type QueryTracer struct {
+	pgx.QueryTracer
 }
 
-func NewLogger() *Logger {
-	return &Logger{}
+type traceQueryData struct {
+	startTime time.Time
+	sql       string
+	args      []any
 }
 
-func (l *Logger) Log(ctx context.Context, level tracelog.LogLevel, msg string, data map[string]interface{}) {
-	logger := log.Logger.WithContext(ctx)
+func (q *QueryTracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
+	return context.WithValue(ctx, 1, &traceQueryData{
+		startTime: time.Now(),
+		sql:       data.SQL,
+		args:      data.Args,
+	})
+}
 
-	logger.Info(data)
+func (q *QueryTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
+	queryData := ctx.Value(1).(*traceQueryData)
 
-	switch level {
-	case tracelog.LogLevelTrace:
-		logger.WithFields(data).Trace(msg)
-	case tracelog.LogLevelDebug:
-		logger.WithFields(data).Debug(msg)
-	case tracelog.LogLevelInfo:
-		logger.WithFields(data).Info(msg)
-	case tracelog.LogLevelWarn:
-		logger.WithFields(data).Warn(msg)
-	case tracelog.LogLevelError:
-		logger.WithFields(data).Error(msg)
+	endTime := time.Now()
+	interval := endTime.Sub(queryData.startTime)
+
+	sql := queryData.sql
+	space := regexp.MustCompile(`\s+`)
+	sql = space.ReplaceAllString(sql, " ")
+	sql = strings.TrimSpace(sql)
+	for i, v := range queryData.args {
+		sql = strings.Replace(sql, fmt.Sprintf("$%d", i+1), fmt.Sprint(v), 1)
 	}
+
+	if data.Err != nil {
+		log.Error(data.Err)
+		log.Error(sql, fmt.Sprintf("[%s]", interval))
+		return
+	}
+
+	log.Trace(sql, fmt.Sprintf("[%s]", interval))
 }
 
 func New(
@@ -60,28 +76,7 @@ func New(
 		return nil
 	}
 
-	var logLevel tracelog.LogLevel
-	switch os.Getenv("LOG_LEVEL") {
-	case "WARN":
-		logLevel = tracelog.LogLevelWarn
-	case "INFO":
-		logLevel = tracelog.LogLevelInfo
-	case "DEBUG":
-		logLevel = tracelog.LogLevelDebug
-	case "ERROR":
-		logLevel = tracelog.LogLevelError
-	case "FATAL":
-		logLevel = tracelog.LogLevelError
-	case "PANIC":
-		logLevel = tracelog.LogLevelError
-	case "TRACE":
-		logLevel = tracelog.LogLevelTrace
-	}
-
-	pgxConfig.ConnConfig.Tracer = &tracelog.TraceLog{
-		Logger:   NewLogger(),
-		LogLevel: logLevel,
-	}
+	pgxConfig.ConnConfig.Tracer = &QueryTracer{}
 
 	pgxConnPool, err := pgxpool.NewWithConfig(context.TODO(), pgxConfig)
 	if err != nil {
