@@ -21,9 +21,11 @@ func NewLogger() *Logger {
 }
 
 func (l *Logger) Log(ctx context.Context, level tracelog.LogLevel, msg string, data map[string]interface{}) {
-	logger := logrus.WithContext(ctx)
+	var logger *logrus.Entry
 	if data != nil {
 		logger = logrus.WithContext(ctx).WithFields(data)
+	} else {
+		logger = logrus.WithContext(ctx)
 	}
 
 	switch level {
@@ -36,8 +38,6 @@ func (l *Logger) Log(ctx context.Context, level tracelog.LogLevel, msg string, d
 	case tracelog.LogLevelWarn:
 		logger.Warn(msg)
 	case tracelog.LogLevelError:
-		logger.Error(msg)
-	default:
 		logger.Error(msg)
 	}
 }
