@@ -48,11 +48,11 @@ func (q *QueryTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pg
 
 	if data.Err != nil {
 		log.Error(data.Err)
-		log.Error(sql, fmt.Sprintf("[%s]", interval))
+		log.Errorf("%s [%s]", sql, interval)
 		return
 	}
 
-	log.Trace(sql, fmt.Sprintf("[%s]", interval))
+	log.Tracef("%s [%s]", sql, interval)
 }
 
 func New(
