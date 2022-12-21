@@ -78,11 +78,14 @@ func (r *RedisClient) Delete(context context.Context, key string) error {
 	return r.Client.Del(context, key).Err()
 }
 
-func (r *RedisClient) GetWithDefault(context context.Context, key string, target interface{}, expiration time.Duration, funcDefaultData func() interface{}) error {
+func (r *RedisClient) GetWithDefault(context context.Context, key string, target interface{}, expiration time.Duration, funcDefaultData func() (interface{}, error)) error {
 	if exist, err := r.Exist(context, key); err != nil {
 		return err
 	} else if !exist {
-		data := funcDefaultData()
+		data, err := funcDefaultData()
+		if err != nil {
+			return err
+		}
 
 		val := reflect.ValueOf(target)
 		if val.Kind() != reflect.Ptr {
