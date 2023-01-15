@@ -140,10 +140,10 @@ func InitCallback(db *gorm.DB) {
 
 func (u Usecase[V]) AddCallback(kind CallbackType, callback func(db *gorm.DB, value *V) error) {
 	if !callbackReady {
-		return
+		InitCallback(u.Repository.DB())
 	}
 
-	if callbacks[kind][u.Repository.TableName()] == nil {
+	if callbacks[kind][u.Repository.TableName()] != nil {
 		return
 	}
 
