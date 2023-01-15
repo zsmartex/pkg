@@ -12,9 +12,9 @@ type VaultService struct {
 	vault *api.Client
 }
 
-func New(vault_addr, token string) (*VaultService, error) {
+func New(vaultAddr, token string) (*VaultService, error) {
 	config := &api.Config{
-		Address: vault_addr,
+		Address: vaultAddr,
 		Timeout: time.Second * 2,
 	}
 

@@ -1,18 +1,18 @@
 package query
 
-type TermsQuery[T any] struct {
+type TermsQuery struct {
 	field  string
-	values []T
+	values []interface{}
 }
 
-func NewTermsQuery[T any](field string, values ...T) *TermsQuery[T] {
-	return &TermsQuery[T]{
+func NewTermsQuery(field string, values ...interface{}) *TermsQuery {
+	return &TermsQuery{
 		field:  field,
 		values: values,
 	}
 }
 
-func (q *TermsQuery[T]) Source() (interface{}, error) {
+func (q *TermsQuery) Source() (interface{}, error) {
 	//
 	// {
 	//   "terms" : {

@@ -143,7 +143,7 @@ func (u Usecase[V]) AddCallback(kind CallbackType, callback func(db *gorm.DB, va
 		return
 	}
 
-	if callbacks[kind][u.Repository.TableName()] != nil {
+	if callbacks[kind][u.Repository.TableName()] == nil {
 		return
 	}
 
