@@ -14,10 +14,10 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"github.com/zsmartex/pkg/v2/infrastucture/event_api"
-	"github.com/zsmartex/pkg/v2/infrastucture/kafka"
-	"github.com/zsmartex/pkg/v2/infrastucture/rango"
-	"github.com/zsmartex/pkg/v2/log"
+	"github.com/zsmartex/pkg/v3/infrastucture/event_api"
+	"github.com/zsmartex/pkg/v3/infrastucture/kafka"
+	"github.com/zsmartex/pkg/v3/infrastucture/rango"
+	"github.com/zsmartex/pkg/v3/log"
 
 	_ "github.com/lib/pq"
 )

@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 
-	"github.com/zsmartex/pkg/v2/gpa"
+	"github.com/zsmartex/pkg/v3/gpa"
 )
 
 type Repository[T schema.Tabler] interface {

@@ -3,7 +3,7 @@ package epa
 import (
 	"time"
 
-	"github.com/zsmartex/pkg/v2/epa/query"
+	"github.com/zsmartex/pkg/v3/epa/query"
 )
 
 func WithMultiFieldsNotEqual(value interface{}, fields ...string) Filter {

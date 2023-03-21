@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	pgxUUID "github.com/vgarvardt/pgx-google-uuid/v5"
-	"github.com/zsmartex/pkg/v2/log"
+	"github.com/zsmartex/pkg/v3/log"
 )
 
 type QueryTracer struct {

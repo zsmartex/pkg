@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/zsmartex/pkg/v2"
-	"github.com/zsmartex/pkg/v2/infrastucture/kafka"
+	"github.com/zsmartex/pkg/v3"
+	"github.com/zsmartex/pkg/v3/infrastucture/kafka"
 )
 
 type Client struct {

@@ -9,9 +9,9 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
-	"github.com/zsmartex/pkg/v2/epa/aggregation"
-	"github.com/zsmartex/pkg/v2/epa/query"
-	"github.com/zsmartex/pkg/v2/queries"
+	"github.com/zsmartex/pkg/v3/epa/aggregation"
+	"github.com/zsmartex/pkg/v3/epa/query"
+	"github.com/zsmartex/pkg/v3/queries"
 )
 
 type Result[T any] struct {

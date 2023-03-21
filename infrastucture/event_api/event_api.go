@@ -11,7 +11,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 
-	"github.com/zsmartex/pkg/v2/infrastucture/kafka"
+	"github.com/zsmartex/pkg/v3/infrastucture/kafka"
 )
 
 type EventAPI struct {

@@ -20,7 +20,7 @@ import (
 	"github.com/jackc/pgerrcode"
 	"gorm.io/gorm"
 
-	"github.com/zsmartex/pkg/v2/log"
+	"github.com/zsmartex/pkg/v3/log"
 )
 
 func Contains[T any](arr []T, v T) bool {

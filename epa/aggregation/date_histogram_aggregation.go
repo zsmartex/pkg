@@ -1,6 +1,6 @@
 package aggregation
 
-import "github.com/zsmartex/pkg/v2/queries"
+import "github.com/zsmartex/pkg/v3/queries"
 
 type DateHistogramAggregation struct {
 	field            string

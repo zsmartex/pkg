@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
 
-	"github.com/zsmartex/pkg/v2/gpa"
+	"github.com/zsmartex/pkg/v3/gpa"
 )
 
 func WithSchema(schema, table schema.Tabler) gpa.Filter {

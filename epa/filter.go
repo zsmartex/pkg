@@ -1,9 +1,9 @@
 package epa
 
 import (
-	"github.com/zsmartex/pkg/v2/epa/aggregation"
-	"github.com/zsmartex/pkg/v2/epa/query"
-	"github.com/zsmartex/pkg/v2/queries"
+	"github.com/zsmartex/pkg/v3/epa/aggregation"
+	"github.com/zsmartex/pkg/v3/epa/query"
+	"github.com/zsmartex/pkg/v3/queries"
 )
 
 type Query struct {

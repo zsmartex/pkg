@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/zsmartex/pkg/v2/infrastucture/elasticsearch"
+	"github.com/zsmartex/pkg/v3/infrastucture/elasticsearch"
 )
 
 type Order struct {

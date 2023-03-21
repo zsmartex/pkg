@@ -5,7 +5,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/zsmartex/pkg/v2/gpa"
+	"github.com/zsmartex/pkg/v3/gpa"
 )
 
 func WithFieldEqual(field string, value interface{}) gpa.Filter {

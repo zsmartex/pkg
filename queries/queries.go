@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/zsmartex/pkg/v2/gpa"
-	"github.com/zsmartex/pkg/v2/gpa/filters"
+	"github.com/zsmartex/pkg/v3/gpa"
+	"github.com/zsmartex/pkg/v3/gpa/filters"
 )
 
 // Pagination is the pagination query parameters.

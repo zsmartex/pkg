@@ -1,6 +1,6 @@
-module github.com/zsmartex/pkg/v2
+module github.com/zsmartex/pkg/v3
 
-go 1.18
+go 1.20
 
 require (
 	github.com/aws/aws-sdk-go v1.43.21
