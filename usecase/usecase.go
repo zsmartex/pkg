@@ -42,6 +42,8 @@ type Usecase[V schema.Tabler] struct {
 }
 
 type IUsecase[V schema.Tabler] interface {
+	WithTrx(tx *gorm.DB) IUsecase[V]
+
 	Count(context context.Context, filters ...gpa.Filter) (int, error)
 	Last(context context.Context, filters ...gpa.Filter) (*V, error)
 	First(context context.Context, filters ...gpa.Filter) (*V, error)
@@ -201,6 +203,12 @@ func (u Usecase[V]) AddCallback(kind CallbackType, callback func(db *gorm.DB, va
 
 		return nil
 	}
+}
+
+func (u Usecase[V]) WithTrx(tx *gorm.DB) IUsecase[V] {
+	u.Repository = u.Repository.WithTrx(tx)
+
+	return u
 }
 
 func (u Usecase[V]) Count(context context.Context, filters ...gpa.Filter) (int, error) {
