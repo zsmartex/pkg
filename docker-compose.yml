@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   elasticsearch:
-    image: elasticsearch:7.17.4
+    image: elasticsearch:8.7.0
     ports:
       - '9200:9200'
       - '9300:9300'
