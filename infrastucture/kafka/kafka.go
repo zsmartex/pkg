@@ -6,6 +6,7 @@ import (
 
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
+
 	"github.com/zsmartex/pkg/v2/log"
 )
 
@@ -16,52 +17,30 @@ type Consumer struct {
 	Group        string
 }
 
-func NewConsumer(brokers []string, group string, topics ...string) (*Consumer, error) {
+func NewConsumer(context context.Context, brokers []string, group string, topics ...string) (*Consumer, error) {
 	seeds := kgo.SeedBrokers(brokers...)
 
 	cl, err := kgo.NewClient(
 		seeds,
+		kgo.AllowAutoTopicCreation(),
+		kgo.ConsumerGroup(group),
+		kgo.ConsumeTopics(topics...),
+		kgo.DisableAutoCommit(),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	var client *kgo.Client
-
-	adm := kadm.NewClient(cl)
-	os, err := adm.FetchOffsetsForTopics(context.Background(), group, topics...)
-
-	if os.Ok() && err == nil {
-		client, err = kgo.NewClient(
-			seeds,
-			kgo.ConsumePartitions(os.KOffsets()),
-		)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		client, err = kgo.NewClient(
-			seeds,
-			kgo.AllowAutoTopicCreation(),
-			kgo.ConsumerGroup(group),
-			kgo.ConsumeTopics(topics...),
-			kgo.DisableAutoCommit(),
-		)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	return &Consumer{
-		CommitClient: adm,
-		Client:       client,
+		CommitClient: kadm.NewClient(cl),
+		Client:       cl,
 		Topics:       topics,
 		Group:        group,
 	}, nil
 }
 
-func (c *Consumer) Poll() ([]*kgo.Record, error) {
-	fetches := c.Client.PollFetches(context.Background())
+func (c *Consumer) Poll(ctx context.Context) ([]*kgo.Record, error) {
+	fetches := c.Client.PollFetches(ctx)
 	if err := fetches.Err(); err != nil {
 		return nil, err
 	}
@@ -69,8 +48,8 @@ func (c *Consumer) Poll() ([]*kgo.Record, error) {
 	return fetches.Records(), nil
 }
 
-func (c *Consumer) CommitRecords(records ...kgo.Record) error {
-	return c.CommitClient.CommitAllOffsets(context.Background(), c.Group, kadm.OffsetsFromRecords(records...))
+func (c *Consumer) CommitRecords(context context.Context, records ...*kgo.Record) error {
+	return c.Client.CommitRecords(context, records...)
 }
 
 func (c *Consumer) Close() {
@@ -96,23 +75,23 @@ func NewProducer(brokers []string) (*Producer, error) {
 	}, nil
 }
 
-func (k *Producer) Produce(topic string, payload interface{}) {
-	k.produce(topic, "", payload)
+func (k *Producer) Produce(context context.Context, topic string, payload interface{}) {
+	k.produce(context, topic, "", payload)
 }
 
-func (k *Producer) ProduceWithKey(topic, key string, payload interface{}) {
-	k.produce(topic, key, payload)
+func (k *Producer) ProduceWithKey(context context.Context, topic, key string, payload interface{}) {
+	k.produce(context, topic, key, payload)
 }
 
-func (p *Producer) produce(topic, key string, payload interface{}) {
+func (p *Producer) produce(context context.Context, topic, key string, payload interface{}) {
 	switch data := payload.(type) {
 	case string:
-		p.produce(topic, key, []byte(data))
+		p.produce(context, topic, key, []byte(data))
 		return
 	case []byte:
 		log.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
 
-		p.Client.Produce(context.Background(), &kgo.Record{
+		p.Client.Produce(context, &kgo.Record{
 			Topic: topic,
 			Key:   []byte(key),
 			Value: data,
@@ -123,11 +102,15 @@ func (p *Producer) produce(topic, key string, payload interface{}) {
 		})
 		return
 	default:
-		jdata, err := json.Marshal(payload)
+		data, err := json.Marshal(payload)
 		if err != nil {
 			return
 		}
 
-		p.produce(topic, key, jdata)
+		p.produce(context, topic, key, data)
 	}
+}
+
+func (p Producer) Health(ctx context.Context) error {
+	return p.Client.Ping(ctx)
 }
