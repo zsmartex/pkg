@@ -28,8 +28,8 @@ func New(addr string) (*RedisClient, error) {
 	}, nil
 }
 
-func (r *RedisClient) Keys(prefix string) ([]string, error) {
-	result := r.Client.Keys(context.Background(), prefix)
+func (r *RedisClient) Keys(context context.Context, prefix string) ([]string, error) {
+	result := r.Client.Keys(context, prefix)
 
 	if err := result.Err(); err != nil {
 		return nil, err
@@ -38,24 +38,34 @@ func (r *RedisClient) Keys(prefix string) ([]string, error) {
 	return result.Val(), nil
 }
 
-func (r *RedisClient) HGet(key, field string) *redis.StringCmd {
-	return r.Client.HGet(context.Background(), key, field)
+func (r *RedisClient) HGet(context context.Context, key, field string) *redis.StringCmd {
+	return r.Client.HGet(context, key, field)
 }
 
-func (r *RedisClient) HSet(key string, values ...interface{}) error {
-	return r.Client.HSet(context.Background(), key, values...).Err()
+func (r *RedisClient) HSet(context context.Context, key string, values ...interface{}) error {
+	return r.Client.HSet(context, key, values...).Err()
 }
 
-func (r *RedisClient) HGetAll(key string) *redis.StringStringMapCmd {
-	return r.Client.HGetAll(context.Background(), key)
+func (r *RedisClient) HExists(context context.Context, key, field string) (exist bool, err error) {
+	result := r.Client.HExists(context, key, field)
+
+	if result.Err() != nil {
+		return false, err
+	}
+
+	return result.Val(), nil
 }
 
-func (r *RedisClient) Set(key string, value interface{}, expiration time.Duration) error {
-	return r.Client.Set(context.Background(), key, value, expiration).Err()
+func (r *RedisClient) HGetAll(context context.Context, key string) *redis.StringStringMapCmd {
+	return r.Client.HGetAll(context, key)
 }
 
-func (r *RedisClient) Get(key string) (value *redis.StringCmd, err error) {
-	result := r.Client.Get(context.Background(), key)
+func (r *RedisClient) Set(context context.Context, key string, value interface{}, expiration time.Duration) error {
+	return r.Client.Set(context, key, value, expiration).Err()
+}
+
+func (r *RedisClient) Get(context context.Context, key string) (value *redis.StringCmd, err error) {
+	result := r.Client.Get(context, key)
 
 	if result.Err() != nil {
 		return nil, err
@@ -64,15 +74,18 @@ func (r *RedisClient) Get(key string) (value *redis.StringCmd, err error) {
 	return result, nil
 }
 
-func (r *RedisClient) Delete(key string) error {
-	return r.Client.Del(context.Background(), key).Err()
+func (r *RedisClient) Delete(context context.Context, key string) error {
+	return r.Client.Del(context, key).Err()
 }
 
-func (r *RedisClient) GetWithDefault(key string, target interface{}, expiration time.Duration, funcDefaultData func() interface{}) error {
-	if exist, err := r.Exist(key); err != nil {
+func (r *RedisClient) GetWithDefault(context context.Context, key string, target interface{}, expiration time.Duration, funcDefaultData func() (interface{}, error)) error {
+	if exist, err := r.Exist(context, key); err != nil {
 		return err
 	} else if !exist {
-		data := funcDefaultData()
+		data, err := funcDefaultData()
+		if err != nil {
+			return err
+		}
 
 		val := reflect.ValueOf(target)
 		if val.Kind() != reflect.Ptr {
@@ -86,12 +99,12 @@ func (r *RedisClient) GetWithDefault(key string, target interface{}, expiration 
 			return err
 		}
 
-		if err := r.Set(key, bytes, expiration); err != nil {
+		if err := r.Set(context, key, bytes, expiration); err != nil {
 			return err
 		}
 	}
 
-	if value, err := r.Get(key); err != nil {
+	if value, err := r.Get(context, key); err != nil {
 		return err
 	} else if value == nil {
 		return nil
@@ -105,12 +118,16 @@ func (r *RedisClient) GetWithDefault(key string, target interface{}, expiration 
 	}
 }
 
-func (r *RedisClient) Exist(key string) (exist bool, err error) {
-	result := r.Client.Exists(context.Background(), key)
+func (r *RedisClient) Exist(context context.Context, key string) (exist bool, err error) {
+	result := r.Client.Exists(context, key)
 
 	if result.Err() != nil {
 		return false, err
 	}
 
 	return result.Val() >= 1, nil
+}
+
+func (r *RedisClient) Health(context context.Context) error {
+	return r.Client.Ping(context).Err()
 }

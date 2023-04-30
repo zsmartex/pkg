@@ -40,9 +40,9 @@ func WithAssign(attrs ...interface{}) gpa.Filter {
 	}
 }
 
-func WithSelect(query string, args ...interface{}) gpa.Filter {
+func WithSelect(first_column interface{}, columns ...interface{}) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
-		return query.Select(query, args...)
+		return query.Select(first_column, columns...)
 	}
 }
 

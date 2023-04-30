@@ -11,14 +11,18 @@ import (
 
 // Auth struct represents parsed jwt information.
 type Auth struct {
-	UID         string   `json:"uid"`
-	State       string   `json:"state"`
-	Email       string   `json:"email"`
-	Username    string   `json:"username"`
-	Role        string   `json:"role"`
-	ReferralUID string   `json:"referral_uid"`
-	Level       int64    `json:"level"`
-	Audience    []string `json:"aud,omitempty"`
+	UID         string                 `json:"uid"`
+	State       string                 `json:"state"`
+	Email       string                 `json:"email"`
+	Username    string                 `json:"username"`
+	Role        string                 `json:"role"`
+	ReferralUID null.String            `json:"referral_uid,omitempty"`
+	Phone       string                 `json:"phone"`
+	KYC         bool                   `json:"kyc"`
+	OTP         bool                   `json:"otp"`
+	Level       int                    `json:"level"`
+	Audience    []string               `json:"aud,omitempty"`
+	Data        map[string]interface{} `json:"data,omitempty"`
 
 	jwt.StandardClaims
 }
@@ -51,24 +55,25 @@ func appendClaims(defaultClaims, customClaims jwt.MapClaims) jwt.MapClaims {
 }
 
 // ForgeToken creates a valid JWT signed by the given private key
-func ForgeToken(uid, email, role string, referral_uid null.String, level int64, key *rsa.PrivateKey, customClaims jwt.MapClaims) (string, error) {
+func ForgeToken(uid, email, role string, referralUID null.String, level int64, otp bool, phone string, kyc bool, data map[string]interface{}, key *rsa.PrivateKey, customClaims jwt.MapClaims) (string, error) {
 	claims := appendClaims(jwt.MapClaims{
-		"iat":   time.Now().Unix(),
-		"jti":   strconv.FormatInt(time.Now().Unix(), 10),
-		"exp":   time.Now().UTC().Add(time.Hour).Unix(),
-		"sub":   "session",
-		"iss":   "barong",
-		"aud":   [3]string{"peatio", "barong", "finex"},
-		"uid":   uid,
-		"email": email,
-		"role":  role,
-		"level": level,
-		"state": "active",
+		"iat":          time.Now().Unix(),
+		"jti":          strconv.FormatInt(time.Now().Unix(), 10),
+		"exp":          time.Now().UTC().Add(time.Hour).Unix(),
+		"sub":          "session",
+		"iss":          "barong",
+		"aud":          [4]string{"peatio", "barong", "kouda", "quantex"},
+		"uid":          uid,
+		"email":        email,
+		"role":         role,
+		"level":        level,
+		"state":        "active",
+		"referral_uid": referralUID,
+		"phone":        phone,
+		"kyc":          kyc,
+		"otp":          otp,
+		"data":         data,
 	}, customClaims)
-
-	if referral_uid.Valid {
-		claims["referral_uid"] = referral_uid.String
-	}
 
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 

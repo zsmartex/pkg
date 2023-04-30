@@ -1,6 +1,7 @@
 package event_api
 
 import (
+	"context"
 	"crypto/rsa"
 	"encoding/base64"
 	"fmt"
@@ -9,60 +10,61 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+
 	"github.com/zsmartex/pkg/v2/infrastucture/kafka"
 )
 
 type EventAPI struct {
-	application_name string
-	producer         *kafka.Producer
-	jwt_private_key  *rsa.PrivateKey
+	applicationName string
+	producer        *kafka.Producer
+	jwtPrivateKey   *rsa.PrivateKey
 }
 
 type EventAPIPayload struct {
 	Record interface{} `json:"record"`
 }
 
-func New(producer *kafka.Producer, application_name string, jwt_private_key string) (*EventAPI, error) {
-	secret, err := base64.StdEncoding.DecodeString(jwt_private_key)
+func New(producer *kafka.Producer, applicationName string, jwtPrivateKey string) (*EventAPI, error) {
+	secret, err := base64.StdEncoding.DecodeString(jwtPrivateKey)
 	if err != nil {
 		return nil, err
 	}
 
-	private_key, err := jwt.ParseRSAPrivateKeyFromPEM(secret)
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(secret)
 	if err != nil {
 		return nil, err
 	}
 
 	return &EventAPI{
-		application_name: application_name,
-		producer:         producer,
-		jwt_private_key:  private_key,
+		applicationName: applicationName,
+		producer:        producer,
+		jwtPrivateKey:   privateKey,
 	}, nil
 }
 
 func (e *EventAPI) generateJWT(event_payload EventAPIPayload) (string, error) {
-	jwt_payload := jwt.MapClaims{
+	jwtPayload := jwt.MapClaims{
 		"iat":   time.Now().Unix(),
 		"jti":   strconv.FormatInt(time.Now().Unix(), 10),
-		"iss":   e.application_name,
+		"iss":   e.applicationName,
 		"exp":   time.Now().UTC().Add(time.Hour).Unix(),
 		"event": event_payload,
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt_payload)
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwtPayload)
 
-	return token.SignedString(e.jwt_private_key)
+	return token.SignedString(e.jwtPrivateKey)
 }
 
-func (e *EventAPI) Notify(event_name string, event_payload EventAPIPayload) error {
+func (e *EventAPI) Notify(context context.Context, event_name string, event_payload EventAPIPayload) error {
 	eventType := strings.Split(event_name, ".")[0]
-	topic := fmt.Sprintf("%s.events.%s", e.application_name, eventType)
-	jwt_token, err := e.generateJWT(event_payload)
+	topic := fmt.Sprintf("%s.events.%s", e.applicationName, eventType)
+	jwtToken, err := e.generateJWT(event_payload)
 	if err != nil {
 		return err
 	}
 
-	e.producer.ProduceWithKey(topic, strings.Replace(event_name, fmt.Sprintf("%s.", eventType), "", 1), jwt_token)
+	e.producer.ProduceWithKey(context, topic, strings.Replace(event_name, fmt.Sprintf("%s.", eventType), "", 1), jwtToken)
 
 	return nil
 }

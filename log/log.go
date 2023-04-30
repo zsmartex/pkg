@@ -87,3 +87,11 @@ func Warn(args ...interface{}) {
 func Warnf(format string, args ...interface{}) {
 	Logger.Warnf(format, args...)
 }
+
+func Trace(args ...interface{}) {
+	Logger.Trace(args...)
+}
+
+func Tracef(format string, args ...interface{}) {
+	Logger.Tracef(format, args...)
+}

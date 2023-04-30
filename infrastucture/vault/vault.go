@@ -1,6 +1,8 @@
 package vault
 
 import (
+	"context"
+	"errors"
 	"time"
 
 	"github.com/hashicorp/vault/api"
@@ -10,9 +12,9 @@ type VaultService struct {
 	vault *api.Client
 }
 
-func New(vault_addr, token string) (*VaultService, error) {
+func New(vaultAddr, token string) (*VaultService, error) {
 	config := &api.Config{
-		Address: vault_addr,
+		Address: vaultAddr,
 		Timeout: time.Second * 2,
 	}
 
@@ -87,4 +89,21 @@ func (s *VaultService) Unwrap(path string) (*api.Secret, error) {
 
 func (s *VaultService) Delete(path string) (*api.Secret, error) {
 	return s.vault.Logical().Delete(path)
+}
+
+func (s *VaultService) Health(ctx context.Context) error {
+	res, err := s.vault.Sys().Health()
+	if err != nil {
+		return err
+	}
+
+	if res.Sealed {
+		return errors.New("vault is sealed")
+	}
+
+	if !res.Initialized {
+		return errors.New("vault is not initialized")
+	}
+
+	return nil
 }
