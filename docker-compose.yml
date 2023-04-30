@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   elasticsearch:
-    image: elasticsearch:7.17.4
+    image: elasticsearch:8.7.0
     ports:
       - '9200:9200'
       - '9300:9300'
@@ -22,6 +22,18 @@ services:
       - ELASTICSEARCH_PASSWORD=elastic
     ports:
       - "5601:5601"
+  
+  questdb:
+    image: questdb/questdb:6.5.5
+    restart: always
+    ports:
+      - "8812:8812"
+      - "9009:9009"
+      - "8041:9000"
+      - "9003:9003"
+    volumes:
+      - questdb:/root/.questdb/db
 
 volumes:
   esdata:
+  questdb:
