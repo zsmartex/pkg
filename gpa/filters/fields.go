@@ -16,7 +16,7 @@ func WithFieldEqual(field string, value interface{}) gpa.Filter {
 
 func WithFieldNotEqual(field string, value interface{}) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
-		return query.Where(fmt.Sprintf("%s <> ?", field), value)
+		return query.Where(fmt.Sprintf("%s != ?", field), value)
 	}
 }
 
@@ -71,5 +71,11 @@ func WithNotLIKE(field string, value interface{}) gpa.Filter {
 func WithFieldIsNull(field string) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		return query.Where(fmt.Sprintf("%s IS NULL", field))
+	}
+}
+
+func WithFieldIsNotNull(field string) gpa.Filter {
+	return func(query *gorm.DB) *gorm.DB {
+		return query.Where(fmt.Sprintf("%s IS NOT NULL", field))
 	}
 }

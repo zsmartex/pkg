@@ -24,7 +24,7 @@ func WithOffset(offset int) gpa.Filter {
 	}
 }
 
-func WithPageable(page, size int) gpa.Filter {
+func WithPagination(page, size int) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
 		query = query.Limit(size)
 		if page > 0 {
