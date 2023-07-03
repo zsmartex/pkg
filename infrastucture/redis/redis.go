@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"time"
 
@@ -13,12 +14,14 @@ type RedisClient struct {
 	*redis.Client
 }
 
-func New(addr string) (*RedisClient, error) {
-	opts, err := redis.ParseURL(addr)
-	if err != nil {
-		return nil, err
-	}
-	client := redis.NewClient(opts)
+func New(password, host string, port int) (*RedisClient, error) {
+	client := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%d", host, port),
+		Password: password,
+		DB:       0,
+	})
+
+	_, err := client.Ping(context.Background()).Result()
 	if err != nil {
 		return nil, err
 	}
