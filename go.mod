@@ -11,9 +11,9 @@ require (
 	github.com/creasty/defaults v1.6.0
 	github.com/elastic/go-elasticsearch/v8 v8.3.0
 	github.com/georgysavva/scany/v2 v2.0.0
-	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.0
+	github.com/gookit/goutil v0.5.5
 	github.com/gookit/validate v1.4.2
 	github.com/hashicorp/vault/api v1.4.1
 	github.com/jackc/pgconn v1.13.0
@@ -21,6 +21,7 @@ require (
 	github.com/jackc/pgx-shopspring-decimal v0.0.0-20220624020537-1d36b5a1853e
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/lib/pq v1.10.4
+	github.com/redis/go-redis/v9 v9.0.5
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/twilio/twilio-go v0.26.0
@@ -46,7 +47,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.13.10 // indirect
 	github.com/aws/smithy-go v1.12.0 // indirect
 	github.com/cenkalti/backoff/v3 v3.0.0 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/elastic/elastic-transport-go/v8 v8.0.0-20211216131617-bbee439d559c // indirect
 	github.com/fatih/color v1.7.0 // indirect
@@ -54,7 +55,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gookit/filter v1.1.2 // indirect
-	github.com/gookit/goutil v0.5.5 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v0.16.2 // indirect

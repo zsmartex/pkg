@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gookit/goutil/arrutil"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"gorm.io/gorm"
@@ -29,6 +30,28 @@ func Contains[T any](arr []T, v T) bool {
 			return true
 		}
 	}
+	return false
+}
+
+func IsDBConnectionError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if pqErr, ok := err.(*pgconn.PgError); ok {
+		connectErrCodes := []string{
+			pgerrcode.ConnectionException,
+			pgerrcode.ConnectionDoesNotExist,
+			pgerrcode.ConnectionFailure,
+			pgerrcode.SQLClientUnableToEstablishSQLConnection,
+			pgerrcode.SQLServerRejectedEstablishmentOfSQLConnection,
+			pgerrcode.TransactionResolutionUnknown,
+			pgerrcode.ProtocolViolation,
+		}
+
+		return arrutil.Contains(connectErrCodes, pqErr.Code)
+	}
+
 	return false
 }
 

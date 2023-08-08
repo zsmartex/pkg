@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 type RedisClient struct {
@@ -59,7 +59,7 @@ func (r *RedisClient) HExists(context context.Context, key, field string) (exist
 	return result.Val(), nil
 }
 
-func (r *RedisClient) HGetAll(context context.Context, key string) *redis.StringStringMapCmd {
+func (r *RedisClient) HGetAll(context context.Context, key string) *redis.MapStringStringCmd {
 	return r.Client.HGetAll(context, key)
 }
 
