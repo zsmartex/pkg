@@ -34,7 +34,7 @@ const (
 var callbackReady = false
 var callbacks = make(map[CallbackType]map[string]func(*gorm.DB) error, 0)
 
-type Usecase[V schema.Tabler] struct {
+type usecase[V schema.Tabler] struct {
 	Repository           repository.Repository[V]
 	ElasticsearchUsecase ElasticsearchUsecase[V]
 	QuestDBUsecase       QuestDBUsecase[V]
@@ -42,23 +42,31 @@ type Usecase[V schema.Tabler] struct {
 }
 
 type IUsecase[V schema.Tabler] interface {
-	Count(context context.Context, filters ...gpa.Filter) int
-	Last(context context.Context, filters ...gpa.Filter) (*V, error)
-	First(context context.Context, filters ...gpa.Filter) (*V, error)
-	Find(context context.Context, filters ...gpa.Filter) []*V
+	Count(ctx context.Context, filters ...gpa.Filter) int
+	Last(ctx context.Context, filters ...gpa.Filter) (*V, error)
+	First(ctx context.Context, filters ...gpa.Filter) (*V, error)
+	Find(ctx context.Context, filters ...gpa.Filter) []*V
 	Transaction(handler func(tx *gorm.DB) error) error
-	FirstOrCreate(context context.Context, model *V, filters ...gpa.Filter)
-	Create(context context.Context, model *V, filters ...gpa.Filter)
-	Updates(context context.Context, model *V, value interface{}, filters ...gpa.Filter)
-	UpdateColumns(context context.Context, model *V, value interface{}, filters ...gpa.Filter)
-	Delete(context context.Context, model *V, filters ...gpa.Filter)
-	Exec(context context.Context, sql string, attrs ...interface{}) error
-	RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error
-	RawScan(context context.Context, dst interface{}, sql string, attrs ...interface{}) error
-	RawFirst(context context.Context, dst interface{}, sql string, attrs ...interface{}) error
+	FirstOrCreate(ctx context.Context, model *V, filters ...gpa.Filter)
+	Create(ctx context.Context, model *V, filters ...gpa.Filter)
+	Updates(ctx context.Context, model *V, value interface{}, filters ...gpa.Filter)
+	UpdateColumns(ctx context.Context, model *V, value interface{}, filters ...gpa.Filter)
+	Delete(ctx context.Context, model *V, filters ...gpa.Filter)
+	Exec(ctx context.Context, sql string, attrs ...interface{}) error
+	RawFind(ctx context.Context, dst interface{}, sql string, attrs ...interface{}) error
+	RawScan(ctx context.Context, dst interface{}, sql string, attrs ...interface{}) error
+	RawFirst(ctx context.Context, dst interface{}, sql string, attrs ...interface{}) error
+
+	OnCreate(ctx context.Context, value interface{}) error
 
 	Es() ElasticsearchUsecase[V]
 	QuestDB() QuestDBUsecase[V]
+}
+
+type Usecase[T schema.Tabler] struct {
+	gorm                    *gorm.DB
+	ElasticsearchRepository epa.Repository[T]
+	QuestDBConn             *pgxpool.Pool
 }
 
 func validateModel(model any) error {
@@ -138,7 +146,7 @@ func InitCallback(db *gorm.DB) {
 	callbackReady = true
 }
 
-func (u Usecase[V]) AddCallback(kind CallbackType, callback func(db *gorm.DB, value *V) error) {
+func (u usecase[V]) AddCallback(kind CallbackType, callback func(db *gorm.DB, value *V) error) {
 	if !callbackReady {
 		InitCallback(u.Repository.DB())
 	}
@@ -203,7 +211,7 @@ func (u Usecase[V]) AddCallback(kind CallbackType, callback func(db *gorm.DB, va
 	}
 }
 
-func (u Usecase[V]) Count(context context.Context, filters ...gpa.Filter) int {
+func (u usecase[V]) Count(context context.Context, filters ...gpa.Filter) int {
 	if count, err := u.Repository.Count(context, filters...); err != nil {
 		panic(err)
 	} else {
@@ -211,7 +219,7 @@ func (u Usecase[V]) Count(context context.Context, filters ...gpa.Filter) int {
 	}
 }
 
-func (u Usecase[V]) Last(context context.Context, filters ...gpa.Filter) (model *V, err error) {
+func (u usecase[V]) Last(context context.Context, filters ...gpa.Filter) (model *V, err error) {
 	if err := u.Repository.Last(context, &model, filters...); errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	} else if err != nil {
@@ -221,7 +229,7 @@ func (u Usecase[V]) Last(context context.Context, filters ...gpa.Filter) (model 
 	return
 }
 
-func (u Usecase[V]) First(context context.Context, filters ...gpa.Filter) (model *V, err error) {
+func (u usecase[V]) First(context context.Context, filters ...gpa.Filter) (model *V, err error) {
 	if err := u.Repository.First(context, &model, filters...); errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	} else if err != nil {
@@ -231,7 +239,7 @@ func (u Usecase[V]) First(context context.Context, filters ...gpa.Filter) (model
 	return
 }
 
-func (u Usecase[V]) Find(context context.Context, filters ...gpa.Filter) (models []*V) {
+func (u usecase[V]) Find(context context.Context, filters ...gpa.Filter) (models []*V) {
 	if err := u.Repository.Find(context, &models, filters...); err != nil {
 		panic(err)
 	}
@@ -239,17 +247,17 @@ func (u Usecase[V]) Find(context context.Context, filters ...gpa.Filter) (models
 	return
 }
 
-func (u Usecase[V]) Transaction(handler func(tx *gorm.DB) error) error {
+func (u usecase[V]) Transaction(handler func(tx *gorm.DB) error) error {
 	return u.Repository.Transaction(handler)
 }
 
-func (u Usecase[V]) FirstOrCreate(context context.Context, model *V, filters ...gpa.Filter) {
+func (u usecase[V]) FirstOrCreate(context context.Context, model *V, filters ...gpa.Filter) {
 	if err := u.Repository.FirstOrCreate(context, model, filters...); err != nil {
 		panic(err)
 	}
 }
 
-func (u Usecase[V]) Create(context context.Context, model *V, fs ...gpa.Filter) {
+func (u usecase[V]) Create(context context.Context, model *V, fs ...gpa.Filter) {
 	fs = append(fs, filters.WithOmit(u.Omits...))
 
 	if err := u.Repository.Create(context, model, fs...); err != nil {
@@ -257,7 +265,7 @@ func (u Usecase[V]) Create(context context.Context, model *V, fs ...gpa.Filter) 
 	}
 }
 
-func (u Usecase[V]) Updates(context context.Context, model *V, value interface{}, fs ...gpa.Filter) {
+func (u usecase[V]) Updates(context context.Context, model *V, value interface{}, fs ...gpa.Filter) {
 	fs = append(fs, filters.WithOmit(u.Omits...))
 
 	if err := u.Repository.Updates(context, model, value, fs...); err != nil {
@@ -265,7 +273,7 @@ func (u Usecase[V]) Updates(context context.Context, model *V, value interface{}
 	}
 }
 
-func (u Usecase[V]) UpdateColumns(context context.Context, model *V, value interface{}, fs ...gpa.Filter) {
+func (u usecase[V]) UpdateColumns(context context.Context, model *V, value interface{}, fs ...gpa.Filter) {
 	fs = append(fs, filters.WithOmit(u.Omits...))
 
 	if err := u.Repository.UpdateColumns(context, model, value, fs...); err != nil {
@@ -273,7 +281,7 @@ func (u Usecase[V]) UpdateColumns(context context.Context, model *V, value inter
 	}
 }
 
-func (u Usecase[V]) Delete(context context.Context, model *V, fs ...gpa.Filter) {
+func (u usecase[V]) Delete(context context.Context, model *V, fs ...gpa.Filter) {
 	fs = append(fs, filters.WithOmit(u.Omits...))
 
 	if err := u.Repository.Delete(context, model, fs...); err != nil {
@@ -281,27 +289,27 @@ func (u Usecase[V]) Delete(context context.Context, model *V, fs ...gpa.Filter) 
 	}
 }
 
-func (u Usecase[V]) Exec(context context.Context, sql string, attrs ...interface{}) error {
+func (u usecase[V]) Exec(context context.Context, sql string, attrs ...interface{}) error {
 	return u.Repository.Exec(context, sql, attrs...).Error
 }
 
-func (u Usecase[V]) RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
+func (u usecase[V]) RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
 	return u.Repository.Raw(context, sql, attrs...).Find(dst).Error
 }
 
-func (u Usecase[V]) RawScan(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
+func (u usecase[V]) RawScan(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
 	return u.Repository.Raw(context, sql, attrs...).Scan(dst).Error
 }
 
-func (u Usecase[V]) RawFirst(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
+func (u usecase[V]) RawFirst(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
 	return u.Repository.Raw(context, sql, attrs...).First(dst).Error
 }
 
-func (u Usecase[V]) Es() ElasticsearchUsecase[V] {
+func (u usecase[V]) Es() ElasticsearchUsecase[V] {
 	return u.ElasticsearchUsecase
 }
 
-func (u Usecase[V]) QuestDB() QuestDBUsecase[V] {
+func (u usecase[V]) QuestDB() QuestDBUsecase[V] {
 	return u.QuestDBUsecase
 }
 

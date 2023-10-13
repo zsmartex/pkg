@@ -1,19 +1,21 @@
 package pkg
 
-import "fmt"
-
 type Error struct {
-	Errors []string `json:"errors"`
-	Code   int      `json:"-"`
+	Errors      []string `json:"errors"`
+	Code        int      `json:"-"`
+	Description string   `json:"-"`
 }
 
-func NewError(code int, message ...string) *Error {
+func NewError(code int, msg string, description string) *Error {
 	return &Error{
-		Errors: message,
-		Code:   code,
+		Errors: []string{
+			msg,
+		},
+		Code:        code,
+		Description: description,
 	}
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("%d: %s", e.Code, e.Errors)
+	return e.Description
 }
