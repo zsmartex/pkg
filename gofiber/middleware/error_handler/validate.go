@@ -7,7 +7,7 @@ type ValidateError struct {
 	Method string
 }
 
-func ValidateHander(c *fiber.Ctx, method, prefix string) {
+func ValidateHandler(c *fiber.Ctx, method, prefix string) {
 	c.Locals("validate_error_prefix", &ValidateError{
 		Prefix: prefix,
 		Method: method,

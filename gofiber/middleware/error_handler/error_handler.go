@@ -41,18 +41,24 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 		if e, ok := err.(*pkg.Error); ok {
 			code = e.Code
 
-			messages := e.Errors
-			for i, msg := range messages {
+			returnedMessages := make([]string, 0)
+			for _, msg := range e.Errors {
 				if !strings.Contains(msg, ".") {
 					validateError, ok := c.Locals("validate_error_prefix").(*ValidateError)
 					if ok {
-						e.Errors[i] = fmt.Sprintf("%s.%s.%s", validateError.Prefix, validateError.Method, msg)
+						returnedMessages = append(returnedMessages, fmt.Sprintf("%s.%s.%s", validateError.Prefix, validateError.Method, msg))
+					} else {
+						if len(e.Errors) == 1 {
+							return c.Status(code).JSON(pkg.ErrServerInternal)
+						}
 					}
+				} else {
+					returnedMessages = append(returnedMessages, msg)
 				}
 			}
 
 			return c.Status(code).JSON(pkg.Error{
-				Errors: e.Errors,
+				Errors: returnedMessages,
 			})
 		} else if errors.Is(err, gorm.ErrRecordNotFound) {
 			return c.Status(fiber.StatusNotFound).JSON(pkg.ErrRecordNotFound)
