@@ -10,6 +10,7 @@ import (
 	"github.com/gookit/validate"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/zsmartex/mergo"
+	"github.com/zsmartex/pkg/v2"
 	"github.com/zsmartex/pkg/v2/epa"
 	"github.com/zsmartex/pkg/v2/gpa"
 	"github.com/zsmartex/pkg/v2/gpa/filters"
@@ -68,7 +69,7 @@ func validateModel(model any) error {
 	v := validate.Struct(model)
 
 	if !v.Validate() {
-		return v.Errors.OneError()
+		return pkg.NewError(422, v.Errors.One(), "model validate failed")
 	}
 
 	return nil
