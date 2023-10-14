@@ -2,7 +2,8 @@ package usecase
 
 import (
 	"context"
-	"errors"
+
+	"github.com/cockroachdb/errors"
 
 	"github.com/creasty/defaults"
 	"github.com/georgysavva/scany/v2/pgxscan"
@@ -266,19 +267,27 @@ func (u Usecase[V]) Delete(context context.Context, model *V, fs ...gpa.Filter) 
 }
 
 func (u Usecase[V]) Exec(context context.Context, sql string, attrs ...interface{}) error {
-	return u.Repository.Exec(context, sql, attrs...).Error
+	err := u.Repository.Exec(context, sql, attrs...).Error
+
+	return errors.Wrap(err, "usecase exec")
 }
 
 func (u Usecase[V]) RawFind(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.Repository.Raw(context, sql, attrs...).Find(dst).Error
+	err := u.Repository.Raw(context, sql, attrs...).Find(dst).Error
+
+	return errors.Wrap(err, "usecase raw find")
 }
 
 func (u Usecase[V]) RawScan(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.Repository.Raw(context, sql, attrs...).Scan(dst).Error
+	err := u.Repository.Raw(context, sql, attrs...).Scan(dst).Error
+
+	return errors.Wrap(err, "usecase raw scan")
 }
 
 func (u Usecase[V]) RawFirst(context context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return u.Repository.Raw(context, sql, attrs...).First(dst).Error
+	err := u.Repository.Raw(context, sql, attrs...).First(dst).Error
+
+	return errors.Wrap(err, "usecase raw first")
 }
 
 func (u Usecase[V]) Es() ElasticsearchUsecase[V] {
@@ -311,9 +320,13 @@ func (u QuestDBUsecase[V]) Exec(ctx context.Context, sql string, attrs ...interf
 }
 
 func (u QuestDBUsecase[V]) Query(ctx context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return pgxscan.Select(ctx, u.Conn, dst, sql, attrs...)
+	err := pgxscan.Select(ctx, u.Conn, dst, sql, attrs...)
+
+	return errors.Wrap(err, "questdb query")
 }
 
 func (u QuestDBUsecase[V]) QueryRow(ctx context.Context, dst interface{}, sql string, attrs ...interface{}) error {
-	return pgxscan.Get(ctx, u.Conn, dst, sql, attrs...)
+	err := pgxscan.Get(ctx, u.Conn, dst, sql, attrs...)
+
+	return errors.Wrap(err, "questdb query row")
 }
