@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/cockroachdb/errors"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -23,7 +24,7 @@ func New(host string, port int, password string) (*RedisClient, error) {
 
 	_, err := client.Ping(context.Background()).Result()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "redis.Ping")
 	}
 
 	return &RedisClient{
@@ -35,7 +36,7 @@ func (r *RedisClient) Keys(context context.Context, prefix string) ([]string, er
 	result := r.Client.Keys(context, prefix)
 
 	if err := result.Err(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "redis.Keys")
 	}
 
 	return result.Val(), nil
@@ -46,14 +47,19 @@ func (r *RedisClient) HGet(context context.Context, key, field string) *redis.St
 }
 
 func (r *RedisClient) HSet(context context.Context, key string, values ...interface{}) error {
-	return r.Client.HSet(context, key, values...).Err()
+	err := r.Client.HSet(context, key, values...).Err()
+	if err != nil {
+		return errors.Wrap(err, "redis.HSet")
+	}
+
+	return nil
 }
 
 func (r *RedisClient) HExists(context context.Context, key, field string) (exist bool, err error) {
 	result := r.Client.HExists(context, key, field)
 
 	if result.Err() != nil {
-		return false, err
+		return false, errors.Wrap(err, "redis.HExists")
 	}
 
 	return result.Val(), nil
@@ -64,21 +70,30 @@ func (r *RedisClient) HGetAll(context context.Context, key string) *redis.MapStr
 }
 
 func (r *RedisClient) Set(context context.Context, key string, value interface{}, expiration time.Duration) error {
-	return r.Client.Set(context, key, value, expiration).Err()
+	err := r.Client.Set(context, key, value, expiration).Err()
+	if err != nil {
+		return errors.Wrap(err, "redis.Set")
+	}
+
+	return nil
 }
 
 func (r *RedisClient) Get(context context.Context, key string) (value *redis.StringCmd, err error) {
 	result := r.Client.Get(context, key)
-
 	if result.Err() != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "redis.Get")
 	}
 
 	return result, nil
 }
 
 func (r *RedisClient) Delete(context context.Context, key string) error {
-	return r.Client.Del(context, key).Err()
+	err := r.Client.Del(context, key).Err()
+	if err != nil {
+		return errors.Wrap(err, "redis.Delete")
+	}
+
+	return err
 }
 
 func (r *RedisClient) GetWithDefault(context context.Context, key string, target interface{}, expiration time.Duration, funcDefaultData func() (interface{}, error)) error {
@@ -87,34 +102,34 @@ func (r *RedisClient) GetWithDefault(context context.Context, key string, target
 	} else if !exist {
 		data, err := funcDefaultData()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "redis.GetWithDefault")
 		}
 
 		val := reflect.ValueOf(target)
 		if val.Kind() != reflect.Ptr {
-			panic("some: check must be a pointer")
+			return errors.New("data must be a pointer")
 		}
 
 		val.Elem().Set(reflect.ValueOf(data))
 
 		bytes, err := json.Marshal(data)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "redis.GetWithDefault")
 		}
 
 		if err := r.Set(context, key, bytes, expiration); err != nil {
-			return err
+			return errors.Wrap(err, "redis.GetWithDefault")
 		}
 	}
 
 	if value, err := r.Get(context, key); err != nil {
-		return err
+		return errors.Wrap(err, "redis.GetWithDefault")
 	} else if value == nil {
 		return nil
 	} else {
 		bytes, err := value.Bytes()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "redis.GetWithDefault")
 		}
 
 		return json.Unmarshal(bytes, target)
@@ -125,12 +140,17 @@ func (r *RedisClient) Exist(context context.Context, key string) (exist bool, er
 	result := r.Client.Exists(context, key)
 
 	if result.Err() != nil {
-		return false, err
+		return false, errors.Wrap(err, "redis.Exists")
 	}
 
 	return result.Val() >= 1, nil
 }
 
 func (r *RedisClient) Health(context context.Context) error {
-	return r.Client.Ping(context).Err()
+	err := r.Client.Ping(context).Err()
+	if err != nil {
+		return errors.Wrap(err, "redis.Ping")
+	}
+
+	return nil
 }
