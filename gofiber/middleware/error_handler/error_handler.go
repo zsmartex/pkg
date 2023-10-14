@@ -31,7 +31,7 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 			return c.Status(code).JSON("404 Not Found")
 		}
 	} else {
-		unwrapError := errors.Unwrap(err)
+		unwrapError := errors.UnwrapAll(err)
 		if unwrapError == nil {
 			return c.Status(code).JSON(pkg.Error{
 				Errors: pkg.ErrServerInternal.Errors,
