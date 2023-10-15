@@ -38,7 +38,7 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 			})
 		}
 
-		if e, ok := err.(*pkg.Error); ok {
+		if e, ok := unwrapError.(*pkg.Error); ok {
 			code = e.Code
 
 			returnedMessages := make([]string, 0)
