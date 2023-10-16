@@ -61,6 +61,7 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 		} else if errors.Is(err, gorm.ErrRecordNotFound) {
 			return c.Status(fiber.StatusNotFound).JSON(pkg.ErrRecordNotFound)
 		} else if utils.IsDuplicateKeyError(err) {
+			log.Info(err)
 			errMsg := err.Error()
 			errMsg = utils.TrimStringBetween(errMsg, "index_", "(")
 			errMsg = strings.TrimSuffix(errMsg, "\" ")

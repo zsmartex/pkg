@@ -69,16 +69,12 @@ type pgConnErr interface {
 }
 
 func IsDuplicateKeyError(err error) bool {
-	log.Info(err)
 	if err == nil {
 		return false
 	}
 
 	if pqErr, ok := err.(pgConnErr); ok {
 		return pqErr.SQLState() == pgerrcode.UniqueViolation
-	} else {
-		log.Info(pqErr)
-		log.Info(ok)
 	}
 
 	return false
