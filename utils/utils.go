@@ -65,12 +65,16 @@ func IsNotFoundError(err error) bool {
 }
 
 func IsDuplicateKeyError(err error) bool {
+	log.Info(err)
 	if err == nil {
 		return false
 	}
 
 	if pqErr, ok := err.(*pgconn.PgError); ok {
 		return pqErr.Code == pgerrcode.UniqueViolation
+	} else {
+		log.Info(pqErr)
+		log.Info(ok)
 	}
 
 	return false
