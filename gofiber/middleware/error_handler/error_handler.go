@@ -35,6 +35,7 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 		if _err != nil {
 			err = _err
 		}
+		log.Infof("err: %T", err)
 
 		if e, ok := err.(*pkg.Error); ok {
 			code = e.Code
