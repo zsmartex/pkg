@@ -64,13 +64,17 @@ func IsNotFoundError(err error) bool {
 	return errors.Is(err, gorm.ErrRecordNotFound)
 }
 
+type pgConnErr interface {
+	SQLState() string
+}
+
 func IsDuplicateKeyError(err error) bool {
 	if err == nil {
 		return false
 	}
 
-	if pqErr, ok := err.(*pgconn.PgError); ok {
-		return pqErr.Code == pgerrcode.UniqueViolation
+	if pqErr, ok := err.(pgConnErr); ok {
+		return pqErr.SQLState() == pgerrcode.UniqueViolation
 	}
 
 	return false
