@@ -35,7 +35,6 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 		if _err != nil {
 			err = _err
 		}
-		log.Infof("err: %T", err)
 
 		if e, ok := err.(*pkg.Error); ok {
 			code = e.Code
@@ -63,6 +62,7 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 			return c.Status(fiber.StatusNotFound).JSON(pkg.ErrRecordNotFound)
 		} else if utils.IsDuplicateKeyError(err) {
 			errMsg := err.Error()
+			log.Infof("errMsg: %s", errMsg)
 			errMsg = utils.TrimStringBetween(errMsg, "index_", "(")
 			errMsg = strings.TrimSuffix(errMsg, "\" ")
 
