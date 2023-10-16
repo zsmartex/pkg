@@ -66,14 +66,16 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 			errMsg = strings.TrimSuffix(errMsg, "\" ")
 
 			columnsStr := utils.TrimStringAfter(errMsg, "on_")
-			log.Info(columnsStr)
 
 			columns := strings.Split(columnsStr, "_and_")
-			log.Info(columns)
-
+			errors := make([]string, 0)
 			for _, column := range columns {
-				return pkg.NewError(fiber.StatusUnprocessableEntity, fmt.Sprintf("%s.taken", column), fmt.Sprintf("data in column %s already exists", column))
+				errors = append(errors, fmt.Sprintf("%s.taken", column))
 			}
+
+			return c.Status(fiber.StatusUnprocessableEntity).JSON(pkg.Error{
+				Errors: errors,
+			})
 		}
 	}
 
