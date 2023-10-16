@@ -61,14 +61,15 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 		} else if errors.Is(err, gorm.ErrRecordNotFound) {
 			return c.Status(fiber.StatusNotFound).JSON(pkg.ErrRecordNotFound)
 		} else if utils.IsDuplicateKeyError(err) {
-			log.Info(err)
 			errMsg := err.Error()
 			errMsg = utils.TrimStringBetween(errMsg, "index_", "(")
 			errMsg = strings.TrimSuffix(errMsg, "\" ")
 
 			columnsStr := utils.TrimStringAfter(errMsg, "on_")
+			log.Info(columnsStr)
 
 			columns := strings.Split(columnsStr, "_and_")
+			log.Info(columns)
 
 			for _, column := range columns {
 				return pkg.NewError(fiber.StatusUnprocessableEntity, fmt.Sprintf("%s.taken", column), fmt.Sprintf("data in column %s already exists", column))
