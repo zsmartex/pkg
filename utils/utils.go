@@ -14,7 +14,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gookit/goutil/arrutil"
 	"github.com/jackc/pgconn"
@@ -164,10 +163,9 @@ func HashStringCRC32(s string) int64 {
 }
 
 func GenerateUID() string {
-	mathRand.Seed(time.Now().UnixNano())
 	arr := mathRand.Perm(10)
 
-	uid := "UID"
+	uid := "UI"
 
 	for _, v := range arr {
 		uid += strconv.Itoa(v)
