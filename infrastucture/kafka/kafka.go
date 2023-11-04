@@ -60,14 +60,14 @@ func NewProducer(brokers []string) (*Producer, error) {
 }
 
 func (k *Producer) Produce(context context.Context, topic string, payload interface{}) error {
-	return k.produce(context, topic, "", payload)
+	return k.produce(context, topic, nil, payload)
 }
 
-func (k *Producer) ProduceWithKey(context context.Context, topic, key string, payload interface{}) error {
+func (k *Producer) ProduceWithKey(context context.Context, topic string, key []byte, payload interface{}) error {
 	return k.produce(context, topic, key, payload)
 }
 
-func (p *Producer) produce(context context.Context, topic, key string, payload interface{}) error {
+func (p *Producer) produce(context context.Context, topic string, key []byte, payload interface{}) error {
 	switch data := payload.(type) {
 	case string:
 		return p.produce(context, topic, key, []byte(data))

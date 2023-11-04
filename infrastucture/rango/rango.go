@@ -16,8 +16,8 @@ func NewClient(producer *kafka.Producer) (*Client, error) {
 	return &Client{producer: producer}, nil
 }
 
-func (k *Client) EnqueueEvent(context context.Context, kind pkg.EnqueueEventKind, id, event string, payload interface{}) {
+func (k *Client) EnqueueEvent(context context.Context, kind pkg.EnqueueEventKind, id, event string, payload interface{}) error {
 	key := strings.Join([]string{string(kind), id, event}, ".")
 
-	k.producer.ProduceWithKey(context, "rango.events", key, payload)
+	return k.producer.ProduceWithKey(context, "rango.events", []byte(key), payload)
 }

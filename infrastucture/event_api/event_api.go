@@ -64,7 +64,7 @@ func (e *EventAPI) Notify(context context.Context, event_name string, event_payl
 		return err
 	}
 
-	e.producer.ProduceWithKey(context, topic, strings.Replace(event_name, fmt.Sprintf("%s.", eventType), "", 1), jwtToken)
+	key := strings.Replace(event_name, fmt.Sprintf("%s.", eventType), "", 1)
 
-	return nil
+	return e.producer.ProduceWithKey(context, topic, []byte(key), jwtToken)
 }
