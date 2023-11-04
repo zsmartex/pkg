@@ -4,43 +4,28 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
 
 	"github.com/zsmartex/pkg/v2/log"
 )
 
 type Consumer struct {
-	CommitClient *kadm.Client
-	Client       *kgo.Client
-	Topics       []string
-	Group        string
+	client *kgo.Client
 }
 
-func NewConsumer(context context.Context, brokers []string, group string, topics ...string) (*Consumer, error) {
-	seeds := kgo.SeedBrokers(brokers...)
-
-	cl, err := kgo.NewClient(
-		seeds,
-		kgo.AllowAutoTopicCreation(),
-		kgo.ConsumerGroup(group),
-		kgo.ConsumeTopics(topics...),
-		kgo.DisableAutoCommit(),
-	)
+func NewConsumer(opts ...kgo.Opt) (*Consumer, error) {
+	client, err := kgo.NewClient()
 	if err != nil {
 		return nil, err
 	}
 
 	return &Consumer{
-		CommitClient: kadm.NewClient(cl),
-		Client:       cl,
-		Topics:       topics,
-		Group:        group,
+		client: client,
 	}, nil
 }
 
 func (c *Consumer) Poll(ctx context.Context) ([]*kgo.Record, error) {
-	fetches := c.Client.PollFetches(ctx)
+	fetches := c.client.PollFetches(ctx)
 	if err := fetches.Err(); err != nil {
 		return nil, err
 	}
@@ -49,16 +34,15 @@ func (c *Consumer) Poll(ctx context.Context) ([]*kgo.Record, error) {
 }
 
 func (c *Consumer) CommitRecords(context context.Context, records ...*kgo.Record) error {
-	return c.Client.CommitRecords(context, records...)
+	return c.client.CommitRecords(context, records...)
 }
 
 func (c *Consumer) Close() {
-	c.Client.Close()
-	c.CommitClient.Close()
+	c.client.Close()
 }
 
 type Producer struct {
-	Client *kgo.Client
+	client *kgo.Client
 }
 
 func NewProducer(brokers []string) (*Producer, error) {
@@ -71,7 +55,7 @@ func NewProducer(brokers []string) (*Producer, error) {
 	}
 
 	return &Producer{
-		Client: client,
+		client: client,
 	}, nil
 }
 
@@ -91,7 +75,7 @@ func (p *Producer) produce(context context.Context, topic, key string, payload i
 	case []byte:
 		log.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
 
-		p.Client.Produce(context, &kgo.Record{
+		p.client.Produce(context, &kgo.Record{
 			Topic: topic,
 			Key:   []byte(key),
 			Value: data,
@@ -112,5 +96,5 @@ func (p *Producer) produce(context context.Context, topic, key string, payload i
 }
 
 func (p Producer) Health(ctx context.Context) error {
-	return p.Client.Ping(ctx)
+	return p.client.Ping(ctx)
 }
