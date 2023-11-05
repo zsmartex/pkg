@@ -48,15 +48,15 @@ func (d *DBlogger) LogMode(logger.LogLevel) logger.Interface {
 }
 
 func (d *DBlogger) Info(ctx context.Context, s string, args ...interface{}) {
-	logrus.WithContext(ctx).Infof(s, args)
+	logrus.WithContext(ctx).Infof(s, args...)
 }
 
 func (d *DBlogger) Warn(ctx context.Context, s string, args ...interface{}) {
-	logrus.WithContext(ctx).Warnf(s, args)
+	logrus.WithContext(ctx).Warnf(s, args...)
 }
 
 func (d *DBlogger) Error(ctx context.Context, s string, args ...interface{}) {
-	logrus.WithContext(ctx).Errorf(s, args)
+	logrus.WithContext(ctx).Errorf(s, args...)
 }
 
 func (d *DBlogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {

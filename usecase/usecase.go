@@ -33,8 +33,12 @@ const (
 	CallbackTypeAfterSave    CallbackType = "AfterSave"
 )
 
-var callbackReady = false
-var callbacks = make(map[CallbackType]map[string]func(*gorm.DB) error, 0)
+var callbacks = map[CallbackType]map[string]func(*gorm.DB) error{
+	CallbackTypeBeforeCreate: make(map[string]func(*gorm.DB) error),
+	CallbackTypeAfterCreate:  make(map[string]func(*gorm.DB) error),
+	CallbackTypeBeforeSave:   make(map[string]func(*gorm.DB) error),
+	CallbackTypeAfterSave:    make(map[string]func(*gorm.DB) error),
+}
 
 var _ IUsecase[schema.Tabler] = (*Usecase[schema.Tabler])(nil)
 
@@ -76,11 +80,6 @@ func validateModel(model any) error {
 }
 
 func InitCallback(db *gorm.DB) {
-	callbacks[CallbackTypeBeforeCreate] = make(map[string]func(*gorm.DB) error, 0)
-	callbacks[CallbackTypeAfterCreate] = make(map[string]func(*gorm.DB) error, 0)
-	callbacks[CallbackTypeBeforeSave] = make(map[string]func(*gorm.DB) error, 0)
-	callbacks[CallbackTypeAfterSave] = make(map[string]func(*gorm.DB) error, 0)
-
 	db.Callback().Create().Before("gorm:create").Register("callback:before_create", func(db *gorm.DB) {
 		defaults.Set(db.Statement.Dest)
 		tableName := db.Statement.Table
@@ -138,15 +137,9 @@ func InitCallback(db *gorm.DB) {
 			db.AddError(callback(db))
 		}
 	})
-
-	callbackReady = true
 }
 
 func (u Usecase[V]) AddCallback(kind CallbackType, callback func(db *gorm.DB, value *V) error) {
-	if !callbackReady {
-		InitCallback(u.Repository.DB())
-	}
-
 	if callbacks[kind][u.Repository.TableName()] != nil {
 		return
 	}

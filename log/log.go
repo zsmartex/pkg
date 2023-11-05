@@ -7,9 +7,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var Logger *logrus.Entry
+var Logger = New(applicationName())
 
-func New(application_name string) {
+func New(application_name string) *logrus.Logger {
 	// Log as JSON instead of the default ASCII formatter.
 	logrus.SetFormatter(&Formatter{
 		CustomCaption: application_name,
@@ -37,7 +37,7 @@ func New(application_name string) {
 		logrus.SetLevel(logrus.TraceLevel)
 	}
 
-	Logger = logrus.WithContext(context.Background())
+	return logrus.WithContext(context.Background()).Logger
 }
 
 func Info(args ...interface{}) {

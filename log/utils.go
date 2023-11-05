@@ -3,10 +3,20 @@ package log
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/sirupsen/logrus"
 )
+
+func applicationName() string {
+	appName := os.Getenv("APPLICATION_NAME")
+	if appName == "" {
+		return "unspecific"
+	}
+
+	return appName
+}
 
 func Stringify(v interface{}) string {
 	var ret string
