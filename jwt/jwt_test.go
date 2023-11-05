@@ -19,7 +19,7 @@ func TestAuth_appendClaims(t *testing.T) {
 		"iss":          "barong",
 		"aud":          [3]string{"peatio", "barong", "finex"},
 		"state":        "active",
-		"referral_uid": "UID132132165",
+		"referral_uid": "ID132132165",
 	}
 
 	t.Run("merges claims with nil", func(t *testing.T) {
@@ -61,7 +61,7 @@ func TestAuth_JWT(t *testing.T) {
 	}
 
 	t.Run("should validate jwt", func(t *testing.T) {
-		token, err := ForgeToken("uid", "email", "role", null.StringFrom("UID123165658"), 3, false, "+12312312", false, nil, ks.PrivateKey, nil)
+		token, err := ForgeToken("uid", "email", "role", null.StringFrom("ID123165658"), 3, false, "+12312312", false, nil, ks.PrivateKey, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
