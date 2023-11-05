@@ -32,14 +32,6 @@ func (c *Consumer) Poll(ctx context.Context) ([]*kgo.Record, error) {
 	return fetches.Records(), nil
 }
 
-func (c *Consumer) CommitRecords(context context.Context, records ...*kgo.Record) error {
-	return c.client.CommitRecords(context, records...)
-}
-
-func (c *Consumer) Close() {
-	c.client.Close()
-}
-
 type ConsumerSubscriber interface {
 	OnMessage(key []byte, message []byte) error
 }
@@ -57,4 +49,12 @@ func (c *Consumer) Subscribe(subscriber ConsumerSubscriber) error {
 			}
 		}
 	}
+}
+
+func (c *Consumer) CommitRecords(context context.Context, records ...*kgo.Record) error {
+	return c.client.CommitRecords(context, records...)
+}
+
+func (c *Consumer) Close() {
+	c.client.Close()
 }

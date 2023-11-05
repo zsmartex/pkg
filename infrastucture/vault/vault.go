@@ -9,7 +9,7 @@ import (
 )
 
 type VaultService struct {
-	vault *api.Client
+	client *api.Client
 }
 
 func New(vaultAddr, token string) (*VaultService, error) {
@@ -26,7 +26,7 @@ func New(vaultAddr, token string) (*VaultService, error) {
 	client.SetToken(token)
 
 	vs := &VaultService{
-		vault: client,
+		client: client,
 	}
 
 	vs.startRenewToken(token)
@@ -35,7 +35,7 @@ func New(vaultAddr, token string) (*VaultService, error) {
 }
 
 func (s *VaultService) startRenewToken(token string) error {
-	secret, err := s.vault.Auth().Token().Lookup(token)
+	secret, err := s.client.Auth().Token().Lookup(token)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (s *VaultService) startRenewToken(token string) error {
 		return nil
 	}
 
-	watcher, err := s.vault.NewLifetimeWatcher(&api.LifetimeWatcherInput{
+	watcher, err := s.client.NewLifetimeWatcher(&api.LifetimeWatcherInput{
 		Secret: &api.Secret{
 			Auth: &api.SecretAuth{
 				Renewable:   renewable,
@@ -76,23 +76,23 @@ func (s *VaultService) startRenewToken(token string) error {
 }
 
 func (s *VaultService) Read(path string) (*api.Secret, error) {
-	return s.vault.Logical().Read(path)
+	return s.client.Logical().Read(path)
 }
 
 func (s *VaultService) Write(path string, data map[string]interface{}) (*api.Secret, error) {
-	return s.vault.Logical().Write(path, data)
+	return s.client.Logical().Write(path, data)
 }
 
 func (s *VaultService) Unwrap(path string) (*api.Secret, error) {
-	return s.vault.Logical().Unwrap(path)
+	return s.client.Logical().Unwrap(path)
 }
 
 func (s *VaultService) Delete(path string) (*api.Secret, error) {
-	return s.vault.Logical().Delete(path)
+	return s.client.Logical().Delete(path)
 }
 
 func (s *VaultService) Health(ctx context.Context) error {
-	res, err := s.vault.Sys().Health()
+	res, err := s.client.Sys().Health()
 	if err != nil {
 		return err
 	}

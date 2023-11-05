@@ -154,3 +154,12 @@ func (r *RedisClient) Health(context context.Context) error {
 
 	return nil
 }
+
+func (r *RedisClient) Close() error {
+	err := r.Client.Close()
+	if err != nil {
+		return errors.Wrap(err, "redis.Ping")
+	}
+
+	return nil
+}
