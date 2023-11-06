@@ -10,7 +10,7 @@ import (
 )
 
 func applicationName() string {
-	appName := os.Getenv("APPLICATION_NAME")
+	appName := os.Getenv("APP_NAME")
 	if appName == "" {
 		return "unspecific"
 	}
