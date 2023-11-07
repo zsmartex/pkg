@@ -13,25 +13,29 @@ require (
 	github.com/elastic/go-elasticsearch/v8 v8.3.0
 	github.com/georgysavva/scany/v2 v2.0.0
 	github.com/gofiber/fiber/v2 v2.49.2
+	github.com/gofiber/utils v1.1.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.1
 	github.com/gookit/goutil v0.5.5
 	github.com/gookit/validate v1.4.2
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/hashicorp/vault/api v1.4.1
 	github.com/jackc/pgconn v1.13.0
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx-shopspring-decimal v0.0.0-20220624020537-1d36b5a1853e
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/lib/pq v1.10.4
+	github.com/mileusna/useragent v1.3.4
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/twilio/twilio-go v0.26.0
 	github.com/twmb/franz-go v1.15.2
-	github.com/twmb/franz-go/pkg/kadm v1.10.0
+	github.com/valyala/fasthttp v1.49.0
 	github.com/vgarvardt/pgx-google-uuid/v5 v5.0.0
 	github.com/volatiletech/null/v9 v9.0.0
 	github.com/zsmartex/mergo v0.0.1-rc.1
+	go.uber.org/fx v1.20.1
 	google.golang.org/grpc v1.53.0
 	gorm.io/driver/postgres v1.5.2
 	gorm.io/gorm v1.25.2
@@ -110,9 +114,11 @@ require (
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/twmb/franz-go/pkg/kmsg v1.7.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.49.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
+	go.uber.org/dig v1.17.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
