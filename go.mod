@@ -13,6 +13,7 @@ require (
 	github.com/elastic/go-elasticsearch/v8 v8.3.0
 	github.com/georgysavva/scany/v2 v2.0.0
 	github.com/gofiber/fiber/v2 v2.49.2
+	github.com/gofiber/helmet/v2 v2.2.26
 	github.com/gofiber/utils v1.1.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.1
