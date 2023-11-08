@@ -14,7 +14,9 @@ import (
 	"github.com/zsmartex/pkg/v2/infrastructure/kafka_fx"
 )
 
-var Module = fx.Module("event_api_fx", fx.Provide(New))
+var (
+	Module = fx.Module("event_api_fx", fx.Provide(New))
+)
 
 type EventAPI struct {
 	producer        *kafka_fx.Producer
@@ -68,7 +70,7 @@ func (e *EventAPI) generateJWT(event_payload EventAPIPayload) (string, error) {
 
 func (e *EventAPI) Notify(context context.Context, event_name string, event_payload EventAPIPayload) error {
 	eventType := strings.Split(event_name, ".")[0]
-	topic := fmt.Sprintf("%s.events.%s", e.applicationName, eventType)
+	topic := kafka_fx.Topic(fmt.Sprintf("%s.events.%s", e.applicationName, eventType))
 	jwtToken, err := e.generateJWT(event_payload)
 	if err != nil {
 		return err
