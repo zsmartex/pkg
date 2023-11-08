@@ -11,11 +11,9 @@ import (
 )
 
 func AsClientParams(resultTags string) interface{} {
-	return fx.Decorate(
-		fx.Annotate(
-			NewGrpcClient,
-			fx.ResultTags(resultTags),
-		),
+	return fx.Annotate(
+		NewGrpcClient,
+		fx.ResultTags(resultTags),
 	)
 }
 
