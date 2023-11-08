@@ -10,9 +10,7 @@ import (
 )
 
 var ServerModule = fx.Module("grpc_fx_testing",
-	fx.Provide(
-		NewListener,
-	),
+	fx.Provide(NewListener),
 	fx.Decorate(NewGrpcServer),
 	fx.Invoke(registerServerHooks),
 )
