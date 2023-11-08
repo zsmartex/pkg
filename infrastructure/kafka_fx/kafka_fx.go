@@ -3,6 +3,7 @@ package kafka_fx
 import (
 	"context"
 
+	"github.com/zsmartex/pkg/v2/log"
 	"go.uber.org/fx"
 )
 
@@ -38,6 +39,8 @@ type SubscriberHooksParams struct {
 func registerSubscriberHooks(lc fx.Lifecycle, params SubscriberHooksParams) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
+			log.Info("Kafka consumer subscriber started listening")
+
 			go params.Consumer.Subscribe(params.Subscriber)
 			return nil
 		},
