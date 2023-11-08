@@ -69,6 +69,7 @@ func (c *Consumer) Subscribe(subscriber ConsumerSubscriber) error {
 		}
 
 		for _, record := range records {
+			log.Debugf("kafka consumer received record: %s, %s", record.Key, record.Value)
 			if err := subscriber.OnMessage(record.Key, record.Value); err != nil {
 				log.Errorf("kafka consumer error: %s", err)
 			}
