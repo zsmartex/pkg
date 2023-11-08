@@ -43,7 +43,6 @@ func registerServerHooks(
 					log.Fatalf("gRPC error in running server: %v", err)
 				}
 			}()
-			log.Infof("Grpc is listening on %s", params.Config.Address())
 
 			return nil
 		},

@@ -89,7 +89,6 @@ func (s *grpcServer) RunGrpcServer(
 	log.Infof("gRPC server is listening on: %s", s.config.Address())
 
 	err = s.server.Serve(l)
-
 	if err != nil {
 		log.Error(
 			fmt.Sprintf("gRPC server serve error: %+v", err),
