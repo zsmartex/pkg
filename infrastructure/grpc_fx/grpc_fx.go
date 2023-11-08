@@ -24,25 +24,31 @@ var (
 	grpcClientInvokes = fx.Invoke(RegisterClientHooks)
 )
 
+type registerServerHooksParams struct {
+	fx.In
+
+	GrpcServer GrpcServer
+	Config     config.GRPC `name:"grpc_server"`
+}
+
 func registerServerHooks(
+	params registerServerHooksParams,
 	lc fx.Lifecycle,
-	grpcServer GrpcServer,
-	config config.GRPC,
 ) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			go func() {
-				if err := grpcServer.RunGrpcServer(nil); err != nil {
+				if err := params.GrpcServer.RunGrpcServer(nil); err != nil {
 					// do a fatal for going to OnStop process
 					log.Fatalf("gRPC error in running server: %v", err)
 				}
 			}()
-			log.Infof("Grpc is listening on %s", config.Address())
+			log.Infof("Grpc is listening on %s", params.Config.Address())
 
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			grpcServer.GracefulShutdown()
+			params.GrpcServer.GracefulShutdown()
 			log.Info("server shutdown gracefully")
 
 			return nil
