@@ -16,11 +16,24 @@ import (
 	"go.uber.org/fx"
 )
 
+var (
+	Module = fx.Module(
+		"fiber_fx",
+		fiberProviders,
+		fiberInvokes,
+	)
+
+	fiberProviders = fx.Provide(
+		New,
+	)
+
+	fiberInvokes = fx.Options(fx.Invoke(registerHooks))
+)
+
 type fiberParams struct {
 	fx.In
 
-	Config          config.HTTP `name:"http_server"`
-	ApplicationName string      `name:"application_name"`
+	ApplicationName string `name:"application_name"`
 }
 
 func New(params fiberParams, lc fx.Lifecycle) *fiber.App {
@@ -45,10 +58,21 @@ func New(params fiberParams, lc fx.Lifecycle) *fiber.App {
 		EnableStackTrace: true,
 	}))
 
+	return fiberApp
+}
+
+type hookParams struct {
+	fx.In
+
+	FiberApp *fiber.App
+	Config   config.HTTP `name:"http_server"`
+}
+
+func registerHooks(lc fx.Lifecycle, params hookParams) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			go func() {
-				err := fiberApp.Listen(params.Config.Address())
+				err := params.FiberApp.Listen(params.Config.Address())
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -57,9 +81,7 @@ func New(params fiberParams, lc fx.Lifecycle) *fiber.App {
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			return fiberApp.ShutdownWithContext(ctx)
+			return params.FiberApp.ShutdownWithContext(ctx)
 		},
 	})
-
-	return fiberApp
 }
