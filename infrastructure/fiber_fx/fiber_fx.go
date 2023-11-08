@@ -81,7 +81,7 @@ func registerHooks(lc fx.Lifecycle, params hookParams) {
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			return params.FiberApp.ShutdownWithContext(ctx)
+			return params.FiberApp.Shutdown()
 		},
 	})
 }
