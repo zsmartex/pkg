@@ -23,6 +23,7 @@ type consumerParams struct {
 	Config config.Kafka
 	Topic  Topic
 	Group  Group `optional:"true"`
+	AtEnd  bool  `optional:"true"`
 }
 
 func NewConsumer(params consumerParams) (*Consumer, error) {
@@ -36,6 +37,10 @@ func NewConsumer(params consumerParams) (*Consumer, error) {
 		options = append(options, kgo.ConsumeResetOffset(kgo.NewOffset().AtEnd()))
 	} else {
 		options = append(options, kgo.ConsumerGroup(string(params.Group)))
+
+		if params.AtEnd {
+			options = append(options, kgo.ConsumeResetOffset(kgo.NewOffset().AtEnd()))
+		}
 	}
 
 	client, err := kgo.NewClient(options...)
@@ -72,7 +77,7 @@ func (c *Consumer) Subscribe(subscriber ConsumerSubscriber) error {
 			if record.Key != nil {
 				log.Debugf("kafka consumer received record with key: %s, value: %s", record.Key, record.Value)
 			} else {
-				log.Debugf("kafka consumer received record with value: %s", record.Key, record.Value)
+				log.Debugf("kafka consumer received record with value: %s", record.Value)
 			}
 
 			if err := subscriber.OnMessage(record.Key, record.Value); err != nil {
