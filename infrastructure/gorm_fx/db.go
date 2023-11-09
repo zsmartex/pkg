@@ -30,7 +30,7 @@ type gormParams struct {
 	fx.In
 
 	Config   config.Postgres
-	EventAPI *event_api_fx.EventAPI
+	EventAPI *event_api_fx.EventAPI `optional:"true"`
 }
 
 func New(params gormParams) (*gorm.DB, error) {
