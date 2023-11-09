@@ -35,7 +35,7 @@ type SubscriberHooksParams struct {
 
 	Consumer   *Consumer
 	Subscriber ConsumerSubscriber
-	Ticker     time.Ticker
+	Ticker     *time.Ticker
 }
 
 func registerSubscriberHooks(lc fx.Lifecycle, params SubscriberHooksParams) {

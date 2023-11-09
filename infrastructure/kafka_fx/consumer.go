@@ -67,7 +67,7 @@ type ConsumerSubscriber interface {
 	OnMessage(key []byte, message []byte) error
 }
 
-func (c *Consumer) Subscribe(subscriber ConsumerSubscriber, ticker time.Ticker) error {
+func (c *Consumer) Subscribe(subscriber ConsumerSubscriber, ticker *time.Ticker) error {
 	for range ticker.C {
 		records, err := c.Poll(context.Background())
 		if err != nil {
