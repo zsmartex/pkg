@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/twmb/franz-go/pkg/kadm"
+	"github.com/zsmartex/pkg/v2/config"
 	"github.com/zsmartex/pkg/v2/log"
 	"go.uber.org/fx"
 )
@@ -24,10 +25,10 @@ var (
 type registerConsumerHooksParams struct {
 	fx.In
 
-	Topic             Topic
-	Consumer          *Consumer
-	AdminClient       *kadm.Client
-	ReplicationFactor ReplicationFactor
+	Topic       Topic
+	Config      config.Kafka
+	Consumer    *Consumer
+	AdminClient *kadm.Client
 }
 
 func registerConsumerHooks(
@@ -42,7 +43,8 @@ func registerConsumerHooks(
 			}
 
 			if topicDetails.Has(string(params.Topic)) {
-				replicationFactor := fmt.Sprintf("%d", params.ReplicationFactor)
+				replicationFactor := fmt.Sprintf("%d", params.Config.ReplicationFactor)
+				partitions := fmt.Sprintf("%d", params.Config.Partitions)
 
 				_, err := params.AdminClient.AlterTopicConfigs(ctx, []kadm.AlterConfig{
 					{
@@ -50,12 +52,23 @@ func registerConsumerHooks(
 						Name:  "replication.factor",
 						Value: &replicationFactor,
 					},
+					{
+						Op:    kadm.SetConfig,
+						Name:  "partitions",
+						Value: &partitions,
+					},
 				}, string(params.Topic))
 				if err != nil {
 					return err
 				}
 			} else {
-				_, err := params.AdminClient.CreateTopic(ctx, 3, int16(params.ReplicationFactor), nil, string(params.Topic))
+				_, err := params.AdminClient.CreateTopic(
+					ctx,
+					params.Config.Partitions,
+					params.Config.ReplicationFactor,
+					nil,
+					string(params.Topic),
+				)
 				if err != nil {
 					return err
 				}

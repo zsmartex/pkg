@@ -43,7 +43,9 @@ type (
 	}
 
 	Kafka struct {
-		Brokers []string `env:"KAFKA_BROKERS" envDefault:"localhost:9092" envSeparator:","`
+		Brokers           []string `env:"KAFKA_BROKERS" envDefault:"localhost:9092" envSeparator:","`
+		Partitions        int32    `env:"KAFKA_PARTITIONS" envDefault:"1"`
+		ReplicationFactor int16    `env:"KAFKA_REPLICATION_FACTOR" envDefault:"1"`
 	}
 
 	Vault struct {
