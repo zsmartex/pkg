@@ -2,6 +2,7 @@ package kafka_fx
 
 import (
 	"context"
+	"time"
 
 	"github.com/cockroachdb/errors"
 	"github.com/twmb/franz-go/pkg/kgo"
@@ -66,8 +67,8 @@ type ConsumerSubscriber interface {
 	OnMessage(key []byte, message []byte) error
 }
 
-func (c *Consumer) Subscribe(subscriber ConsumerSubscriber) error {
-	for {
+func (c *Consumer) Subscribe(subscriber ConsumerSubscriber, ticker time.Ticker) error {
+	for range ticker.C {
 		records, err := c.Poll(context.Background())
 		if err != nil {
 			return err
@@ -85,6 +86,8 @@ func (c *Consumer) Subscribe(subscriber ConsumerSubscriber) error {
 			}
 		}
 	}
+
+	return nil
 }
 
 func (c *Consumer) CommitRecords(context context.Context, records ...*kgo.Record) error {
