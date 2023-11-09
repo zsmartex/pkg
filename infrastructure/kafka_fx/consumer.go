@@ -23,7 +23,7 @@ type consumerParams struct {
 	Config config.Kafka
 	Topic  Topic
 	Group  Group `optional:"true"`
-	AtEnd  bool  `optional:"true"`
+	AtEnd  bool  `name:"at_end" optional:"true"`
 }
 
 func NewConsumer(params consumerParams) (*Consumer, error) {
