@@ -14,7 +14,6 @@ import (
 
 type Topic string
 type Group string
-type ReplicationFactor int16
 
 type Consumer struct {
 	client *kgo.Client
@@ -68,7 +67,7 @@ func (c *Consumer) Poll(ctx context.Context) ([]*kgo.Record, error) {
 }
 
 type ConsumerSubscriber interface {
-	OnMessage(key []byte, message []byte) error
+	OnMessage(*kgo.Record) error
 }
 
 func (c *Consumer) Subscribe(subscriber ConsumerSubscriber, ticker *time.Ticker) error {
@@ -85,7 +84,7 @@ func (c *Consumer) Subscribe(subscriber ConsumerSubscriber, ticker *time.Ticker)
 				log.Debugf("kafka consumer received record with value: %s", record.Value)
 			}
 
-			if err := subscriber.OnMessage(record.Key, record.Value); err != nil {
+			if err := subscriber.OnMessage(record); err != nil {
 				log.Errorf("kafka consumer error: %s", err)
 			}
 		}
