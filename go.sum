@@ -446,6 +446,8 @@ github.com/twilio/twilio-go v0.26.0 h1:wFW4oTe3/LKt6bvByP7eio8JsjtaLHjMQKOUEzQry
 github.com/twilio/twilio-go v0.26.0/go.mod h1:lz62Hopu4vicpQ056H5TJ0JE4AP0rS3sQ35/ejmgOwE=
 github.com/twmb/franz-go v1.15.2 h1:mt3i7bTAp4GH/kMJiGAikJQUlG+UsCwxCmEy1CcAKYo=
 github.com/twmb/franz-go v1.15.2/go.mod h1:aos+d/UBuigWkOs+6WoqEPto47EvC2jipLAO5qrAu48=
+github.com/twmb/franz-go/pkg/kadm v1.10.0 h1:3oYKNP+e3HGo4GYadrDeRxOaAIsOXmX6LBVMz9PxpCU=
+github.com/twmb/franz-go/pkg/kadm v1.10.0/go.mod h1:hUMoV4SRho+2ij/S9cL39JaLsr+XINjn0ZkCdBY2DXc=
 github.com/twmb/franz-go/pkg/kmsg v1.7.0 h1:a457IbvezYfA5UkiBvyV3zj0Is3y1i8EJgqjJYoij2E=
 github.com/twmb/franz-go/pkg/kmsg v1.7.0/go.mod h1:se9Mjdt0Nwzc9lnjJ0HyDtLyBnaBDAd7pCje47OhSyw=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=

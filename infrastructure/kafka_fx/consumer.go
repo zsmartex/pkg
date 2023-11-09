@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/cockroachdb/errors"
+	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/zsmartex/pkg/v2/config"
 	"github.com/zsmartex/pkg/v2/log"
@@ -13,6 +14,7 @@ import (
 
 type Topic string
 type Group string
+type ReplicationFactor int16
 
 type Consumer struct {
 	client *kgo.Client
@@ -27,7 +29,7 @@ type consumerParams struct {
 	AtEnd  bool  `name:"at_end" optional:"true"`
 }
 
-func NewConsumer(params consumerParams) (*Consumer, error) {
+func NewConsumer(params consumerParams) (*Consumer, *kadm.Client, error) {
 	options := []kgo.Opt{
 		kgo.SeedBrokers(params.Config.Brokers...),
 		kgo.AllowAutoTopicCreation(),
@@ -46,12 +48,14 @@ func NewConsumer(params consumerParams) (*Consumer, error) {
 
 	client, err := kgo.NewClient(options...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+
+	adminClient := kadm.NewClient(client)
 
 	return &Consumer{
 		client: client,
-	}, nil
+	}, adminClient, nil
 }
 
 func (c *Consumer) Poll(ctx context.Context) ([]*kgo.Record, error) {

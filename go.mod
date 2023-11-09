@@ -32,6 +32,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/twilio/twilio-go v0.26.0
 	github.com/twmb/franz-go v1.15.2
+	github.com/twmb/franz-go/pkg/kadm v1.10.0
 	github.com/valyala/fasthttp v1.49.0
 	github.com/vgarvardt/pgx-google-uuid/v5 v5.0.0
 	github.com/volatiletech/null/v9 v9.0.0

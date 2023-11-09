@@ -2,8 +2,10 @@ package kafka_fx
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/zsmartex/pkg/v2/log"
 	"go.uber.org/fx"
 )
@@ -19,15 +21,54 @@ var (
 	producerInvokes = fx.Options(fx.Invoke(registerProducerHooks))
 )
 
-func registerConsumerHooks(
-	lc fx.Lifecycle,
-	kafkaConsumer *Consumer,
-) {
-	lc.Append(fx.StopHook(func(ctx context.Context) error {
-		kafkaConsumer.Close()
+type registerConsumerHooksParams struct {
+	fx.In
 
-		return nil
-	}))
+	Topic             Topic
+	Consumer          *Consumer
+	AdminClient       *kadm.Client
+	ReplicationFactor ReplicationFactor
+}
+
+func registerConsumerHooks(
+	params registerConsumerHooksParams,
+	lc fx.Lifecycle,
+) {
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			topicDetails, err := params.AdminClient.ListTopics(ctx)
+			if err != nil {
+				return err
+			}
+
+			if topicDetails.Has(string(params.Topic)) {
+				replicationFactor := fmt.Sprintf("%d", params.ReplicationFactor)
+
+				_, err := params.AdminClient.AlterTopicConfigs(ctx, []kadm.AlterConfig{
+					{
+						Op:    kadm.SetConfig,
+						Name:  "replication.factor",
+						Value: &replicationFactor,
+					},
+				}, string(params.Topic))
+				if err != nil {
+					return err
+				}
+			} else {
+				_, err := params.AdminClient.CreateTopic(ctx, 3, int16(params.ReplicationFactor), nil, string(params.Topic))
+				if err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			params.Consumer.Close()
+
+			return nil
+		},
+	})
 }
 
 type SubscriberHooksParams struct {
