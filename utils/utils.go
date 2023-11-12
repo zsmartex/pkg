@@ -165,7 +165,7 @@ func HashStringCRC32(s string) int64 {
 func GenerateUID() string {
 	arr := mathRand.Perm(10)
 
-	uid := "UI"
+	uid := "ID"
 
 	for _, v := range arr {
 		uid += strconv.Itoa(v)
