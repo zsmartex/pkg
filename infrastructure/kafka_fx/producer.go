@@ -57,7 +57,7 @@ func (p *Producer) produce(context context.Context, topic Topic, key []byte, pay
 		return err
 	}
 
-	log.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
+	log.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, data)
 
 	p.client.Produce(context, &kgo.Record{
 		Topic: string(topic),
@@ -65,7 +65,7 @@ func (p *Producer) produce(context context.Context, topic Topic, key []byte, pay
 		Value: data,
 	}, func(r *kgo.Record, err error) {
 		if err != nil {
-			log.Errorf("Failed to produce message to topic: %s, key: %s, payload: %s, error: %s", topic, key, payload, err)
+			log.Errorf("Failed to produce message to topic: %s, key: %s, payload: %s, error: %s", topic, key, data, err)
 		}
 	})
 
@@ -78,7 +78,7 @@ func (p *Producer) produceSync(context context.Context, topic Topic, key []byte,
 		return err
 	}
 
-	log.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
+	log.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, data)
 
 	res := p.client.ProduceSync(context, &kgo.Record{
 		Topic: string(topic),
@@ -87,7 +87,7 @@ func (p *Producer) produceSync(context context.Context, topic Topic, key []byte,
 	})
 
 	if err := res.FirstErr(); err != nil {
-		log.Errorf("Failed to produce message to topic: %s, key: %s, payload: %s, error: %s", topic, key, payload, err)
+		log.Errorf("Failed to produce message to topic: %s, key: %s, payload: %s, error: %s", topic, key, data, err)
 	}
 
 	return nil
