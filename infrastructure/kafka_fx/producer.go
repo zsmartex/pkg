@@ -43,31 +43,64 @@ func (k *Producer) ProduceWithKey(context context.Context, topic Topic, key []by
 	return k.produce(context, topic, key, payload)
 }
 
+func (k *Producer) ProduceSync(context context.Context, topic Topic, payload interface{}) error {
+	return k.produceSync(context, topic, nil, payload)
+}
+
+func (k *Producer) ProduceSyncWithKey(context context.Context, topic Topic, key []byte, payload interface{}) error {
+	return k.produceSync(context, topic, key, payload)
+}
+
 func (p *Producer) produce(context context.Context, topic Topic, key []byte, payload interface{}) error {
+	data, err := p.marshalPayload(payload)
+	if err != nil {
+		return err
+	}
+
+	log.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
+
+	p.client.Produce(context, &kgo.Record{
+		Topic: string(topic),
+		Key:   []byte(key),
+		Value: data,
+	}, func(r *kgo.Record, err error) {
+		if err != nil {
+			log.Errorf("Failed to produce message to topic: %s, key: %s, payload: %s, error: %s", topic, key, payload, err)
+		}
+	})
+
+	return nil
+}
+
+func (p *Producer) produceSync(context context.Context, topic Topic, key []byte, payload interface{}) error {
+	data, err := p.marshalPayload(payload)
+	if err != nil {
+		return err
+	}
+
+	log.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
+
+	res := p.client.ProduceSync(context, &kgo.Record{
+		Topic: string(topic),
+		Key:   []byte(key),
+		Value: data,
+	})
+
+	if err := res.FirstErr(); err != nil {
+		log.Errorf("Failed to produce message to topic: %s, key: %s, payload: %s, error: %s", topic, key, payload, err)
+	}
+
+	return nil
+}
+
+func (p *Producer) marshalPayload(payload interface{}) ([]byte, error) {
 	switch data := payload.(type) {
 	case string:
-		return p.produce(context, topic, key, []byte(data))
+		return []byte(data), nil
 	case []byte:
-		log.Debugf("Kafka producer produce to: %s, key: %s, payload: %s", topic, key, payload)
-
-		res := p.client.ProduceSync(context, &kgo.Record{
-			Topic: string(topic),
-			Key:   []byte(key),
-			Value: data,
-		})
-
-		if err := res.FirstErr(); err != nil {
-			log.Errorf("Kafka producer produce to: %s, key: %s, payload: %s, error: %s", topic, key, payload, err)
-		}
-
-		return nil
+		return data, nil
 	default:
-		data, err := json.Marshal(payload)
-		if err != nil {
-			return err
-		}
-
-		return p.produce(context, topic, key, data)
+		return json.Marshal(payload)
 	}
 }
 
