@@ -22,10 +22,11 @@ type Consumer struct {
 type consumerParams struct {
 	fx.In
 
-	Config config.Kafka
-	Topic  Topic
-	Group  Group `optional:"true"`
-	AtEnd  bool  `name:"at_end" optional:"true"`
+	Config       config.Kafka
+	Topic        Topic
+	Group        Group `optional:"true"`
+	AtEnd        bool  `name:"at_end" optional:"true"`
+	ManualCommit bool  `name:"manual_commit" optional:"true"`
 }
 
 func NewConsumer(params consumerParams) (*Consumer, *kadm.Client, error) {
@@ -33,6 +34,10 @@ func NewConsumer(params consumerParams) (*Consumer, *kadm.Client, error) {
 		kgo.SeedBrokers(params.Config.Brokers...),
 		kgo.AllowAutoTopicCreation(),
 		kgo.ConsumeTopics(string(params.Topic)),
+	}
+
+	if params.ManualCommit {
+		options = append(options, kgo.DisableAutoCommit())
 	}
 
 	if params.Group == "" {
