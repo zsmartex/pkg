@@ -21,8 +21,6 @@ var (
 var _ IUsecase[schema.Tabler] = (*Usecase[schema.Tabler])(nil)
 
 type IUsecase[V schema.Tabler] interface {
-	SetOmits(omits []string)
-	AddCallback(kind gorm_fx.CallbackType, callback func(db *gorm.DB, value *V) error)
 	Repository() gorm_fx.Repository[V]
 	Count(ctx context.Context, filters ...gpa.Filter) (count int, err error)
 	Last(ctx context.Context, filters ...gpa.Filter) (model *V, err error)
