@@ -21,6 +21,7 @@ var (
 var _ IUsecase[schema.Tabler] = (*Usecase[schema.Tabler])(nil)
 
 type IUsecase[V schema.Tabler] interface {
+	SetOmits(omits []string)
 	AddCallback(kind gorm_fx.CallbackType, callback func(db *gorm.DB, value *V) error)
 	Repository() gorm_fx.Repository[V]
 	Count(ctx context.Context, filters ...gpa.Filter) (count int, err error)
@@ -63,7 +64,6 @@ type Options[V schema.Tabler] struct {
 	DatabaseRepo      gorm_fx.Repository[V]
 	ElasticsearchRepo elasticsearch_fx.Repository[V] `optional:"true"`
 	QuestDBRepo       questdb_fx.Repository[V]       `optional:"true"`
-	Omits             []string                       `optional:"true"`
 }
 
 func NewUsecase[V schema.Tabler](opts Options[V]) Usecase[V] {
@@ -71,6 +71,5 @@ func NewUsecase[V schema.Tabler](opts Options[V]) Usecase[V] {
 		DatabaseRepo:      opts.DatabaseRepo,
 		ElasticsearchRepo: opts.ElasticsearchRepo,
 		QuestDBRepo:       opts.QuestDBRepo,
-		Omits:             opts.Omits,
 	}
 }

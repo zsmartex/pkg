@@ -10,6 +10,10 @@ import (
 	"gorm.io/gorm"
 )
 
+func (u *Usecase[V]) SetOmits(omits []string) {
+	u.Omits = omits
+}
+
 func (u Usecase[V]) AddCallback(kind gorm_fx.CallbackType, callback func(db *gorm.DB, value *V) error) {
 	u.DatabaseRepo.AddCallback(kind, callback)
 }
