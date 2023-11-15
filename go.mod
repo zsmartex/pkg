@@ -27,17 +27,20 @@ require (
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/lib/pq v1.10.4
 	github.com/mileusna/useragent v1.3.4
+	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/twilio/twilio-go v0.26.0
 	github.com/twmb/franz-go v1.15.2
 	github.com/twmb/franz-go/pkg/kadm v1.10.0
+	github.com/twmb/franz-go/pkg/kmsg v1.7.0
 	github.com/valyala/fasthttp v1.49.0
 	github.com/vgarvardt/pgx-google-uuid/v5 v5.0.0
 	github.com/volatiletech/null/v9 v9.0.0
 	github.com/zsmartex/mergo v0.0.1-rc.1
 	go.uber.org/fx v1.20.1
+	go.uber.org/mock v0.3.0
 	google.golang.org/grpc v1.53.0
 	gorm.io/driver/postgres v1.5.2
 	gorm.io/gorm v1.25.2
@@ -110,11 +113,9 @@ require (
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
-	github.com/twmb/franz-go/pkg/kmsg v1.7.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect

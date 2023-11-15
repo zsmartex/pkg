@@ -1,4 +1,4 @@
-package epa_test
+package elasticsearch_fx_test
 
 // type Order struct {
 // 	ID        int64     `json:"id"`

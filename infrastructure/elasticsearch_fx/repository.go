@@ -1,14 +1,17 @@
-package epa
+//go:generate mockgen -source=repository.go -destination=mock/repository.go -package=mock_elasticsearch
+
+package elasticsearch_fx
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
+	"github.com/zsmartex/pkg/v2/epa"
 	"github.com/zsmartex/pkg/v2/epa/aggregation"
 	"github.com/zsmartex/pkg/v2/epa/query"
 	"github.com/zsmartex/pkg/v2/queries"
@@ -24,19 +27,24 @@ type Schema interface {
 	IndexName() string
 }
 
-type Repository[T any] struct {
+type Repository[T any] interface {
+	CheckHealth(ctx context.Context) bool
+	Find(ctx context.Context, q epa.Query) (*Result[T], error)
+}
+
+type repository[T any] struct {
 	*elasticsearch.Client
 	Schema
 }
 
-func New[T Schema](client *elasticsearch.Client, entity T) Repository[T] {
-	return Repository[T]{
+func NewRepository[T Schema](client *elasticsearch.Client, entity T) repository[T] {
+	return repository[T]{
 		client,
 		entity,
 	}
 }
 
-func (r Repository[T]) CheckHealth(ctx context.Context) bool {
+func (r repository[T]) CheckHealth(ctx context.Context) bool {
 	_, err := r.Info(r.Info.WithContext(ctx))
 	return err == nil
 }
@@ -78,7 +86,7 @@ type ErrorResponse struct {
 	Status int `json:"status"`
 }
 
-func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
+func (r repository[T]) Find(ctx context.Context, q epa.Query) (*Result[T], error) {
 	var indexes []string
 	if len(q.Indexes) > 0 {
 		indexes = q.Indexes
@@ -105,7 +113,7 @@ func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
 	queryMap := map[string]interface{}{}
 
 	if len(q.Filters) > 0 {
-		q, err := ApplyFilters(query.NewBoolQuery(), q.Filters).Source()
+		q, err := epa.ApplyFilters(query.NewBoolQuery(), q.Filters).Source()
 		if err != nil {
 			return nil, err
 		}
@@ -151,7 +159,7 @@ func (r Repository[T]) Find(ctx context.Context, q Query) (*Result[T], error) {
 		return nil, err
 	}
 
-	resBuf, err := ioutil.ReadAll(res.Body)
+	resBuf, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
