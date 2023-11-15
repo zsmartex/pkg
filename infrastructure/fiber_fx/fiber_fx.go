@@ -33,7 +33,8 @@ var (
 type fiberParams struct {
 	fx.In
 
-	ApplicationName string `name:"application_name"`
+	Config          config.HTTP `name:"http_server"`
+	ApplicationName string      `name:"application_name"`
 }
 
 func New(params fiberParams, lc fx.Lifecycle) *fiber.App {
@@ -45,6 +46,7 @@ func New(params fiberParams, lc fx.Lifecycle) *fiber.App {
 		AppName:                  params.ApplicationName,
 		ErrorHandler:             error_handler.ErrorHandler,
 		EnableSplittingOnParsers: true,
+		Prefork:                  params.Config.Prefork,
 	})
 
 	fiberApp.Use(compress.New())

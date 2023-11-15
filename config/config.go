@@ -4,8 +4,9 @@ import "fmt"
 
 type (
 	HTTP struct {
-		Host string `env:"HTTP_HOST" envDefault:"localhost"`
-		Port int    `env:"HTTP_PORT" envDefault:"3000"`
+		Host    string `env:"HTTP_HOST" envDefault:"localhost"`
+		Port    int    `env:"HTTP_PORT" envDefault:"3000"`
+		Prefork bool   `env:"HTTP_PREFORK" envDefault:"false"`
 	}
 
 	GRPC struct {
