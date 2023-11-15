@@ -22,7 +22,7 @@ var _ Usecase[schema.Tabler] = (*usecase[schema.Tabler])(nil)
 
 type Usecase[V schema.Tabler] interface {
 	AddCallback(kind gorm_fx.CallbackType, callback func(db *gorm.DB, value *V) error)
-	WithTrx(tx *gorm.DB) Usecase[V]
+	Repository() gorm_fx.Repository[V]
 	Count(ctx context.Context, filters ...gpa.Filter) (count int, err error)
 	Last(ctx context.Context, filters ...gpa.Filter) (model *V, err error)
 	First(ctx context.Context, filters ...gpa.Filter) (model *V, err error)

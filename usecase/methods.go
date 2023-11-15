@@ -14,10 +14,8 @@ func (u usecase[V]) AddCallback(kind gorm_fx.CallbackType, callback func(db *gor
 	u.DatabaseRepo.AddCallback(kind, callback)
 }
 
-func (u usecase[V]) WithTrx(tx *gorm.DB) Usecase[V] {
-	u.DatabaseRepo = u.DatabaseRepo.WithTrx(tx)
-
-	return u
+func (u usecase[V]) Repository() gorm_fx.Repository[V] {
+	return u.DatabaseRepo
 }
 
 func (u usecase[V]) Count(ctx context.Context, filters ...gpa.Filter) (count int, err error) {
