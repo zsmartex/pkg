@@ -16,7 +16,8 @@ type Topic string
 type Group string
 
 type Consumer struct {
-	client *kgo.Client
+	client       *kgo.Client
+	manualCommit bool
 }
 
 type consumerParams struct {
@@ -58,7 +59,8 @@ func NewConsumer(params consumerParams) (*Consumer, *kadm.Client, error) {
 	adminClient := kadm.NewClient(client)
 
 	return &Consumer{
-		client: client,
+		client:       client,
+		manualCommit: params.ManualCommit,
 	}, adminClient, nil
 }
 
@@ -90,7 +92,12 @@ func (c *Consumer) Subscribe(subscriber ConsumerSubscriber, ticker *time.Ticker)
 			}
 
 			if err := subscriber.OnMessage(record); err != nil {
-				log.Errorf("kafka consumer error: %s", err)
+				log.Errorf("kafka consumer handle message error: %s", err)
+			} else if c.manualCommit {
+				err := c.CommitRecords(context.Background(), record)
+				if err != nil {
+					log.Errorf("kafka consumer commit error: %s", err)
+				}
 			}
 		}
 	}
