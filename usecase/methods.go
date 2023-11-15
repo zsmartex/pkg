@@ -5,9 +5,14 @@ import (
 
 	"github.com/zsmartex/pkg/v2/gpa"
 	"github.com/zsmartex/pkg/v2/infrastructure/elasticsearch_fx"
+	"github.com/zsmartex/pkg/v2/infrastructure/gorm_fx"
 	"github.com/zsmartex/pkg/v2/infrastructure/questdb_fx"
 	"gorm.io/gorm"
 )
+
+func (u usecase[V]) AddCallback(kind gorm_fx.CallbackType, callback func(db *gorm.DB, value *V) error) {
+	u.DatabaseRepo.AddCallback(kind, callback)
+}
 
 func (u usecase[V]) Count(ctx context.Context, filters ...gpa.Filter) (count int, err error) {
 	return u.DatabaseRepo.Count(ctx, filters...)
