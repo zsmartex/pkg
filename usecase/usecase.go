@@ -63,7 +63,7 @@ type Options[V schema.Tabler] struct {
 	DatabaseRepo      gorm_fx.Repository[V]
 	ElasticsearchRepo elasticsearch_fx.Repository[V] `optional:"true"`
 	QuestDBRepo       questdb_fx.Repository          `optional:"true"`
-	Omits             []string                       `name:"omits" optional:"true"`
+	Omits             []string                       `optional:"true"`
 }
 
 func NewUsecase[V schema.Tabler](opts Options[V]) Usecase[V] {
