@@ -78,6 +78,6 @@ func (u Usecase[V]) Es() elasticsearch_fx.Repository[V] {
 	return u.ElasticsearchRepo
 }
 
-func (u Usecase[V]) QuestDB() questdb_fx.Repository {
+func (u Usecase[V]) QuestDB() questdb_fx.Repository[V] {
 	return u.QuestDBRepo
 }

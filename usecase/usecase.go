@@ -39,13 +39,13 @@ type IUsecase[V schema.Tabler] interface {
 	RawFirst(ctx context.Context, dst interface{}, sql string, attrs ...interface{}) error
 
 	Es() elasticsearch_fx.Repository[V]
-	QuestDB() questdb_fx.Repository
+	QuestDB() questdb_fx.Repository[V]
 }
 
 type Usecase[V schema.Tabler] struct {
 	DatabaseRepo      gorm_fx.Repository[V]
 	ElasticsearchRepo elasticsearch_fx.Repository[V]
-	QuestDBRepo       questdb_fx.Repository
+	QuestDBRepo       questdb_fx.Repository[V]
 	Omits             []string
 }
 
@@ -62,7 +62,7 @@ type Options[V schema.Tabler] struct {
 
 	DatabaseRepo      gorm_fx.Repository[V]
 	ElasticsearchRepo elasticsearch_fx.Repository[V] `optional:"true"`
-	QuestDBRepo       questdb_fx.Repository          `optional:"true"`
+	QuestDBRepo       questdb_fx.Repository[V]       `optional:"true"`
 	Omits             []string                       `optional:"true"`
 }
 
