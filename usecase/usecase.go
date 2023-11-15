@@ -18,9 +18,9 @@ var (
 	ErrBadConnection = errors.New("driver: bad connection")
 )
 
-var _ Usecase[schema.Tabler] = (*usecase[schema.Tabler])(nil)
+var _ IUsecase[schema.Tabler] = (*Usecase[schema.Tabler])(nil)
 
-type Usecase[V schema.Tabler] interface {
+type IUsecase[V schema.Tabler] interface {
 	AddCallback(kind gorm_fx.CallbackType, callback func(db *gorm.DB, value *V) error)
 	Repository() gorm_fx.Repository[V]
 	Count(ctx context.Context, filters ...gpa.Filter) (count int, err error)
@@ -42,7 +42,7 @@ type Usecase[V schema.Tabler] interface {
 	QuestDB() questdb_fx.Repository
 }
 
-type usecase[V schema.Tabler] struct {
+type Usecase[V schema.Tabler] struct {
 	DatabaseRepo      gorm_fx.Repository[V]
 	ElasticsearchRepo elasticsearch_fx.Repository[V]
 	QuestDBRepo       questdb_fx.Repository
@@ -67,7 +67,7 @@ type Options[V schema.Tabler] struct {
 }
 
 func NewUsecase[V schema.Tabler](opts Options[V]) Usecase[V] {
-	return &usecase[V]{
+	return Usecase[V]{
 		DatabaseRepo:      opts.DatabaseRepo,
 		ElasticsearchRepo: opts.ElasticsearchRepo,
 		QuestDBRepo:       opts.QuestDBRepo,
