@@ -8,9 +8,10 @@ import (
 
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kmsg"
+	"go.uber.org/fx"
+
 	"github.com/zsmartex/pkg/v2/config"
 	"github.com/zsmartex/pkg/v2/log"
-	"go.uber.org/fx"
 )
 
 var (
@@ -24,10 +25,75 @@ var (
 	producerInvokes = fx.Options(fx.Invoke(registerProducerHooks))
 )
 
+type alterTopicParams struct {
+	Topic       Topic
+	Config      config.Kafka
+	Consumer    *Consumer
+	AdminClient *kadm.Client
+}
+
+func alterTopic(ctx context.Context, params alterTopicParams) error {
+	topicDetails, err := params.AdminClient.ListTopics(ctx)
+	if err != nil {
+		return err
+	}
+
+	if topicDetails.Has(string(params.Topic)) {
+		replicationFactor := fmt.Sprintf("%d", params.Config.ReplicationFactor)
+
+		_, err := params.AdminClient.AlterTopicConfigs(ctx, []kadm.AlterConfig{
+			{
+				Op:    kadm.SetConfig,
+				Name:  "replication.factor",
+				Value: &replicationFactor,
+			},
+		}, string(params.Topic))
+		if err != nil {
+			return err
+		}
+
+		req := kmsg.NewPtrMetadataRequest()
+		reqTopic := kmsg.NewMetadataRequestTopic()
+		reqTopic.Topic = kmsg.StringPtr(string(params.Topic))
+		req.Topics = append(req.Topics, reqTopic)
+		resp, err := req.RequestWith(context.Background(), params.Consumer.client)
+		if err != nil {
+			return err
+		}
+
+		if len(resp.Topics) == 0 {
+			return errors.New("no topics found")
+		}
+
+		t := resp.Topics[0]
+
+		if len(t.Partitions) < int(params.Config.Partitions) {
+			remainTopics := int(params.Config.Partitions) - len(t.Partitions)
+			_, err := params.AdminClient.CreatePartitions(ctx, remainTopics, string(params.Topic))
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		_, err := params.AdminClient.CreateTopic(
+			ctx,
+			params.Config.Partitions,
+			params.Config.ReplicationFactor,
+			nil,
+			string(params.Topic),
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type registerConsumerHooksParams struct {
 	fx.In
 
-	Topic       Topic
+	Topics      []Topic
 	Config      config.Kafka
 	Consumer    *Consumer
 	AdminClient *kadm.Client
@@ -39,55 +105,13 @@ func registerConsumerHooks(
 ) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			topicDetails, err := params.AdminClient.ListTopics(ctx)
-			if err != nil {
-				return err
-			}
-
-			if topicDetails.Has(string(params.Topic)) {
-				replicationFactor := fmt.Sprintf("%d", params.Config.ReplicationFactor)
-
-				_, err := params.AdminClient.AlterTopicConfigs(ctx, []kadm.AlterConfig{
-					{
-						Op:    kadm.SetConfig,
-						Name:  "replication.factor",
-						Value: &replicationFactor,
-					},
-				}, string(params.Topic))
-				if err != nil {
-					return err
-				}
-
-				req := kmsg.NewPtrMetadataRequest()
-				reqTopic := kmsg.NewMetadataRequestTopic()
-				reqTopic.Topic = kmsg.StringPtr(string(params.Topic))
-				req.Topics = append(req.Topics, reqTopic)
-				resp, err := req.RequestWith(context.Background(), params.Consumer.client)
-				if err != nil {
-					return err
-				}
-
-				if len(resp.Topics) == 0 {
-					return errors.New("no topics found")
-				}
-
-				t := resp.Topics[0]
-
-				if len(t.Partitions) < int(params.Config.Partitions) {
-					remainTopics := int(params.Config.Partitions) - len(t.Partitions)
-					_, err := params.AdminClient.CreatePartitions(ctx, remainTopics, string(params.Topic))
-					if err != nil {
-						return err
-					}
-				}
-			} else {
-				_, err := params.AdminClient.CreateTopic(
-					ctx,
-					params.Config.Partitions,
-					params.Config.ReplicationFactor,
-					nil,
-					string(params.Topic),
-				)
+			for _, topic := range params.Topics {
+				err := alterTopic(ctx, alterTopicParams{
+					Topic:       topic,
+					Config:      params.Config,
+					Consumer:    params.Consumer,
+					AdminClient: params.AdminClient,
+				})
 				if err != nil {
 					return err
 				}

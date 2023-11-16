@@ -7,9 +7,10 @@ import (
 	"github.com/cockroachdb/errors"
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
+	"go.uber.org/fx"
+
 	"github.com/zsmartex/pkg/v2/config"
 	"github.com/zsmartex/pkg/v2/log"
-	"go.uber.org/fx"
 )
 
 type Topic string
@@ -17,6 +18,8 @@ type Group string
 
 type Consumer struct {
 	client       *kgo.Client
+	config       config.Kafka
+	adminClient  *kadm.Client
 	manualCommit bool
 }
 
@@ -24,17 +27,22 @@ type consumerParams struct {
 	fx.In
 
 	Config       config.Kafka
-	Topic        Topic
-	Group        Group `optional:"true"`
-	AtEnd        bool  `name:"at_end" optional:"true"`
-	ManualCommit bool  `name:"manual_commit" optional:"true"`
+	Topics       []Topic `optional:"true"`
+	Group        Group   `optional:"true"`
+	AtEnd        bool    `name:"at_end" optional:"true"`
+	ManualCommit bool    `name:"manual_commit" optional:"true"`
 }
 
 func NewConsumer(params consumerParams) (*Consumer, *kadm.Client, error) {
+	topics := make([]string, len(params.Topics))
+	for i, topic := range params.Topics {
+		topics[i] = string(topic)
+	}
+
 	options := []kgo.Opt{
 		kgo.SeedBrokers(params.Config.Brokers...),
 		kgo.AllowAutoTopicCreation(),
-		kgo.ConsumeTopics(string(params.Topic)),
+		kgo.ConsumeTopics(topics...),
 	}
 
 	if params.ManualCommit {
@@ -60,8 +68,32 @@ func NewConsumer(params consumerParams) (*Consumer, *kadm.Client, error) {
 
 	return &Consumer{
 		client:       client,
+		config:       params.Config,
+		adminClient:  adminClient,
 		manualCommit: params.ManualCommit,
 	}, adminClient, nil
+}
+
+func (c *Consumer) AddConsumeTopics(ctx context.Context, topics ...Topic) error {
+	var strTopics []string
+	for _, topic := range topics {
+		strTopics = append(strTopics, string(topic))
+	}
+
+	for _, topic := range topics {
+		err := alterTopic(ctx, alterTopicParams{
+			Topic:       topic,
+			Config:      c.config,
+			Consumer:    c,
+			AdminClient: c.adminClient,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	c.client.AddConsumeTopics(strTopics...)
+	return nil
 }
 
 func (c *Consumer) Poll(ctx context.Context) ([]*kgo.Record, error) {
