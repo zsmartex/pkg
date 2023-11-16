@@ -11,6 +11,7 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
+
 	"github.com/zsmartex/pkg/v2/epa"
 	"github.com/zsmartex/pkg/v2/epa/aggregation"
 	"github.com/zsmartex/pkg/v2/epa/query"
@@ -37,7 +38,7 @@ type repository[T any] struct {
 	Schema
 }
 
-func NewRepository[T Schema](client *elasticsearch.Client, entity T) repository[T] {
+func NewRepository[T Schema](client *elasticsearch.Client, entity T) Repository[T] {
 	return repository[T]{
 		client,
 		entity,
