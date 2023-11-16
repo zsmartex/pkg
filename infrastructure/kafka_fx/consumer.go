@@ -27,22 +27,20 @@ type consumerParams struct {
 	fx.In
 
 	Config       config.Kafka
-	Topics       []Topic `optional:"true"`
-	Group        Group   `optional:"true"`
-	AtEnd        bool    `name:"at_end" optional:"true"`
-	ManualCommit bool    `name:"manual_commit" optional:"true"`
+	Topic        Topic `optional:"true"`
+	Group        Group `optional:"true"`
+	AtEnd        bool  `name:"at_end" optional:"true"`
+	ManualCommit bool  `name:"manual_commit" optional:"true"`
 }
 
 func NewConsumer(params consumerParams) (*Consumer, *kadm.Client, error) {
-	topics := make([]string, len(params.Topics))
-	for i, topic := range params.Topics {
-		topics[i] = string(topic)
-	}
-
 	options := []kgo.Opt{
 		kgo.SeedBrokers(params.Config.Brokers...),
 		kgo.AllowAutoTopicCreation(),
-		kgo.ConsumeTopics(topics...),
+	}
+
+	if len(params.Topic) > 0 {
+		options = append(options, kgo.ConsumeTopics(string(params.Topic)))
 	}
 
 	if params.ManualCommit {

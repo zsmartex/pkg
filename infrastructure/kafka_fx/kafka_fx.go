@@ -93,7 +93,7 @@ func alterTopic(ctx context.Context, params alterTopicParams) error {
 type registerConsumerHooksParams struct {
 	fx.In
 
-	Topics      []Topic
+	Topic       Topic `optional:"true"`
 	Config      config.Kafka
 	Consumer    *Consumer
 	AdminClient *kadm.Client
@@ -105,19 +105,16 @@ func registerConsumerHooks(
 ) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			for _, topic := range params.Topics {
-				err := alterTopic(ctx, alterTopicParams{
-					Topic:       topic,
-					Config:      params.Config,
-					Consumer:    params.Consumer,
-					AdminClient: params.AdminClient,
-				})
-				if err != nil {
-					return err
-				}
+			if params.Topic == "" {
+				return nil
 			}
 
-			return nil
+			return alterTopic(ctx, alterTopicParams{
+				Topic:       params.Topic,
+				Config:      params.Config,
+				Consumer:    params.Consumer,
+				AdminClient: params.AdminClient,
+			})
 		},
 		OnStop: func(ctx context.Context) error {
 			params.Consumer.Close()
