@@ -13,33 +13,34 @@ import (
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
+	schema "gorm.io/gorm/schema"
 )
 
 // MockRepository is a mock of Repository interface.
-type MockRepository struct {
+type MockRepository[T schema.Tabler] struct {
 	ctrl     *gomock.Controller
-	recorder *MockRepositoryMockRecorder
+	recorder *MockRepositoryMockRecorder[T]
 }
 
 // MockRepositoryMockRecorder is the mock recorder for MockRepository.
-type MockRepositoryMockRecorder struct {
-	mock *MockRepository
+type MockRepositoryMockRecorder[T schema.Tabler] struct {
+	mock *MockRepository[T]
 }
 
 // NewMockRepository creates a new mock instance.
-func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
-	mock := &MockRepository{ctrl: ctrl}
-	mock.recorder = &MockRepositoryMockRecorder{mock}
+func NewMockRepository[T schema.Tabler](ctrl *gomock.Controller) *MockRepository[T] {
+	mock := &MockRepository[T]{ctrl: ctrl}
+	mock.recorder = &MockRepositoryMockRecorder[T]{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
+func (m *MockRepository[T]) EXPECT() *MockRepositoryMockRecorder[T] {
 	return m.recorder
 }
 
 // Exec mocks base method.
-func (m *MockRepository) Exec(ctx context.Context, sql string, attrs ...any) error {
+func (m *MockRepository[T]) Exec(ctx context.Context, sql string, attrs ...any) error {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, sql}
 	for _, a := range attrs {
@@ -51,14 +52,14 @@ func (m *MockRepository) Exec(ctx context.Context, sql string, attrs ...any) err
 }
 
 // Exec indicates an expected call of Exec.
-func (mr *MockRepositoryMockRecorder) Exec(ctx, sql any, attrs ...any) *gomock.Call {
+func (mr *MockRepositoryMockRecorder[T]) Exec(ctx, sql any, attrs ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx, sql}, attrs...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockRepository)(nil).Exec), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockRepository[T])(nil).Exec), varargs...)
 }
 
 // Query mocks base method.
-func (m *MockRepository) Query(ctx context.Context, dst any, sql string, attrs ...any) error {
+func (m *MockRepository[T]) Query(ctx context.Context, dst any, sql string, attrs ...any) error {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, dst, sql}
 	for _, a := range attrs {
@@ -70,14 +71,14 @@ func (m *MockRepository) Query(ctx context.Context, dst any, sql string, attrs .
 }
 
 // Query indicates an expected call of Query.
-func (mr *MockRepositoryMockRecorder) Query(ctx, dst, sql any, attrs ...any) *gomock.Call {
+func (mr *MockRepositoryMockRecorder[T]) Query(ctx, dst, sql any, attrs ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx, dst, sql}, attrs...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Query", reflect.TypeOf((*MockRepository)(nil).Query), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Query", reflect.TypeOf((*MockRepository[T])(nil).Query), varargs...)
 }
 
 // QueryRow mocks base method.
-func (m *MockRepository) QueryRow(ctx context.Context, dst any, sql string, attrs ...any) error {
+func (m *MockRepository[T]) QueryRow(ctx context.Context, dst any, sql string, attrs ...any) error {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, dst, sql}
 	for _, a := range attrs {
@@ -89,8 +90,8 @@ func (m *MockRepository) QueryRow(ctx context.Context, dst any, sql string, attr
 }
 
 // QueryRow indicates an expected call of QueryRow.
-func (mr *MockRepositoryMockRecorder) QueryRow(ctx, dst, sql any, attrs ...any) *gomock.Call {
+func (mr *MockRepositoryMockRecorder[T]) QueryRow(ctx, dst, sql any, attrs ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx, dst, sql}, attrs...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryRow", reflect.TypeOf((*MockRepository)(nil).QueryRow), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryRow", reflect.TypeOf((*MockRepository[T])(nil).QueryRow), varargs...)
 }
