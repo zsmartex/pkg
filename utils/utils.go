@@ -133,7 +133,7 @@ func TrimStringAfter(str string, a string) string {
 
 // Generate random string with length
 func RandomString(length int) string {
-	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-"
+	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
 	ll := len(chars)
 	b := make([]byte, length)
