@@ -56,6 +56,9 @@ func (r Repository) Create(ctx context.Context, model interface{}, filters ...Fi
 	return ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).Create(model).Error
 }
 
+func (r Repository) UpdateInBatches(ctx context.Context, value interface{}, filters ...Filter) error {
+	return ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).Updates(value).Error
+}
 func (r Repository) CreateInBatches(ctx context.Context, models interface{}, batchSize int, filters ...Filter) error {
 	return ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).CreateInBatches(models, batchSize).Error
 }

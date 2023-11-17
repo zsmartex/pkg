@@ -25,6 +25,7 @@ type Repository[T schema.Tabler] interface {
 	FirstOrCreate(ctx context.Context, model *T, filters ...gpa.Filter) error
 	CreateInBatches(ctx context.Context, models []*T, batchSize int, filters ...gpa.Filter) error
 	Create(ctx context.Context, model *T, filters ...gpa.Filter) error
+	UpdateInBatches(ctx context.Context, value interface{}, filters ...gpa.Filter) error
 	Updates(ctx context.Context, model *T, value interface{}, filters ...gpa.Filter) error
 	UpdateColumns(ctx context.Context, model *T, value interface{}, filters ...gpa.Filter) error
 	Delete(ctx context.Context, model *T, filters ...gpa.Filter) error
@@ -166,6 +167,12 @@ func (r repository[T]) FirstOrCreate(context context.Context, model *T, filters 
 	err := r.repository.FirstOrCreate(context, model, filters...)
 
 	return errors.Wrap(err, "repository first or create")
+}
+
+func (r repository[T]) UpdateInBatches(ctx context.Context, value interface{}, filters ...gpa.Filter) error {
+	err := r.repository.UpdateInBatches(ctx, value, filters...)
+
+	return errors.Wrap(err, "repository batch in update")
 }
 
 func (r repository[T]) CreateInBatches(ctx context.Context, models []*T, batchSize int, filters ...gpa.Filter) error {

@@ -5,13 +5,13 @@ import (
 
 	"github.com/cockroachdb/errors"
 	"go.uber.org/fx"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 
 	"github.com/zsmartex/pkg/v2/gpa"
 	"github.com/zsmartex/pkg/v2/infrastructure/elasticsearch_fx"
 	"github.com/zsmartex/pkg/v2/infrastructure/gorm_fx"
 	"github.com/zsmartex/pkg/v2/infrastructure/questdb_fx"
-	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
 )
 
 var (
@@ -28,7 +28,9 @@ type IUsecase[V schema.Tabler] interface {
 	Find(ctx context.Context, filters ...gpa.Filter) (models []*V, err error)
 	Transaction(handler func(tx *gorm.DB) error) error
 	FirstOrCreate(ctx context.Context, model *V, filters ...gpa.Filter) error
+	CreateInBatches(ctx context.Context, models []*V, batchSize int, filters ...gpa.Filter) error
 	Create(ctx context.Context, model *V, filters ...gpa.Filter) error
+	UpdateInBatches(ctx context.Context, value interface{}, filters ...gpa.Filter) error
 	Updates(ctx context.Context, model *V, value interface{}, filters ...gpa.Filter) error
 	UpdateColumns(ctx context.Context, model *V, value interface{}, filters ...gpa.Filter) error
 	Delete(ctx context.Context, model *V, filters ...gpa.Filter) error

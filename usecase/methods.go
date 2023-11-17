@@ -3,11 +3,12 @@ package usecase
 import (
 	"context"
 
+	"gorm.io/gorm"
+
 	"github.com/zsmartex/pkg/v2/gpa"
 	"github.com/zsmartex/pkg/v2/infrastructure/elasticsearch_fx"
 	"github.com/zsmartex/pkg/v2/infrastructure/gorm_fx"
 	"github.com/zsmartex/pkg/v2/infrastructure/questdb_fx"
-	"gorm.io/gorm"
 )
 
 func (u *Usecase[V]) SetOmits(omits []string) {
@@ -46,8 +47,16 @@ func (u Usecase[V]) FirstOrCreate(ctx context.Context, model *V, filters ...gpa.
 	return u.DatabaseRepo.FirstOrCreate(ctx, model, filters...)
 }
 
+func (u Usecase[V]) CreateInBatches(ctx context.Context, models []*V, batchSize int, filters ...gpa.Filter) error {
+	return u.DatabaseRepo.CreateInBatches(ctx, models, batchSize, filters...)
+}
+
 func (u Usecase[V]) Create(ctx context.Context, model *V, filters ...gpa.Filter) error {
 	return u.DatabaseRepo.Create(ctx, model, filters...)
+}
+
+func (u Usecase[V]) UpdateInBatches(ctx context.Context, value interface{}, filters ...gpa.Filter) error {
+	return u.DatabaseRepo.UpdateInBatches(ctx, value, filters...)
 }
 
 func (u Usecase[V]) Updates(ctx context.Context, model *V, value interface{}, filters ...gpa.Filter) error {
