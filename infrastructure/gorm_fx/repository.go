@@ -4,11 +4,10 @@ import (
 	"context"
 
 	"github.com/cockroachdb/errors"
-
+	"github.com/zsmartex/mergo"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 
-	"github.com/zsmartex/mergo"
 	"github.com/zsmartex/pkg/v2/gpa"
 	"github.com/zsmartex/pkg/v2/utils"
 )
@@ -24,6 +23,7 @@ type Repository[T schema.Tabler] interface {
 	First(ctx context.Context, filters ...gpa.Filter) (model *T, err error)
 	Find(ctx context.Context, filters ...gpa.Filter) (models []*T, err error)
 	FirstOrCreate(ctx context.Context, model *T, filters ...gpa.Filter) error
+	CreateInBatches(ctx context.Context, models []*T, batchSize int, filters ...gpa.Filter) error
 	Create(ctx context.Context, model *T, filters ...gpa.Filter) error
 	Updates(ctx context.Context, model *T, value interface{}, filters ...gpa.Filter) error
 	UpdateColumns(ctx context.Context, model *T, value interface{}, filters ...gpa.Filter) error
@@ -166,6 +166,12 @@ func (r repository[T]) FirstOrCreate(context context.Context, model *T, filters 
 	err := r.repository.FirstOrCreate(context, model, filters...)
 
 	return errors.Wrap(err, "repository first or create")
+}
+
+func (r repository[T]) CreateInBatches(ctx context.Context, models []*T, batchSize int, filters ...gpa.Filter) error {
+	err := r.repository.CreateInBatches(ctx, models, batchSize, filters...)
+
+	return errors.Wrap(err, "repository batch in create")
 }
 
 func (r repository[T]) Create(context context.Context, model *T, filters ...gpa.Filter) error {
