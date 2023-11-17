@@ -18,7 +18,13 @@ func AsClientParams(paramsTags, resultTags string) interface{} {
 	)
 }
 
-func NewGrpcClient(ctx context.Context, config config.GRPC) (grpc.ClientConnInterface, error) {
+func NewGrpcClient(lc fx.Lifecycle, config config.GRPC) (grpc.ClientConnInterface, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	lc.Append(fx.StartHook(func() {
+		cancel()
+	}))
+
 	conn, err := grpc.DialContext(ctx, config.Address(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	if err != nil {
 		return nil, err
