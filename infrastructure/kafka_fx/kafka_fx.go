@@ -132,15 +132,10 @@ type SubscriberHooksParams struct {
 	Ticker     *time.Ticker
 }
 
-func registerSubscriberHooks(lc fx.Lifecycle, params SubscriberHooksParams) {
-	lc.Append(fx.Hook{
-		OnStart: func(ctx context.Context) error {
-			log.Info("Kafka consumer subscriber started listening")
+func registerSubscriberHooks(ctx context.Context, params SubscriberHooksParams) {
+	log.Info("Kafka consumer subscriber started listening")
 
-			go params.Consumer.Subscribe(params.Subscriber, params.Ticker)
-			return nil
-		},
-	})
+	go params.Consumer.Subscribe(ctx, params.Subscriber, params.Ticker)
 }
 
 func registerProducerHooks(

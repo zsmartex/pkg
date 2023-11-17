@@ -1,10 +1,13 @@
 package grpc_fx
 
 import (
-	"github.com/zsmartex/pkg/v2/config"
+	"context"
+
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/zsmartex/pkg/v2/config"
 )
 
 func AsClientParams(paramsTags, resultTags string) interface{} {
@@ -15,8 +18,8 @@ func AsClientParams(paramsTags, resultTags string) interface{} {
 	)
 }
 
-func NewGrpcClient(config config.GRPC) (grpc.ClientConnInterface, error) {
-	conn, err := grpc.Dial(config.Address(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+func NewGrpcClient(ctx context.Context, config config.GRPC) (grpc.ClientConnInterface, error) {
+	conn, err := grpc.DialContext(ctx, config.Address(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}

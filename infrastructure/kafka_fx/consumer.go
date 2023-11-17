@@ -107,9 +107,9 @@ type ConsumerSubscriber interface {
 	OnMessage(*kgo.Record) error
 }
 
-func (c *Consumer) Subscribe(subscriber ConsumerSubscriber, ticker *time.Ticker) error {
+func (c *Consumer) Subscribe(ctx context.Context, subscriber ConsumerSubscriber, ticker *time.Ticker) error {
 	for range ticker.C {
-		records, err := c.Poll(context.Background())
+		records, err := c.Poll(ctx)
 		if err != nil {
 			return err
 		}
