@@ -21,7 +21,7 @@ func AsClientParams(paramsTags, resultTags string) interface{} {
 func NewGrpcClient(config config.GRPC, lc fx.Lifecycle) (grpc.ClientConnInterface, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	lc.Append(fx.StartHook(func() {
+	lc.Append(fx.StopHook(func() {
 		cancel()
 	}))
 
