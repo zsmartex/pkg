@@ -121,14 +121,22 @@ func (c *Consumer) Subscribe(ctx context.Context, subscriber ConsumerSubscriber,
 				log.Debugf("kafka consumer received record with value: %s", record.Value)
 			}
 
-			if err := subscriber.OnMessage(record); err != nil {
-				log.Errorf("kafka consumer handle message error: %s", err)
-			} else if c.manualCommit {
-				err := c.CommitRecords(context.Background(), record)
-				if err != nil {
-					log.Errorf("kafka consumer commit error: %s", err)
+			func(record *kgo.Record) {
+				defer func() {
+					if err := recover(); err != nil {
+						log.Errorf("kafka consumer handle message panic: %s", err)
+					}
+				}()
+
+				if err := subscriber.OnMessage(record); err != nil {
+					log.Errorf("kafka consumer handle message error: %s", err)
+				} else if c.manualCommit {
+					err := c.CommitRecords(context.Background(), record)
+					if err != nil {
+						log.Errorf("kafka consumer commit error: %s", err)
+					}
 				}
-			}
+			}(record)
 		}
 	}
 
