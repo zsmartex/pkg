@@ -3,8 +3,9 @@ package vault_fx
 import (
 	"fmt"
 
-	"github.com/zsmartex/pkg/v2/config"
 	"go.uber.org/fx"
+
+	"github.com/zsmartex/pkg/v2/config"
 )
 
 type TOTP struct {
@@ -37,6 +38,10 @@ func (s *TOTP) Create(issuer, uid, email string) (map[string]interface{}, error)
 	} else {
 		return result.Data, nil
 	}
+}
+
+func (s *TOTP) SetApplicationName(name string) {
+	s.applicationName = name
 }
 
 func (s *TOTP) Validate(uid, code string) bool {
