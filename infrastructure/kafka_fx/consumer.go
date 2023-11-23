@@ -132,11 +132,11 @@ func (c *Consumer) Subscribe(ctx context.Context, subscriber ConsumerSubscriber,
 				}()
 
 				if err := subscriber.OnMessage(record); err != nil {
-					log.Errorf("kafka consumer handle message error: %s", err)
+					log.Errorf("kafka consumer handle message error: %+v", err)
 				} else if c.manualCommit {
 					err := c.CommitRecords(context.Background(), record)
 					if err != nil {
-						log.Errorf("kafka consumer commit error: %s", err)
+						log.Errorf("kafka consumer commit error: %+v", err)
 					}
 				}
 			}(record)
