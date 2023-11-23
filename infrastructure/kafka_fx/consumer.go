@@ -2,7 +2,7 @@ package kafka_fx
 
 import (
 	"context"
-	"runtime/debug"
+	"runtime"
 	"time"
 
 	"github.com/cockroachdb/errors"
@@ -125,7 +125,9 @@ func (c *Consumer) Subscribe(ctx context.Context, subscriber ConsumerSubscriber,
 			func(record *kgo.Record) {
 				defer func() {
 					if r := recover(); r != nil {
-						log.Errorf("kafka consumer handle message panic: %v\n%s", r, debug.Stack())
+						buf := make([]byte, 2048)
+						buf = buf[:runtime.Stack(buf, false)]
+						log.Errorf("kafka consumer handle message panic: %v\n%s", r, string(buf))
 					}
 				}()
 
