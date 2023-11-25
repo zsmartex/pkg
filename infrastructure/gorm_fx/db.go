@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"time"
 
+	_ "github.com/lib/pq"
 	"go.uber.org/fx"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -13,8 +14,6 @@ import (
 	"github.com/zsmartex/pkg/v2/config"
 	"github.com/zsmartex/pkg/v2/infrastructure/event_api_fx"
 	"github.com/zsmartex/pkg/v2/log"
-
-	_ "github.com/lib/pq"
 )
 
 type Config struct {
@@ -43,6 +42,7 @@ func New(params gormParams) (*gorm.DB, error) {
 			params.Config.Pass,
 			params.Config.Name,
 		),
+		PreferSimpleProtocol: true,
 	})
 
 	db, err := gorm.Open(dialector, &gorm.Config{
