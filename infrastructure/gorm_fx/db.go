@@ -42,7 +42,6 @@ func New(params gormParams) (*gorm.DB, error) {
 			params.Config.Pass,
 			params.Config.Name,
 		),
-		PreferSimpleProtocol: true,
 	})
 
 	db, err := gorm.Open(dialector, &gorm.Config{
