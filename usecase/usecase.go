@@ -11,6 +11,7 @@ import (
 	"github.com/zsmartex/pkg/v2/gpa"
 	"github.com/zsmartex/pkg/v2/infrastructure/elasticsearch_fx"
 	"github.com/zsmartex/pkg/v2/infrastructure/gorm_fx"
+	"github.com/zsmartex/pkg/v2/infrastructure/mongo_fx"
 	"github.com/zsmartex/pkg/v2/infrastructure/questdb_fx"
 )
 
@@ -39,12 +40,14 @@ type IUsecase[V schema.Tabler] interface {
 	RawScan(ctx context.Context, dst interface{}, sql string, attrs ...interface{}) error
 	RawFirst(ctx context.Context, dst interface{}, sql string, attrs ...interface{}) error
 
+	MongoDB() mongo_fx.Repository[V]
 	Es() elasticsearch_fx.Repository[V]
 	QuestDB() questdb_fx.Repository[V]
 }
 
 type Usecase[V schema.Tabler] struct {
 	DatabaseRepo      gorm_fx.Repository[V]
+	MongoDBRepo       mongo_fx.Repository[V]
 	ElasticsearchRepo elasticsearch_fx.Repository[V]
 	QuestDBRepo       questdb_fx.Repository[V]
 	Omits             []string
@@ -62,6 +65,7 @@ type Options[V schema.Tabler] struct {
 	fx.In
 
 	DatabaseRepo      gorm_fx.Repository[V]
+	MongoDBRepo       mongo_fx.Repository[V]         `optional:"true"`
 	ElasticsearchRepo elasticsearch_fx.Repository[V] `optional:"true"`
 	QuestDBRepo       questdb_fx.Repository[V]       `optional:"true"`
 }
@@ -69,6 +73,7 @@ type Options[V schema.Tabler] struct {
 func NewUsecase[V schema.Tabler](opts Options[V]) Usecase[V] {
 	return Usecase[V]{
 		DatabaseRepo:      opts.DatabaseRepo,
+		MongoDBRepo:       opts.MongoDBRepo,
 		ElasticsearchRepo: opts.ElasticsearchRepo,
 		QuestDBRepo:       opts.QuestDBRepo,
 	}

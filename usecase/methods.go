@@ -8,6 +8,7 @@ import (
 	"github.com/zsmartex/pkg/v2/gpa"
 	"github.com/zsmartex/pkg/v2/infrastructure/elasticsearch_fx"
 	"github.com/zsmartex/pkg/v2/infrastructure/gorm_fx"
+	"github.com/zsmartex/pkg/v2/infrastructure/mongo_fx"
 	"github.com/zsmartex/pkg/v2/infrastructure/questdb_fx"
 )
 
@@ -85,6 +86,10 @@ func (u Usecase[V]) RawScan(ctx context.Context, dst interface{}, sql string, at
 
 func (u Usecase[V]) RawFirst(ctx context.Context, dst interface{}, sql string, attrs ...interface{}) error {
 	return u.DatabaseRepo.RawFirst(ctx, dst, sql, attrs...)
+}
+
+func (u Usecase[V]) MongoDB() mongo_fx.Repository[V] {
+	return u.MongoDBRepo
 }
 
 func (u Usecase[V]) Es() elasticsearch_fx.Repository[V] {
