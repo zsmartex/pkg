@@ -26,8 +26,8 @@ func (r Repository) Count(ctx context.Context, filters ...Filter) (int, error) {
 	return int(result), err
 }
 
-func (r Repository) Find(ctx context.Context, models interface{}, filters []Filter, opts ...*options.FindOptions) error {
-	cursor, err := r.DB.Collection(r.tabler.TableName()).Find(ctx, ApplyFilters(filters...), opts...)
+func (r Repository) Find(ctx context.Context, models interface{}, opts *options.FindOptions, filters ...Filter) error {
+	cursor, err := r.DB.Collection(r.tabler.TableName()).Find(ctx, ApplyFilters(filters...), opts)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func (r Repository) Last(ctx context.Context, model interface{}, filters ...Filt
 }
 
 func (r Repository) FirstOrCreate(ctx context.Context, model interface{}, create interface{}, filters ...Filter) error {
-	err := r.DB.Collection(r.tabler.TableName()).FindOne(ctx, ApplyFilters(filters...)).Decode(&model)
+	err := r.DB.Collection(r.tabler.TableName()).FindOne(ctx, ApplyFilters(filters...)).Decode(model)
 	if err == nil {
 		return nil
 	}
@@ -69,7 +69,7 @@ func (r Repository) FirstOrCreate(ctx context.Context, model interface{}, create
 		return err
 	}
 
-	model = create
+	model = &create
 
 	return nil
 }

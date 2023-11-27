@@ -9,18 +9,15 @@ import (
 )
 
 func WithID(id string) mpa.Filter {
-	return func() bson.E {
+	return func() (k string, v interface{}) {
 		_id, _ := primitive.ObjectIDFromHex(id)
 
-		return bson.E{
-			Key:   "_id",
-			Value: _id,
-		}
+		return "_id", _id
 	}
 }
 
 func WithIDs(ids ...string) mpa.Filter {
-	return func() bson.E {
+	return func() (k string, v interface{}) {
 		var _ids []primitive.ObjectID
 
 		for _, id := range ids {
@@ -28,64 +25,42 @@ func WithIDs(ids ...string) mpa.Filter {
 			_ids = append(_ids, _id)
 		}
 
-		return bson.E{
-			Key:   "_id",
-			Value: bson.M{"$in": _ids},
-		}
+		return "_id", bson.M{"$in": _ids}
 	}
 }
 
 func WithCreatedAtBy(created_at time.Time) mpa.Filter {
-	return func() bson.E {
-		return bson.E{
-			Key:   "created_at",
-			Value: created_at,
-		}
+	return func() (k string, v interface{}) {
+		return "created_at", created_at
 	}
 }
 
 func WithUpdatedAtBy(updated_at time.Time) mpa.Filter {
-	return func() bson.E {
-		return bson.E{
-			Key:   "updated_at",
-			Value: updated_at,
-		}
+	return func() (k string, v interface{}) {
+		return "updated_at", updated_at
 	}
 }
 
 func WithCreatedAtAfter(created_at time.Time) mpa.Filter {
-	return func() bson.E {
-		return bson.E{
-			Key:   "created_at",
-			Value: bson.M{"$gt": created_at},
-		}
+	return func() (k string, v interface{}) {
+		return "created_at", bson.M{"$gt": created_at}
 	}
 }
 
 func WithCreatedAtBefore(created_at time.Time) mpa.Filter {
-	return func() bson.E {
-		return bson.E{
-			Key:   "created_at",
-			Value: bson.M{"$lt": created_at},
-		}
+	return func() (k string, v interface{}) {
+		return "created_at", bson.M{"$lt": created_at}
 	}
 }
 
 func WithUpdatedAtAfter(updated_at time.Time) mpa.Filter {
-	return func() bson.E {
-		return bson.E{
-			Key:   "updated_at",
-			Value: bson.M{"$gt": updated_at},
-		}
+	return func() (k string, v interface{}) {
+		return "updated_at", bson.M{"$gt": updated_at}
 	}
 }
 
 func WithUpdatedAtBefore(updated_at time.Time) mpa.Filter {
-	return func() bson.E {
-		return bson.E{
-			Key:   "updated_at",
-			Value: bson.M{"$lt": updated_at},
-		}
+	return func() (k string, v interface{}) {
+		return "updated_at", bson.M{"$lt": updated_at}
 	}
-
 }

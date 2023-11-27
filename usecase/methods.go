@@ -88,8 +88,12 @@ func (u Usecase[V]) RawFirst(ctx context.Context, dst interface{}, sql string, a
 	return u.DatabaseRepo.RawFirst(ctx, dst, sql, attrs...)
 }
 
-func (u Usecase[V]) MongoDB() mongo_fx.Repository[V] {
-	return u.MongoDBRepo
+func (u Usecase[V]) MongoDBRead() mongo_fx.ReadRepository[V] {
+	return u.MongoDBReadRepo
+}
+
+func (u Usecase[V]) MongoDBWrite() mongo_fx.WriteRepository[V] {
+	return u.MongoDBWriteRepo
 }
 
 func (u Usecase[V]) Es() elasticsearch_fx.Repository[V] {

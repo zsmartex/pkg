@@ -7,6 +7,10 @@ import (
 	"go.uber.org/fx"
 )
 
+type Tabler interface {
+	TableName() string
+}
+
 var (
 	Module = fx.Module("mongo_fx", mongoProviders, mongoInvokes)
 
