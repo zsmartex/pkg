@@ -44,15 +44,15 @@ func (s *TOTP) SetApplicationName(name string) {
 	s.applicationName = name
 }
 
-func (s *TOTP) Validate(uid, code string) bool {
+func (s *TOTP) Validate(uid, code string) (bool, error) {
 	secret, err := s.client.Write(s.totpCodeKey(uid), map[string]interface{}{
 		"code": code,
 	})
 	if err != nil {
-		return false
+		return false, err
 	}
 
-	return secret.Data["valid"].(bool)
+	return secret.Data["valid"].(bool), nil
 }
 
 func (s *TOTP) Delete(uid string) {
