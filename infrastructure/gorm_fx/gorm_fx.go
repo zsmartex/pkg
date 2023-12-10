@@ -3,10 +3,11 @@ package gorm_fx
 import (
 	"github.com/creasty/defaults"
 	"github.com/gookit/validate"
-	"github.com/zsmartex/pkg/v2"
 	"go.uber.org/fx"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
+
+	"github.com/zsmartex/pkg/v2"
 )
 
 var (
@@ -17,10 +18,8 @@ var (
 	gormInvokes = fx.Invoke(registerHooks)
 )
 
-func registerHooks(lc fx.Lifecycle, db *gorm.DB) {
-	lc.Append(fx.StartHook(func() {
-		InitCallback(db)
-	}))
+func registerHooks(db *gorm.DB) {
+	InitCallback(db)
 }
 
 type CallbackType string
