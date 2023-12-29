@@ -10,6 +10,7 @@ import (
 
 type TOTP struct {
 	client          *Client
+	isser           string
 	applicationName string
 }
 
@@ -30,7 +31,7 @@ func NewTOTP(params totpParams) *TOTP {
 func (s *TOTP) Create(issuer, uid, email string) (map[string]interface{}, error) {
 	if result, err := s.client.Write(s.totpKey(uid), map[string]interface{}{
 		"generate":     true,
-		"issuer":       s.applicationName,
+		"issuer":       issuer,
 		"account_name": email,
 		"qr_size":      100,
 	}); err != nil {

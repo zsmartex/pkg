@@ -88,6 +88,47 @@ type ErrorResponse struct {
 }
 
 func (r repository[T]) Find(ctx context.Context, q epa.Query) (*Result[T], error) {
+	if q.Limit*q.Page > 10000 {
+		// find the record at 9999th position
+		res, err := r.find(ctx, epa.Query{
+			Page:         10000,
+			Limit:        1,
+			Filters:      q.Filters,
+			Indexes:      q.Indexes,
+			Aggregations: q.Aggregations,
+			OrderBy:      q.OrderBy,
+			Ordering:     q.Ordering,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		if len(res.Values) == 0 {
+			return &Result[T]{
+				Values:       []*T{},
+				TotalHits:    res.TotalHits,
+				Aggregations: res.Aggregations,
+			}, nil
+		}
+
+		latestRow := res.Values[0]
+		latestRowJson, err := json.Marshal(latestRow)
+		if err != nil {
+			return nil, err
+		}
+
+		latestRowJsonMap := make(map[string]interface{})
+		if err := json.Unmarshal(latestRowJson, &latestRowJsonMap); err != nil {
+			return nil, err
+		}
+
+		q.SearchAfter = []interface{}{latestRowJsonMap[q.OrderBy]}
+	}
+
+	return r.find(ctx, q)
+}
+
+func (r repository[T]) find(ctx context.Context, q epa.Query) (*Result[T], error) {
 	var indexes []string
 	if len(q.Indexes) > 0 {
 		indexes = q.Indexes
@@ -133,6 +174,10 @@ func (r repository[T]) Find(ctx context.Context, q epa.Query) (*Result[T], error
 		}
 
 		queryMap["aggs"] = aggs
+	}
+
+	if len(q.SearchAfter) > 0 {
+		queryMap["search_after"] = q.SearchAfter
 	}
 
 	if q.OrderBy != "" {

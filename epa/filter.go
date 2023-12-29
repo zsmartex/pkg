@@ -13,6 +13,7 @@ type Query struct {
 	OrderBy      string
 	Ordering     queries.Ordering
 	Filters      []Filter
+	SearchAfter  []interface{}
 	Aggregations map[string]aggregation.Aggregation
 }
 
