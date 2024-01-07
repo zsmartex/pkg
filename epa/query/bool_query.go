@@ -30,8 +30,6 @@ func (q *BoolQuery) Must(queries ...Query) *BoolQuery {
 func (q *BoolQuery) MustNot(queries ...Query) *BoolQuery {
 	q.mustNotClauses = append(q.mustNotClauses, queries...)
 
-	q.MustNot(NewMultiMatchQuery(""))
-
 	return q
 }
 
