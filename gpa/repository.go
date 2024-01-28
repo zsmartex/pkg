@@ -32,6 +32,12 @@ func (r Repository) Find(ctx context.Context, models interface{}, filters ...Fil
 	return ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).Find(models).Error
 }
 
+func (r Repository) FindInBatches(ctx context.Context, models interface{}, batch int, filters ...Filter) error {
+	return ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).FindInBatches(models, batch, func(tx *gorm.DB, batch int) error {
+		return nil
+	}).Error
+}
+
 func (r Repository) Pluck(ctx context.Context, column string, dest interface{}, filters ...Filter) error {
 	return ApplyFilters(r.DB.WithContext(ctx).Table(r.TableName()), filters).Pluck(column, dest).Error
 }

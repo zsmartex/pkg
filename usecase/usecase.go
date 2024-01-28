@@ -27,6 +27,7 @@ type IUsecase[V schema.Tabler] interface {
 	Last(ctx context.Context, filters ...gpa.Filter) (model *V, err error)
 	First(ctx context.Context, filters ...gpa.Filter) (model *V, err error)
 	Find(ctx context.Context, filters ...gpa.Filter) (models []*V, err error)
+	FindInBatches(ctx context.Context, batch int, filters ...gpa.Filter) (models []*V, err error)
 	Transaction(handler func(tx *gorm.DB) error) error
 	FirstOrCreate(ctx context.Context, model *V, filters ...gpa.Filter) error
 	CreateInBatches(ctx context.Context, models []*V, batchSize int, filters ...gpa.Filter) error

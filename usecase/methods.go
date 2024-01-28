@@ -40,6 +40,10 @@ func (u Usecase[V]) Find(ctx context.Context, filters ...gpa.Filter) (models []*
 	return u.DatabaseRepo.Find(ctx, filters...)
 }
 
+func (u Usecase[V]) FindInBatches(ctx context.Context, batch int, filters ...gpa.Filter) (models []*V, err error) {
+	return u.DatabaseRepo.FindInBatches(ctx, batch, filters...)
+}
+
 func (u Usecase[V]) Transaction(handler func(tx *gorm.DB) error) error {
 	return u.DatabaseRepo.Transaction(handler)
 }

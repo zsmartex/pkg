@@ -22,6 +22,7 @@ type Repository[T schema.Tabler] interface {
 	Last(ctx context.Context, filters ...gpa.Filter) (model *T, err error)
 	First(ctx context.Context, filters ...gpa.Filter) (model *T, err error)
 	Find(ctx context.Context, filters ...gpa.Filter) (models []*T, err error)
+	FindInBatches(ctx context.Context, batch int, filters ...gpa.Filter) (models []*T, err error)
 	FirstOrCreate(ctx context.Context, model *T, filters ...gpa.Filter) error
 	CreateInBatches(ctx context.Context, models []*T, batchSize int, filters ...gpa.Filter) error
 	Create(ctx context.Context, model *T, filters ...gpa.Filter) error
@@ -158,6 +159,15 @@ func (r repository[T]) Find(context context.Context, filters ...gpa.Filter) (mod
 	err = r.repository.Find(context, &models, filters...)
 	if err != nil {
 		return nil, errors.Wrap(err, "repository find")
+	}
+
+	return models, nil
+}
+
+func (r repository[T]) FindInBatches(context context.Context, batch int, filters ...gpa.Filter) (models []*T, err error) {
+	err = r.repository.FindInBatches(context, &models, batch, filters...)
+	if err != nil {
+		return nil, errors.Wrap(err, "repository find in batches")
 	}
 
 	return models, nil
