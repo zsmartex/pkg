@@ -35,3 +35,17 @@ func (a Aggregations) Sum(name string) (value *AggregationSumValue, found bool) 
 
 	return nil, false
 }
+
+func (a Aggregations) Count(name string) (value *AggregationCountValue, found bool) {
+	if raw, found := a[name]; found {
+		agg := new(AggregationCountValue)
+		if raw == nil {
+			return agg, true
+		}
+		if err := json.Unmarshal(raw, agg); err == nil {
+			return agg, true
+		}
+	}
+
+	return nil, false
+}
