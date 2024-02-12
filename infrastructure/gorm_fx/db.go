@@ -56,6 +56,15 @@ func New(params gormParams) (*gorm.DB, error) {
 		return nil, err
 	}
 
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(150)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
 	if params.EventAPI != nil {
 		db.Callback().Create().After("gorm:create").Register("eventapi:created", func(db *gorm.DB) {
 			if db.Statement.Schema != nil {
