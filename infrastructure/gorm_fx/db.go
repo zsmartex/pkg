@@ -28,8 +28,11 @@ type Config struct {
 type gormParams struct {
 	fx.In
 
-	Config   config.Postgres
-	EventAPI *event_api_fx.EventAPI `optional:"true"`
+	MaxIdleConns    int           `name:"max_idle_conns"`
+	MaxOpenConns    int           `name:"max_open_conns"`
+	ConnMaxLifetime time.Duration `name:"conn_max_lifetime"`
+	Config          config.Postgres
+	EventAPI        *event_api_fx.EventAPI `optional:"true"`
 }
 
 func New(params gormParams) (*gorm.DB, error) {
@@ -61,9 +64,9 @@ func New(params gormParams) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(150)
-	sqlDB.SetConnMaxLifetime(time.Hour)
+	sqlDB.SetMaxIdleConns(params.MaxIdleConns)
+	sqlDB.SetMaxOpenConns(params.MaxOpenConns)
+	sqlDB.SetConnMaxLifetime(params.ConnMaxLifetime)
 
 	if params.EventAPI != nil {
 		db.Callback().Create().After("gorm:create").Register("eventapi:created", func(db *gorm.DB) {
