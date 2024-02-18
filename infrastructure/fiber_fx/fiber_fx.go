@@ -11,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/helmet/v2"
+	"github.com/zsmartex/pkg/v2"
 	"github.com/zsmartex/pkg/v2/config"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/error_handler"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/ip_parse"
@@ -18,6 +19,10 @@ import (
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/recover"
 	"github.com/zsmartex/pkg/v2/infrastructure/redis_fx"
 	"go.uber.org/fx"
+)
+
+var (
+	ErrRequestLimitExceeded = pkg.NewError(429, "request.limit_exceeded", "request limit exceeded")
 )
 
 var (
@@ -87,6 +92,9 @@ func NewLimiter(params limiterParams) Limiter {
 		Expiration: 1 * time.Minute,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			return c.Get("remote_ip")
+		},
+		LimitReached: func(c *fiber.Ctx) error {
+			return ErrRequestLimitExceeded
 		},
 		Storage: store,
 	})
