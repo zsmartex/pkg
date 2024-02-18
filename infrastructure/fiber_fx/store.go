@@ -2,6 +2,7 @@ package fiber_fx
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/zsmartex/pkg/v2/infrastructure/redis_fx"
@@ -12,6 +13,15 @@ type RedisStore struct {
 }
 
 func (r *RedisStore) Get(key string) ([]byte, error) {
+	exist, err := r.Client.Exist(context.Background(), key)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exist {
+		return nil, errors.New("key not found")
+	}
+
 	value, err := r.Client.Get(context.Background(), key)
 	if err != nil {
 		return nil, err

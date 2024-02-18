@@ -11,12 +11,12 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/helmet/v2"
-	"github.com/gofiber/storage/redis/v3"
 	"github.com/zsmartex/pkg/v2/config"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/error_handler"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/ip_parse"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/logger"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/recover"
+	"github.com/zsmartex/pkg/v2/infrastructure/redis_fx"
 	"go.uber.org/fx"
 )
 
@@ -74,20 +74,13 @@ type Limiter func(*fiber.Ctx) error
 type limiterParams struct {
 	fx.In
 
-	Config config.Redis
+	RedisClient *redis_fx.Client
 }
 
 func NewLimiter(params limiterParams) Limiter {
-	// store := &RedisStore{
-	// 	params.RedisClient,
-	// }
-
-	store := redis.New(redis.Config{
-		Host:     params.Config.Host,
-		Port:     params.Config.Port,
-		Password: params.Config.Password,
-		Database: 0,
-	})
+	store := &RedisStore{
+		params.RedisClient,
+	}
 
 	return limiter.New(limiter.Config{
 		Max:        15,
