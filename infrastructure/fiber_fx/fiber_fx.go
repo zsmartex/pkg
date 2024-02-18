@@ -74,7 +74,7 @@ type Limiter func(*fiber.Ctx) error
 type limiterParams struct {
 	fx.In
 
-	Config config.Redis `name:"redis"`
+	Config config.Redis
 }
 
 func NewLimiter(params limiterParams) Limiter {
