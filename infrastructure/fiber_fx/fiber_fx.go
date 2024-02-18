@@ -11,6 +11,8 @@ import (
 	"github.com/gofiber/helmet/v2"
 	"github.com/zsmartex/pkg/v2/config"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/error_handler"
+	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/ip_parse"
+	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/limiter"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/logger"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/recover"
 	"go.uber.org/fx"
@@ -25,6 +27,7 @@ var (
 
 	fiberProviders = fx.Provide(
 		New,
+		limiter.New,
 	)
 
 	fiberInvokes = fx.Options(fx.Invoke(registerHooks))
@@ -56,6 +59,7 @@ func New(params fiberParams, lc fx.Lifecycle) *fiber.App {
 	}))
 	fiberApp.Use(requestid.New())
 	fiberApp.Use(logger.New())
+	fiberApp.Use(ip_parse.New())
 	fiberApp.Use(recover.New(recover.Config{
 		EnableStackTrace: true,
 	}))
