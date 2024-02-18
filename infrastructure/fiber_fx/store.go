@@ -1,4 +1,4 @@
-package limiter
+package fiber_fx
 
 import (
 	"context"

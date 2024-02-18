@@ -3,16 +3,19 @@ package fiber_fx
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/helmet/v2"
 	"github.com/zsmartex/pkg/v2/config"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/error_handler"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/logger"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/recover"
+	"github.com/zsmartex/pkg/v2/infrastructure/redis_fx"
 	"go.uber.org/fx"
 )
 
@@ -25,6 +28,7 @@ var (
 
 	fiberProviders = fx.Provide(
 		New,
+		NewLimiter,
 	)
 
 	fiberInvokes = fx.Options(fx.Invoke(registerHooks))
@@ -61,6 +65,26 @@ func New(params fiberParams, lc fx.Lifecycle) *fiber.App {
 	}))
 
 	return fiberApp
+}
+
+type Limiter func(*fiber.Ctx) error
+
+type limiterParams struct {
+	fx.In
+
+	RedisClient *redis_fx.Client
+}
+
+func NewLimiter(params limiterParams) Limiter {
+	store := &RedisStore{
+		params.RedisClient,
+	}
+
+	return limiter.New(limiter.Config{
+		Max:        15,
+		Expiration: 1 * time.Minute,
+		Storage:    store,
+	})
 }
 
 type hookParams struct {
