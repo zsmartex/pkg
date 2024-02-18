@@ -1,6 +1,7 @@
 package limiter
 
 import (
+	"net"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -31,7 +32,7 @@ func New(params limiterParams) Limiter {
 		Max:        20,
 		Expiration: 1 * time.Minute,
 		KeyGenerator: func(c *fiber.Ctx) string {
-			ip := string(c.Locals("remote_ip").([]byte))
+			ip := c.Locals("remote_ip").(net.IP).String()
 			return ip
 		},
 		LimitReached: func(c *fiber.Ctx) error {
