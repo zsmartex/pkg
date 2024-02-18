@@ -5,17 +5,13 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
-	"github.com/gofiber/storage/redis/v3"
-	"github.com/zsmartex/pkg/v2/config"
+	"github.com/zsmartex/pkg/v2/infrastructure/redis_fx"
 )
 
-func New(config config.Redis) func(*fiber.Ctx) error {
-	store := redis.New(redis.Config{
-		Host:     config.Host,
-		Port:     config.Port,
-		Password: config.Password,
-		Database: 0,
-	})
+func New(redisClient *redis_fx.Client) func(*fiber.Ctx) error {
+	store := &RedisStore{
+		redisClient,
+	}
 
 	return limiter.New(limiter.Config{
 		Max:        10,
