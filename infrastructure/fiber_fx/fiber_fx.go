@@ -85,7 +85,10 @@ func NewLimiter(params limiterParams) Limiter {
 	return limiter.New(limiter.Config{
 		Max:        15,
 		Expiration: 1 * time.Minute,
-		Storage:    store,
+		KeyGenerator: func(c *fiber.Ctx) string {
+			return c.Get("remote_ip")
+		},
+		Storage: store,
 	})
 }
 
