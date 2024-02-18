@@ -126,7 +126,7 @@ func New(config ...Config) fiber.Handler {
 				c.Method(),
 				c.Path(),
 				c.Response().StatusCode(),
-				c.Get("remote_ip"),
+				c.Locals("remote_ip").(string),
 				latency,
 				reqBodyBytes,
 				resBodyBytes,
