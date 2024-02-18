@@ -121,12 +121,13 @@ func New(config ...Config) fiber.Handler {
 			resBodyBytes = bytes.TrimPrefix(resBodyBytes, []byte("\""))
 			resBodyBytes = bytes.TrimSuffix(resBodyBytes, []byte("\""))
 
+			ip := c.Locals("remote_ip").(string)
 			logStr := fmt.Sprintf(
-				`{"method": %q, "path": %q, "status": %d, "ip": %s, "latency": %q, "payload": "%s", "response": "%s" }`,
+				`{"method": %q, "path": %q, "status": %d, "ip": %q, "latency": %q, "payload": "%s", "response": "%s" }`,
 				c.Method(),
 				c.Path(),
 				c.Response().StatusCode(),
-				c.Locals("remote_ip").(string),
+				ip,
 				latency,
 				reqBodyBytes,
 				resBodyBytes,

@@ -31,7 +31,8 @@ func New(params limiterParams) Limiter {
 		Max:        20,
 		Expiration: 1 * time.Minute,
 		KeyGenerator: func(c *fiber.Ctx) string {
-			return c.Locals("remote_ip").(string)
+			ip := c.Locals("remote_ip").(string)
+			return ip
 		},
 		LimitReached: func(c *fiber.Ctx) error {
 			return ErrRequestLimitExceeded
