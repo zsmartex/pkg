@@ -6,9 +6,10 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
+	"go.uber.org/fx"
+
 	"github.com/zsmartex/pkg/v2"
 	"github.com/zsmartex/pkg/v2/infrastructure/redis_fx"
-	"go.uber.org/fx"
 )
 
 var (
@@ -29,7 +30,7 @@ func New(params limiterParams) Limiter {
 	}
 
 	return limiter.New(limiter.Config{
-		Max:        20,
+		Max:        60,
 		Expiration: 1 * time.Minute,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			ip := c.Locals("remote_ip").(net.IP)
