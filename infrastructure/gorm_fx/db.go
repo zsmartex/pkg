@@ -48,7 +48,7 @@ func New(params gormParams) (*gorm.DB, error) {
 	})
 
 	db, err := gorm.Open(dialector, &gorm.Config{
-		SkipDefaultTransaction:   true,
+		SkipDefaultTransaction:   false,
 		DisableNestedTransaction: false,
 		Logger: &DBlogger{
 			SlowThreshold:         15000 * time.Millisecond,
