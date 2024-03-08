@@ -28,9 +28,6 @@ type Config struct {
 type gormParams struct {
 	fx.In
 
-	MaxIdleConns    int           `name:"max_idle_conns"`
-	MaxOpenConns    int           `name:"max_open_conns"`
-	ConnMaxLifetime time.Duration `name:"conn_max_lifetime"`
 	Config          config.Postgres
 	EventAPI        *event_api_fx.EventAPI `optional:"true"`
 }
