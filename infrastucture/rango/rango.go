@@ -1,22 +1,23 @@
 package rango
 
 import (
+	"context"
 	"strings"
 
 	"github.com/zsmartex/pkg/v2"
 	"github.com/zsmartex/pkg/v2/infrastucture/kafka"
 )
 
-type RangoClient struct {
+type Client struct {
 	producer *kafka.Producer
 }
 
-func NewRangoClient(producer *kafka.Producer) (*RangoClient, error) {
-	return &RangoClient{producer: producer}, nil
+func NewClient(producer *kafka.Producer) (*Client, error) {
+	return &Client{producer: producer}, nil
 }
 
-func (k *RangoClient) EnqueueEvent(kind pkg.EnqueueEventKind, id, event string, payload interface{}) {
+func (k *Client) EnqueueEvent(context context.Context, kind pkg.EnqueueEventKind, id, event string, payload interface{}) {
 	key := strings.Join([]string{string(kind), id, event}, ".")
 
-	k.producer.ProduceWithKey("rango.events", key, payload)
+	k.producer.ProduceWithKey(context, "rango.events", key, payload)
 }

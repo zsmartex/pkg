@@ -1,14 +1,19 @@
 package elasticsearch
 
-import "github.com/olivere/elastic/v7"
+import (
+	"github.com/elastic/go-elasticsearch/v8"
+)
 
 type Config struct {
-	URL      string
+	URL      []string
 	Username string
 	Password string
-	Sniff    bool
 }
 
-func New(cfg *Config) (*elastic.Client, error) {
-	return elastic.NewClient(elastic.SetBasicAuth(cfg.Username, cfg.Password), elastic.SetGzip(true), elastic.SetURL(cfg.URL), elastic.SetSniff(cfg.Sniff))
+func New(cfg *Config) (*elasticsearch.Client, error) {
+	return elasticsearch.NewClient(elasticsearch.Config{
+		Addresses: cfg.URL,
+		Username:  cfg.Username,
+		Password:  cfg.Password,
+	})
 }
