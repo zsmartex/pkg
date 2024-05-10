@@ -6,16 +6,16 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/helmet/v2"
+	"go.uber.org/fx"
+
 	"github.com/zsmartex/pkg/v2/config"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/error_handler"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/ip_parse"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/limiter"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/logger"
 	"github.com/zsmartex/pkg/v2/infrastructure/fiber_fx/middleware/recover"
-	"go.uber.org/fx"
 )
 
 var (
@@ -54,9 +54,10 @@ func New(params fiberParams, lc fx.Lifecycle) *fiber.App {
 
 	fiberApp.Use(compress.New())
 	fiberApp.Use(helmet.New())
-	fiberApp.Use(cors.New(cors.Config{
-		AllowCredentials: true,
-	}))
+	// fiberApp.Use(cors.New(cors.Config{
+	// 	AllowCredentials: false,
+	// 	AllowOrigins:     "*",
+	// }))
 	fiberApp.Use(requestid.New())
 	fiberApp.Use(logger.New())
 	fiberApp.Use(ip_parse.New())
