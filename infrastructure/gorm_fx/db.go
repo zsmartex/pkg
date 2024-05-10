@@ -28,19 +28,20 @@ type Config struct {
 type gormParams struct {
 	fx.In
 
-	Config          config.Postgres
-	EventAPI        *event_api_fx.EventAPI `optional:"true"`
+	Config   config.Postgres
+	EventAPI *event_api_fx.EventAPI `optional:"true"`
 }
 
 func New(params gormParams) (*gorm.DB, error) {
 	dialector := postgres.New(postgres.Config{
 		DSN: fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+			"host=%s port=%d user=%s password=%s dbname=%s application_name=%s sslmode=disable",
 			params.Config.Host,
 			params.Config.Port,
 			params.Config.User,
 			params.Config.Pass,
 			params.Config.Name,
+			params.Config.ApplicationName,
 		),
 	})
 

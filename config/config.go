@@ -15,11 +15,12 @@ type (
 	}
 
 	DB struct {
-		Host string `env:"HOST" envDefault:"localhost"`
-		Port int    `env:"PORT" envDefault:"5432"`
-		User string `env:"USER" envDefault:"root"`
-		Pass string `env:"PASS" envDefault:"changeme"`
-		Name string `env:"NAME" envDefault:"db"`
+		Host            string `env:"HOST" envDefault:"localhost"`
+		Port            int    `env:"PORT" envDefault:"5432"`
+		User            string `env:"USER" envDefault:"root"`
+		Pass            string `env:"PASS" envDefault:"changeme"`
+		Name            string `env:"NAME" envDefault:"db"`
+		ApplicationName string `env:"APPLICATION_NAME" envDefault:"peatio"`
 	}
 
 	Postgres DB
