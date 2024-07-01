@@ -12,11 +12,11 @@ require (
 	github.com/creasty/defaults v1.6.0
 	github.com/elastic/go-elasticsearch/v8 v8.3.0
 	github.com/georgysavva/scany/v2 v2.0.0
-	github.com/gofiber/fiber/v2 v2.49.2
+	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/gofiber/helmet/v2 v2.2.26
 	github.com/gofiber/utils v1.1.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.5.0
 	github.com/gookit/goutil v0.5.5
 	github.com/gookit/validate v1.4.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
@@ -35,7 +35,7 @@ require (
 	github.com/twmb/franz-go v1.15.2
 	github.com/twmb/franz-go/pkg/kadm v1.10.0
 	github.com/twmb/franz-go/pkg/kmsg v1.7.0
-	github.com/valyala/fasthttp v1.49.0
+	github.com/valyala/fasthttp v1.51.0
 	github.com/vgarvardt/pgx-google-uuid/v5 v5.0.0
 	github.com/volatiletech/null/v9 v9.0.0
 	github.com/zsmartex/mergo v0.0.1-rc.1
@@ -104,7 +104,7 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -132,9 +132,9 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
 	google.golang.org/genproto v0.0.0-20230227214838-9b19f0bdc514 // indirect
