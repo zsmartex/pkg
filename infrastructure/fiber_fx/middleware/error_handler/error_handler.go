@@ -44,7 +44,7 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 				if !strings.Contains(msg, ".") {
 					validateError, ok := c.Locals("validate_error_prefix").(*ValidateError)
 					if ok {
-						returnedMessages = append(returnedMessages, fmt.Sprintf("%s.%s.%s", validateError.Prefix, validateError.Method, msg))
+						returnedMessages = append(returnedMessages, fmt.Sprintf("%s.%s",  validateError.Method, msg))
 					} else {
 						if len(e.Errors) == 1 {
 							return c.Status(code).JSON(pkg.ErrServerInternal)
