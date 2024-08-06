@@ -17,7 +17,7 @@ require (
 	github.com/gofiber/utils v1.1.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.1
-	github.com/gookit/goutil v0.5.5
+	github.com/gookit/goutil v0.6.0
 	github.com/gookit/validate v1.4.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/hashicorp/vault/api v1.4.1
