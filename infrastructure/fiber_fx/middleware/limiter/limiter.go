@@ -19,7 +19,7 @@ var (
 type Config struct {
 	Max        int
 	Expiration time.Duration
-	Prefix     string
+	Prefix     string // optional
 }
 
 type Limiter func(config Config) fiber.Handler
