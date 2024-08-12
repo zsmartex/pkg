@@ -16,7 +16,12 @@ var (
 	ErrRequestLimitExceeded = pkg.NewError(429, "request.limit_exceeded", "request limit exceeded")
 )
 
-type Limiter func(*fiber.Ctx) error
+type Config struct {
+	Max        int
+	Expiration time.Duration
+}
+
+type Limiter func(config Config) fiber.Handler
 
 type limiterParams struct {
 	fx.In
@@ -29,16 +34,18 @@ func New(params limiterParams) Limiter {
 		params.RedisClient,
 	}
 
-	return limiter.New(limiter.Config{
-		Max:        60,
-		Expiration: 1 * time.Minute,
-		KeyGenerator: func(c *fiber.Ctx) string {
-			ip := c.Locals("remote_ip").(net.IP)
-			return ip.String()
-		},
-		LimitReached: func(c *fiber.Ctx) error {
-			return ErrRequestLimitExceeded
-		},
-		Storage: store,
-	})
+	return func(config Config) fiber.Handler {
+		return limiter.New(limiter.Config{
+			Max:        config.Max,
+			Expiration: config.Expiration,
+			KeyGenerator: func(c *fiber.Ctx) string {
+				ip := c.Locals("remote_ip").(net.IP)
+				return ip.String()
+			},
+			LimitReached: func(c *fiber.Ctx) error {
+				return ErrRequestLimitExceeded
+			},
+			Store: store,
+		})
+	}
 }
