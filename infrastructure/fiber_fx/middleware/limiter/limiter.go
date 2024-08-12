@@ -19,6 +19,7 @@ var (
 type Config struct {
 	Max        int
 	Expiration time.Duration
+	Prefix     string
 }
 
 type Limiter func(config Config) fiber.Handler
@@ -40,6 +41,11 @@ func New(params limiterParams) Limiter {
 			Expiration: config.Expiration,
 			KeyGenerator: func(c *fiber.Ctx) string {
 				ip := c.Locals("remote_ip").(net.IP)
+
+				if config.Prefix != "" {
+					return config.Prefix + ":" + ip.String()
+				}
+
 				return ip.String()
 			},
 			LimitReached: func(c *fiber.Ctx) error {
