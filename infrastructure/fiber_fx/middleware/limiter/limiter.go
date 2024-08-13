@@ -1,6 +1,7 @@
 package limiter
 
 import (
+	"net"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -42,7 +43,24 @@ func New(params limiterParams) Limiter {
 			LimitReached: func(c *fiber.Ctx) error {
 				return ErrRequestLimitExceeded
 			},
-			Store: store,
+			Store:                  store,
+			SkipFailedRequests:     true,
+			SkipSuccessfulRequests: false,
+			LimiterMiddleware:      &FlexLimiter{},
 		})
+	}
+}
+
+type FlexLimiter struct{}
+
+func (l *FlexLimiter) New(cfg limiter.Config) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		ip := c.Locals("remote_ip").(net.IP)
+
+		if ip.IsPrivate() {
+			return c.Next()
+		}
+
+		return limiter.FixedWindow{}.New(cfg)(c)
 	}
 }
