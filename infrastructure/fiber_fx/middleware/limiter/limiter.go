@@ -1,7 +1,6 @@
 package limiter
 
 import (
-	"net"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -17,9 +16,9 @@ var (
 )
 
 type Config struct {
-	Max        int
-	Expiration time.Duration
-	Prefix     string // optional
+	Max          int
+	Expiration   time.Duration
+	KeyGenerator func(*fiber.Ctx) string
 }
 
 type Limiter func(config Config) fiber.Handler
@@ -37,17 +36,9 @@ func New(params limiterParams) Limiter {
 
 	return func(config Config) fiber.Handler {
 		return limiter.New(limiter.Config{
-			Max:        config.Max,
-			Expiration: config.Expiration,
-			KeyGenerator: func(c *fiber.Ctx) string {
-				ip := c.Locals("remote_ip").(net.IP)
-
-				if config.Prefix != "" {
-					return config.Prefix + ":" + ip.String()
-				}
-
-				return ip.String()
-			},
+			Max:          config.Max,
+			Expiration:   config.Expiration,
+			KeyGenerator: config.KeyGenerator,
 			LimitReached: func(c *fiber.Ctx) error {
 				return ErrRequestLimitExceeded
 			},
