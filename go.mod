@@ -42,7 +42,7 @@ require (
 	go.mongodb.org/mongo-driver v1.13.0
 	go.uber.org/fx v1.20.1
 	go.uber.org/mock v0.3.0
-	google.golang.org/grpc v1.53.0
+	google.golang.org/grpc v1.56.3
 	gorm.io/driver/postgres v1.5.6
 	gorm.io/gorm v1.25.7
 )
