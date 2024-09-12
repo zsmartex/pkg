@@ -21,6 +21,7 @@ type (
 		Pass            string `env:"PASS" envDefault:"changeme"`
 		Name            string `env:"NAME" envDefault:"db"`
 		ApplicationName string `env:"APPLICATION_NAME" envDefault:"peatio"`
+		SSLMode         bool
 	}
 
 	Postgres DB

@@ -16,15 +16,6 @@ import (
 	"github.com/zsmartex/pkg/v2/log"
 )
 
-type Config struct {
-	Host                 string
-	Port                 int
-	User                 string
-	Password             string
-	Name                 string
-	PreferSimpleProtocol bool
-}
-
 type gormParams struct {
 	fx.In
 
@@ -33,15 +24,22 @@ type gormParams struct {
 }
 
 func New(params gormParams) (*gorm.DB, error) {
+	sslMode := "disable"
+
+	if params.Config.SSLMode {
+		sslMode = "require"
+	}
+
 	dialector := postgres.New(postgres.Config{
 		DSN: fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s application_name=%s sslmode=disable",
+			"host=%s port=%d user=%s password=%s dbname=%s application_name=%s sslmode=%s",
 			params.Config.Host,
 			params.Config.Port,
 			params.Config.User,
 			params.Config.Pass,
 			params.Config.Name,
 			params.Config.ApplicationName,
+			sslMode,
 		),
 	})
 
