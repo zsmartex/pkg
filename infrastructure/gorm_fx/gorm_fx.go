@@ -1,6 +1,8 @@
 package gorm_fx
 
 import (
+	"context"
+
 	"github.com/creasty/defaults"
 	"github.com/gookit/validate"
 	"go.uber.org/fx"
@@ -18,8 +20,24 @@ var (
 	gormInvokes = fx.Invoke(registerHooks)
 )
 
-func registerHooks(db *gorm.DB) {
-	InitCallback(db)
+func registerHooks(
+	lc fx.Lifecycle,
+	db *gorm.DB,
+) {
+	lc.Append(fx.Hook{
+		OnStart: func(context.Context) error {
+			InitCallback(db)
+			return nil
+		},
+		OnStop: func(context.Context) error {
+			sqlDB, err := db.DB()
+			if err != nil {
+				return err
+			}
+
+			return sqlDB.Close()
+		},
+	})
 }
 
 type CallbackType string
