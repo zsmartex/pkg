@@ -64,7 +64,7 @@ func WithFieldLike(field string, value interface{}) gpa.Filter {
 
 func WithNotLIKE(field string, value interface{}) gpa.Filter {
 	return func(query *gorm.DB) *gorm.DB {
-		return query.Where(fmt.Sprintf("%s LIKE ?", field), value)
+		return query.Where(fmt.Sprintf("%s NOT LIKE ?", field), value)
 	}
 }
 
