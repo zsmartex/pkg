@@ -118,3 +118,7 @@ func (s *Client) Health(ctx context.Context) error {
 
 	return nil
 }
+
+func (s *Client) HAStatus() (*api.HAStatusResponse, error) {
+	return s.client.Sys().HAStatus()
+}
