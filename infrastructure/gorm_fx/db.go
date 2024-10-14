@@ -16,14 +16,14 @@ import (
 	"github.com/zsmartex/pkg/v2/log"
 )
 
-type gormParams struct {
+type Config struct {
 	fx.In
 
 	Config   config.Postgres
 	EventAPI *event_api_fx.EventAPI `optional:"true"`
 }
 
-func New(params gormParams) (*gorm.DB, error) {
+func New(params Config) (*gorm.DB, error) {
 	sslMode := "disable"
 
 	if params.Config.SSLMode {
