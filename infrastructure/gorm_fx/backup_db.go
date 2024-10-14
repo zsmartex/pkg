@@ -66,5 +66,11 @@ func (db *DatabaseBackup) PGStatWalReceiver() (*PGStatWalReceiverRes, error) {
 		return nil, errors.New("pg_stat_wal_receiver is empty")
 	}
 
-	return res[0], nil
+	for _, r := range res {
+		if r.Status == "streaming" {
+			return r, nil
+		}
+	}
+
+	return nil, errors.New("slot not found")
 }
