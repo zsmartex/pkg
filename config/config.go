@@ -26,6 +26,8 @@ type (
 
 	Postgres DB
 
+	BackupPostgres DB
+
 	QuestDB DB
 
 	JWT struct {
