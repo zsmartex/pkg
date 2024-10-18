@@ -122,6 +122,18 @@ func New(config ...Config) fiber.Handler {
 			resBodyBytes = bytes.TrimPrefix(resBodyBytes, []byte("\""))
 			resBodyBytes = bytes.TrimSuffix(resBodyBytes, []byte("\""))
 
+			if len(reqBodyBytes) > 10240 {
+				reqBodyBytes = []byte("[LARGE DATA]")
+			}
+
+			if strings.Contains(c.GetRespHeader("Content-Type"), "image/") {
+				resBodyBytes = []byte("[ENCODED IMAGE]")
+			} else if strings.Contains(c.GetRespHeader("Content-Type"), "application/octet-stream") {
+				resBodyBytes = []byte("[BINARY DATA]")
+			} else if len(resBodyBytes) > 50280 {
+				resBodyBytes = []byte("[LARGE DATA]")
+			}
+
 			ip := c.Locals("remote_ip").(net.IP)
 			logStr := fmt.Sprintf(
 				`{"method": %q, "path": %q, "status": %d, "ip": %q, "latency": %q, "payload": "%s", "response": "%s" }`,
